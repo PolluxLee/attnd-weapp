@@ -1,0 +1,211 @@
+<style lang="scss">
+  @import '../assets/style/_variables.scss';
+  @import '../assets/style/_common.scss';
+
+.mine {
+  box-sizing: border-box;
+  padding: 30rpx;
+
+  &__info {
+    box-sizing: border-box;
+    background: white;
+    height: 200rpx;
+    @extend %box-edge;
+    margin-bottom: 30rpx;
+    padding: 30rpx;
+    display: flex;
+    position: relative;
+  }
+
+  &__avator {
+    width: 140rpx;
+    height: 140rpx;
+    border-radius: 5rpx;
+    margin-right: 30rpx;
+  }
+
+  &__selfinfo {
+    height: 100%;
+    width: 430rpx;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    &--name {
+      font-size: 32rpx;
+      color: black;
+      white-space: nowrap;
+      overflow-x: auto;
+      margin-top: 6rpx;
+    }
+    &--location {
+      font-size: 28rpx;
+      color: $font;
+      white-space: nowrap;
+      overflow-x: auto;
+      margin-top: 6rpx;
+    }
+  }
+
+  &__arrow {
+    width: 30rpx;
+    height: 30rpx;
+    position: absolute;
+    right: 20rpx;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  &__config {
+    width: 40rpx;
+    height: 40rpx;
+    position: absolute;
+    right: 30rpx;
+    top: 30rpx;
+  }
+
+  &__status {
+    box-sizing: border-box;
+    height: 75rpx;
+    margin-bottom: 30rpx;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  &__tab {
+    box-sizing: border-box;
+    color: $font;
+    font-size: 32rpx;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    &--yell, &--resp {
+      display: inline-block;
+      vertical-align: center;
+      border-bottom: 6rpx solid $font;
+      margin-right: 20rpx;
+    }
+  }
+
+  &__search {
+    box-sizing: border-box;
+    width: 350rpx;
+    height: 64rpx;
+    background: white;
+    @extend %box-edge;
+    display: flex;
+    align-items: center;
+    image {
+      width: 40rpx;
+      height: 40rpx;
+      display: inline-block;
+      vertical-align: center;
+      box-sizing: border-box;
+      padding: 2rpx;
+      margin: 0 10rpx;
+    }
+    input {
+      display: inline-block;
+      vertical-align: center;
+      font-size: 28rpx;
+      color: $font;
+      width: 280rpx;
+      height: 48rpx;
+    }
+  }
+
+  &__list {
+    margin-bottom: 30rpx;
+    box-sizing: border-box;
+  }
+
+  &__item {
+    margin-bottom: 30rpx;
+    box-sizing: border-box;
+    @extend %box-edge;
+    background: white;
+    padding: 30rpx;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    &--title {
+      white-space: nowrap;
+      font-size: 40rpx;
+      color: black;
+      margin-bottom: 20rpx;
+    }
+    &--p {
+      white-space: nowrap;
+      font-size: 26rpx;
+      color: $font;
+      margin-top: 4rpx;
+      margin-bottom: 4rpx;
+      &-pwd {
+        color: $red;
+      }
+    }
+  }
+}
+</style>
+
+<template>
+  <view class="mine">
+    <view class="mine__info">
+      <image class="mine__avator" src="http://os5w1n6kc.bkt.clouddn.com/mini-05.jpg" mode="scaleToFill"></image>
+      <view class="mine__selfinfo">
+        <view class="mine__selfinfo--name">巴西拳王</view>
+        <view class="mine__selfinfo--location">我的位置：南亭猫咪主题餐厅一楼二楼三楼四楼五楼好长的地址</view>
+      </view>
+      <image class="mine__arrow" src="{{arrow}}" mode="scaleToFill"/>
+    </view>
+    <view class="mine__status">
+      <view class="mine__search">
+        <image src="{{search}}" mode="scaleToFill"/>
+        <input placeholder="按考勤名字搜索" confirm-type="search"></input>
+      </view>
+      <view class="mine__tab">
+        <view class="mine__tab--yell">点名</view>
+        <view class="mine__tab--resp">签到</view>
+      </view>
+    </view>
+    <view class="mine__list">
+      <view class="mine__item">
+        <view class="mine__item--title">嵌入式</view>
+        <view class="mine__item--p mine__item--p-pwd">口令：DR125SDR5</view>
+        <view class="mine__item--p">时间：2018/05/07 13:50</view>
+        <view class="mine__item--p">持续：10 mins</view>
+        <view class="mine__item--p">发布者：老金</view>
+        <view class="mine__item--p">位置：南亭猫咪主题餐厅</view>
+        <image class="mine__arrow" src="{{arrow}}" mode="scaleToFill"/>
+        <image class="mine__config" src="{{config}}" mode="scaleToFill"/>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import Icon from '../assets/icon/icon'
+  import ALog from '../mixins/a-log'
+
+  export default class Mine extends wepy.page {
+    mixins = [ALog, Icon]
+    data = {
+      winH: 0
+    }
+
+    onLoad() {
+      this.getWinHeight()
+    }
+
+    getWinHeight() {
+      // 获取屏幕可用高度
+      try {
+        var res = wx.getSystemInfoSync()
+        this.winH = res.windowHeight
+      } catch (e) {
+        this.print(e)
+      }
+    }
+  }
+</script>

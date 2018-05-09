@@ -1,8 +1,4 @@
-<style lang="less">
-.container {
-  height: 100%;
-  box-sizing: border-box;
-}
+<style lang="scss">
 </style>
 
 <script>
@@ -12,13 +8,28 @@ import 'wepy-async-function'
 export default class extends wepy.app {
   config = {
     pages: [
-      'pages/index'
+      'pages/index',
+      'pages/mine',
+      'pages/attnd'
     ],
     window: {
       backgroundTextStyle: 'light',
-      navigationBarBackgroundColor: '#fff',
-      navigationBarTitleText: 'WeChat',
-      navigationBarTextStyle: 'black'
+      navigationBarBackgroundColor: '#00897B',
+      navigationBarTitleText: '小小考勤',
+      navigationBarTextStyle: 'white',
+      backgroundTextStyle: 'dark',
+      enablePullDownRefresh: true,
+      onReachBottomDistance: 50
+    },
+    tabBar: {
+      color: '#757575',
+      selectedColor: '#00897B',
+      borderStyle: 'black',
+      position: 'bottom',
+      list: [
+        { pagePath: 'pages/index', text: '考勤' },
+        { pagePath: 'pages/mine', text: '我的' },
+      ]
     }
   }
 
