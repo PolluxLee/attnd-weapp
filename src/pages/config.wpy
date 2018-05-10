@@ -85,34 +85,16 @@
 <template>
   <view class="config">
     <view class="config__title">考勤信息</view>
-    <view class="config__item">
-      <view class="config__label">考勤名称</view>
-      <view class="config__input">
-        <input />
-      </view>  
-    </view>
-    <view class="config__item">
-      <view class="config__label">日期</view>
-      <view class="config__input">
-        <picker mode="date" value="YYYY-MM-DD">
-          <view class="picker">
-            {{date}}
-          </view>
-        </picker>
-      </view>  
-    </view>
-    <view class="config__item">
-      <view class="config__label">时间</view>
-      <view class="config__input">
-        <picker mode="time">
-          <view class="picker">
-            {{time}}
-          </view>
-        </picker>
-      </view>  
-    </view>
+    <nameInput :model.sync="nameModel"></nameInput>
+    <datePicker :model.sync="dateModel"></datePicker>
+    <timePicker :model.sync="timeModel"></timePicker>
+    <lastInput :model.sync="lastModel"></lastInput>
+    <view class="config__title">个人信息</view>
+    <authorInput :model.sync="authorModel"></authorInput>
+    <locationInput :model.sync="locationModel"></locationInput>
+
     <view class="config__group">
-      <button class="config__btn config__btn--release">发布</button>
+      <button class="config__btn config__btn--release" @tap="test">发布</button>
       <button class="config__btn config__btn--update">更新</button>
       <button class="config__btn config__btn--delete">删除</button>
     </view>
@@ -122,26 +104,54 @@
 <script>
   import wepy from 'wepy'
   import ALog from '../mixins/a-log'
+  import AttndInput from '../components/attnd-input'
+  import Constant from '../mixins/constant'
+  import Func from '../mixins/func'
 
   export default class Config extends wepy.page {
 
-    mixins = [ALog]
+    mixins = [Func, ALog, Constant]
     data = {
-      array: [1,2,3,4],
-      date: '2016-09-01',
-      time: '12:01',
+      nameModel: {},
+      dateModel: {},
+      timeModel: {},
+      lastModel: {},
+      authorModel: {},
+      locationModel: {},
     }
 
     components = {
-
+      nameInput: AttndInput,
+      datePicker: AttndInput,
+      timePicker: AttndInput,
+      lastInput: AttndInput,
+      authorInput: AttndInput,
+      locationInput: AttndInput
     }
 
     onLoad() {
+      this.initData()
+    }
 
+    initData() {
+      this.nameModel = { type: this.Type.TEXT, label: '考勤名称', value: '' }
+      this.dateModel = { type: this.Type.DATE, label: '日期', value: '', start: '' }
+      this.timeModel = { type: this.Type.TIME, label: '时间', value: '', start: '' }
+      this.lastModel = { type: this.Type.SELECT, label: '持续', value: 0, options: [], suffix: '分钟' }
+      this.authorModel = { type: this.Type.TEXT, label: '发布者', value: '' }
+      this.locationModel = { type: this.Type.TEXT, label: '位置', value: '南亭猫咪主题餐厅', readonly: true }
+      
+      this.dateModel.start = this.getCurTime('date')
+      this.dateModel.value = this.dateModel.start
+      this.timeModel.start = this.getCurTime('time')
+      this.timeModel.value = this.timeModel.start
+      this.lastModel.options = [5,10,15,20,25,30]
     }
 
     methods = {
-
+      test() {
+        console.log(this.model)
+      }
     }
 
   }

@@ -1,0 +1,47 @@
+<style lang="scss">
+  @import '../assets/style/_variables.scss';
+  @import '../assets/style/_common.scss';
+
+  .self {
+    box-sizing: border-box;
+    
+  }
+</style>
+
+<template>
+  <view class="self">
+    <view class="self__title">个人信息</view>
+    <view class="self__item">
+      <view class="self__label">名字</view>
+      <view class="self__input">
+        <input />
+      </view>  
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import ALog from '../mixins/a-log'
+
+  export default class SelfInfo extends wepy.page {
+
+    mixins = [ALog]
+    data = {
+
+    }
+
+    components = {
+
+    }
+
+    onLoad() {
+
+    }
+
+    methods = {
+
+    }
+
+  }
+</script>

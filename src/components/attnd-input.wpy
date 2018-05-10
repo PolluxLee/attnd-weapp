@@ -1,0 +1,141 @@
+<style lang="scss">
+  @import '../assets/style/_variables.scss';
+  @import '../assets/style/_common.scss';
+
+  .atinput {
+    &__item {
+      box-sizing: border-box;
+      height: 90rpx;
+      display: flex;
+      background: white;
+      margin-bottom: 2rpx;
+    }
+
+    &__label {
+      height: 100%;
+      width: 180rpx;
+      color: black;
+      font-size: 30rpx;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-sizing: border-box;
+      border-right: 1rpx solid $bg-dark;
+    }
+
+    &__input {
+      height: 100%;
+      width: 570rpx;
+      color: $font;
+      font-size: 30rpx;
+      padding-left: 30rpx;
+      padding-right: 30rpx;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      input {
+        width: 100%;
+        height: 90%;
+      }
+      picker {
+        .picker {
+          width: 560rpx;
+          height: 70rpx;
+          display: flex;
+          align-items: center;
+        }
+      }
+    }
+  }
+</style>
+
+<template>
+  <view class="atinput">
+    <view class="atinput__item">
+      <view class="atinput__label">{{model.label}}</view>
+      <view class="atinput__input">
+        <input wx:if="{{model.type===Type.TEXT}}"
+          value="{{model.value}}"
+          disabled="{{model.readonly}}"
+          maxlength="{{model.length}}"
+          @input="onInputChange"/>
+        <picker wx:if="{{model.type===Type.TIME}}" 
+          @change="onPickerChange" 
+          value="{{model.value}}"
+          start="{{model.start}}" mode="time"
+          disabled="{{model.readonly}}">
+          <view class="picker">
+            {{model.value}}
+          </view>
+        </picker>
+        <picker wx:if="{{model.type===Type.DATE}}"
+          @change="onPickerChange" 
+          value="{{model.value}}"
+          mode="date" start="{{model.start}}"
+          disabled="{{model.readonly}}">
+          <view class="picker">
+            {{model.value}}
+          </view>
+        </picker>
+        <picker wx:if="{{model.type===Type.SELECT && model.options.length > 0}}" 
+          range="{{model.options}}"
+          @change="onPickerChange" mode="selector"
+          disabled="{{model.readonly}}">
+          <view class="picker">
+            {{model.options[model.value]}} {{model.suffix}}
+          </view>
+        </picker>
+      </view>  
+    </view>
+
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import ALog from '../mixins/a-log'
+  import Constant from '../mixins/constant'
+
+  export default class AttndInput extends wepy.component {
+
+    mixins = [ALog, Constant]
+    data = {
+
+    }
+
+    props = {
+      model: {
+        type: Object,
+        default: {
+          type: 0, 
+          label: 'Label',
+          value: 'Value',
+          readonly: false,
+          length: 50,
+          options: [],
+          suffix: '',
+          start: '',
+          end: '',
+        },
+        twoWay: true
+      }
+    }
+
+    onLoad() {
+
+    }
+
+    methods = {
+      onInputChange(event) {
+        if (!event.detail.value) return
+        this.model.value = event.detail.value
+      },
+      onPickerChange(event) {
+        if (!event.detail.value) return
+        this.model.value = event.detail.value
+        console.log(this.model.value)
+      }
+    }
+
+  }
+</script>

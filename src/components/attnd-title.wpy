@@ -1,0 +1,32 @@
+<style lang="scss">
+  @import '../assets/style/_variables.scss';
+  @import '../assets/style/_common.scss';
+
+
+</style>
+
+<template>
+
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import ALog from '../mixins/a-log'
+
+  export default class AttndTitle extends wepy.component {
+
+    mixins = [ALog]
+    data = {
+
+    }
+
+    onLoad() {
+
+    }
+
+    methods = {
+
+    }
+
+  }
+</script>
