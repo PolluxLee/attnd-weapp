@@ -191,21 +191,11 @@
   export default class Mine extends wepy.page {
     mixins = [ALog, Icon]
     data = {
-      winH: 0
+
     }
 
     onLoad() {
-      this.getWinHeight()
-    }
 
-    getWinHeight() {
-      // 获取屏幕可用高度
-      try {
-        var res = wx.getSystemInfoSync()
-        this.winH = res.windowHeight
-      } catch (e) {
-        this.print(e)
-      }
     }
   }
 </script>

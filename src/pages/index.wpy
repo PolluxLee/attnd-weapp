@@ -2,63 +2,64 @@
   @import '../assets/style/_variables.scss';
   @import '../assets/style/_common.scss';
 
-.home {
-  box-sizing: border-box;
-  width: 100%;
-
-  &__yell, &__resp {
-    box-sizing: border-box;
-    height: 50%;
-    width: 100%;
-  }
-  &__yell { padding: 50rpx; }
-  &__resp { padding-left: 50rpx; padding-right: 50rpx; padding-bottom: 100rpx; }
-
-  &__btn {
+  .home {
     box-sizing: border-box;
     width: 100%;
-    height: 100%;
-    background: white;
-    @extend %box-edge;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
+    padding: 50rpx;
 
-  &__circle {
-    height: 124rpx;
-    width: 124rpx;
-    font-size: 48rpx;
-    margin: 16rpx auto;
-    border-radius: 50%;
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    &--yell {
-      background: $theme;
+    &__yell, &__resp {
+      box-sizing: border-box;
+      height: 450rpx;
+      width: 100%;
     }
 
-    &--resp {
-      background: $theme-aid;
+    &__yell { margin-bottom: 50rpx; }
+
+    &__btn {
+      box-sizing: border-box;
+      width: 100%;
+      height: 100%;
+      background: white;
+      @extend %box-edge;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
-  }
 
-  &__text {
-    text-align: center;
-    font-size: 32rpx;
-    padding-top: 10rpx;
-    color: black;
-  }
+    &__circle {
+      height: 124rpx;
+      width: 124rpx;
+      font-size: 48rpx;
+      margin: 16rpx auto;
+      border-radius: 50%;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
 
-}
+      &--yell {
+        background: $theme;
+      }
+
+      &--resp {
+        background: $theme-aid;
+      }
+    }
+
+    &__text {
+      text-align: center;
+      font-size: 32rpx;
+      padding-top: 10rpx;
+      color: black;
+    }
+
+  }
 </style>
 
 <template>
-  <view class="home" style="height: {{winH}}px">
+  <view class="home">
     <view class="home__yell">
-      <view class="home__btn">
+      <view class="home__btn" @tap="onClickYell">
         <view class="home__circle home__circle--yell">点</view>
         <view class="home__text">我要点名</view>
       </view>
@@ -80,14 +81,20 @@
 
     mixins = [ALog]
     data = {
-      winH: 0
+
     }
 
     onLoad() {
-      this.getWinHeight()
+      // this.getWinHeight()
     }
 
     methods = {
+      onClickYell() {
+        wx.navigateTo({
+          url: 'config'
+        })
+      },
+
       onClickResp() {
         wx.navigateTo({
           url: 'attnd'
@@ -95,14 +102,14 @@
       }
     }
 
-    getWinHeight() {
-      // 获取屏幕可用高度
-      try {
-        var res = wx.getSystemInfoSync()
-        this.winH = res.windowHeight
-      } catch (e) {
-        this.print(e)
-      }
-    }
+    // getWinHeight() {
+    //   // 获取屏幕可用高度
+    //   try {
+    //     var res = wx.getSystemInfoSync()
+    //     this.winH = res.windowHeight
+    //   } catch (e) {
+    //     this.print(e)
+    //   }
+    // }
   }
 </script>

@@ -10,7 +10,8 @@ export default class extends wepy.app {
     pages: [
       'pages/index',
       'pages/mine',
-      'pages/attnd'
+      'pages/attnd',
+      'pages/config'
     ],
     window: {
       backgroundTextStyle: 'light',

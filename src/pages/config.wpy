@@ -1,0 +1,148 @@
+<style lang="scss">
+  @import '../assets/style/_variables.scss';
+  @import '../assets/style/_common.scss';
+
+  .config {
+    box-sizing: border-box;
+    width: 100%;
+    background: $bg-dark;
+    height: 600rpx;
+
+    &__title {
+      box-sizing: border-box;
+      height: 70rpx;
+      color: $font;
+      font-size: 28rpx;
+      padding-left: 20rpx;
+      display: flex;
+      align-items: center;
+    }
+
+    &__item {
+      box-sizing: border-box;
+      height: 90rpx;
+      display: flex;
+      background: white;
+      margin-bottom: 2rpx;
+    }
+
+    &__label {
+      height: 100%;
+      width: 180rpx;
+      color: black;
+      font-size: 30rpx;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-sizing: border-box;
+      border-right: 1rpx solid $bg-dark;
+    }
+
+    &__input {
+      height: 100%;
+      width: 570rpx;
+      color: $font;
+      font-size: 30rpx;
+      padding-left: 30rpx;
+      padding-right: 30rpx;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      input {
+        width: 100%;
+        height: 90%;
+      }
+      picker {
+        .picker {
+          width: 560rpx;
+          height: 70rpx;
+          display: flex;
+          align-items: center;
+        }
+      }
+    }
+
+    &__group {
+      box-sizing: border-box;
+      margin-top: 30rpx;
+      margin-bottom: 30rpx;
+    }
+
+    &__btn {
+      color: white;
+      margin-left: 10rpx;
+      margin-right: 10rpx;
+      margin-bottom: 22rpx;
+      border-width: 0;
+      font-size: 36rpx;
+      &--release, &--update { background: $theme; &:active { background: $theme-dark; } }
+      &--delete { background: $sweet-red; &:active { background: $sweet-red2; } }
+    }
+    
+  }
+</style>
+
+<template>
+  <view class="config">
+    <view class="config__title">考勤信息</view>
+    <view class="config__item">
+      <view class="config__label">考勤名称</view>
+      <view class="config__input">
+        <input />
+      </view>  
+    </view>
+    <view class="config__item">
+      <view class="config__label">日期</view>
+      <view class="config__input">
+        <picker mode="date" value="YYYY-MM-DD">
+          <view class="picker">
+            {{date}}
+          </view>
+        </picker>
+      </view>  
+    </view>
+    <view class="config__item">
+      <view class="config__label">时间</view>
+      <view class="config__input">
+        <picker mode="time">
+          <view class="picker">
+            {{time}}
+          </view>
+        </picker>
+      </view>  
+    </view>
+    <view class="config__group">
+      <button class="config__btn config__btn--release">发布</button>
+      <button class="config__btn config__btn--update">更新</button>
+      <button class="config__btn config__btn--delete">删除</button>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import ALog from '../mixins/a-log'
+
+  export default class Config extends wepy.page {
+
+    mixins = [ALog]
+    data = {
+      array: [1,2,3,4],
+      date: '2016-09-01',
+      time: '12:01',
+    }
+
+    components = {
+
+    }
+
+    onLoad() {
+
+    }
+
+    methods = {
+
+    }
+
+  }
+</script>
