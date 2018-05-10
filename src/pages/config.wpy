@@ -84,12 +84,12 @@
 
 <template>
   <view class="config">
-    <view class="config__title">考勤信息</view>
+    <attndTitle><view slot="title">考勤信息</view></attndTitle>
     <nameInput :model.sync="nameModel"></nameInput>
     <datePicker :model.sync="dateModel"></datePicker>
     <timePicker :model.sync="timeModel"></timePicker>
     <lastInput :model.sync="lastModel"></lastInput>
-    <view class="config__title">个人信息</view>
+    <attndTitle><view slot="title">个人信息</view></attndTitle>
     <authorInput :model.sync="authorModel"></authorInput>
     <locationInput :model.sync="locationModel"></locationInput>
 
@@ -104,6 +104,7 @@
 <script>
   import wepy from 'wepy'
   import ALog from '../mixins/a-log'
+  import AttndTitle from '../components/attnd-title'
   import AttndInput from '../components/attnd-input'
   import Constant from '../mixins/constant'
   import Func from '../mixins/func'
@@ -121,6 +122,7 @@
     }
 
     components = {
+      attndTitle: AttndTitle,
       nameInput: AttndInput,
       datePicker: AttndInput,
       timePicker: AttndInput,

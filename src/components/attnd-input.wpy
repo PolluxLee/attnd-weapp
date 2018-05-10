@@ -133,7 +133,6 @@
       onPickerChange(event) {
         if (!event.detail.value) return
         this.model.value = event.detail.value
-        console.log(this.model.value)
       }
     }
 

@@ -2,11 +2,25 @@
   @import '../assets/style/_variables.scss';
   @import '../assets/style/_common.scss';
 
-
+  .attitle {
+    &__title {
+      box-sizing: border-box;
+      height: 70rpx;
+      color: $font;
+      font-size: 28rpx;
+      padding-left: 20rpx;
+      display: flex;
+      align-items: center;
+    }
+  }
 </style>
 
 <template>
-
+  <view class="attitle">
+    <view class="attitle__title">
+      <slot name="title">Title</slot>
+    </view>
+  </view>
 </template>
 
 <script>
