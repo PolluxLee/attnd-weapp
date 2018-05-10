@@ -1,0 +1,70 @@
+<style lang="scss">
+  @import '../assets/style/_variables.scss';
+  @import '../assets/style/_common.scss';
+
+  .atbtn {
+    &__group {
+      box-sizing: border-box;
+      margin-top: 30rpx;
+      margin-bottom: 30rpx;
+    }
+
+    &__btn {
+      color: white;
+      margin-left: 10rpx;
+      margin-right: 10rpx;
+      margin-bottom: 22rpx;
+      border-width: 0;
+      font-size: 36rpx;
+      &--release, &--update { background: $theme; &:active { background: $theme-dark; } }
+      &--delete { background: $sweet-red; &:active { background: $sweet-red2; } }
+    }
+  }
+</style>
+
+<template>
+  <view class="atbtn__group">
+    <button class="atbtn__btn atbtn__btn--release" wx:if="{{releaseBtn}}">发布</button>
+    <button class="atbtn__btn atbtn__btn--update" wx:if="{{updateBtn}}">更新</button>
+    <button class="atbtn__btn atbtn__btn--delete" wx:if="{{removeBtn}}">删除</button>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import ALog from '../mixins/a-log'
+  import Constant from '../mixins/constant'
+
+  export default class AttndBtn extends wepy.component {
+
+    mixins = [ALog, Constant]
+    data = {
+      releaseBtn: false,
+      updateBtn: false,
+      removeBtn: false
+    }
+
+    props = {
+      types: {
+        type: Object,
+        default: {
+          arr: []
+        }
+      }
+    }
+
+    onLoad() {
+      setTimeout(() => {
+        if (this.types.arr.indexOf(this.BtnType.RELEASE) !== -1) this.releaseBtn = true
+        if (this.types.arr.indexOf(this.BtnType.UPDATE) !== -1) this.updateBtn = true
+        if (this.types.arr.indexOf(this.BtnType.REMOVE) !== -1) this.removeBtn = true
+        this.$apply()
+      }, 0);
+    }
+
+    methods = {
+
+    }
+
+  }
+</script>
