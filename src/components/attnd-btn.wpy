@@ -16,17 +16,15 @@
       margin-bottom: 22rpx;
       border-width: 0;
       font-size: 36rpx;
-      &--release, &--update { background: $theme; &:active { background: $theme-dark; } }
-      &--delete { background: $sweet-red; &:active { background: $sweet-red2; } }
     }
   }
 </style>
 
 <template>
   <view class="atbtn__group">
-    <button class="atbtn__btn atbtn__btn--release" wx:if="{{releaseBtn}}">发布</button>
-    <button class="atbtn__btn atbtn__btn--update" wx:if="{{updateBtn}}">更新</button>
-    <button class="atbtn__btn atbtn__btn--delete" wx:if="{{removeBtn}}">删除</button>
+    <button wx:for-items="{{btns}}" wx:for-item="model" wx:key="id"
+      class="atbtn__btn" style="background: {{model.color}}"
+      @tap="onClick({{model}})">{{model.name}}</button>
   </view>
 </template>
 
@@ -39,43 +37,25 @@
 
     mixins = [ALog, Constant]
     data = {
-      releaseBtn: false,
-      updateBtn: false,
-      removeBtn: false,
-      model: {
-        name: '发布',
-        emit: 'release',
-        color: '#00897B'
-      }
+
     }
 
     props = {
-      types: {
-        type: Object,
-        default: {
-          arr: []
-        }
+      btns: {
+        type: Array,
+        default: []
       }
     }
 
     onLoad() {
       setTimeout(() => {
-        if (this.types.arr.indexOf(this.BtnType.RELEASE) !== -1) this.releaseBtn = true
-        if (this.types.arr.indexOf(this.BtnType.UPDATE) !== -1) this.updateBtn = true
-        if (this.types.arr.indexOf(this.BtnType.REMOVE) !== -1) this.removeBtn = true
-        this.$apply()
+        this.print(this.btns)
       }, 0);
     }
 
     methods = {
-      onClickRelease() {
-        this.$emit('onClickRelease');
-      },
-      onClickUpdate() {
-        this.$emit('onClickUpdate');
-      },
-      onClickRemove() {
-        this.$emit('onClickRemove');
+      onClick(model) {
+        this.$emit(model.emit)
       }
     }
 

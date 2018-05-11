@@ -18,7 +18,7 @@
     <authorInput :model.sync="authorModel"></authorInput>
     <locationInput :model.sync="locationModel"></locationInput>
     <attndTitle><view slot="title">*签到有效范围为 200 米，上限 1000 人</view></attndTitle>
-    <attndBtn :types.sync="btnTypes"></attndBtn>
+    <attndBtn :btns.sync="btnModel"></attndBtn>
   </view>
 </template>
 
@@ -41,7 +41,7 @@
       lastModel: {},
       authorModel: {},
       locationModel: {},
-      btnTypes: {}
+      btnModel: []
     }
 
     components = {
@@ -73,7 +73,11 @@
       this.timeModel.value = this.timeModel.start
       this.lastModel.options = [5,10,15,20,25,30]
 
-      this.btnTypes = { arr: [1,2] }
+      this.btnModel = [
+        { name: '发布', emit: 'release', color: '#00897B' },
+        { name: '删除', emit: 'remove', color: '#E6433E' },
+        { name: '更新', emit: 'update', color: '#00897B' },
+      ]
     }
 
     methods = {
@@ -81,14 +85,8 @@
     }
 
     events = {
-      onClickRelease($event) {
+      onClickBtn(emit) {
         
-      },
-      onClickUpdate($event) {
-
-      },
-      onClickRemove($event) {
-
       }
     }
 

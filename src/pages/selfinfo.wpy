@@ -13,7 +13,7 @@
     <attndTitle><view slot="title">个人信息</view></attndTitle>
     <nameInput :model.sync="nameModel"></nameInput>
     <attndTitle><view slot="title">*建议填写真实姓名</view></attndTitle>
-    
+
   </view>
 </template>
 
@@ -30,6 +30,7 @@
     mixins = [ALog, Constant]
     data = {
       nameModel: {},
+      btnModel: []
     }
 
     components = {
@@ -44,6 +45,9 @@
 
     initData() {
       this.nameModel = { type: this.Type.TEXT, label: '名字', readonly: false, length: 50, options: [], suffix: '', start: '', end: '', value: '' }
+      this.btnModel = [
+        { name: '保存', emit: 'save', color: '#00897B' },
+      ]
     }
 
     methods = {
@@ -51,7 +55,9 @@
     }
 
     events = {
-      
+      onClickBtn(emit) {
+        
+      }
     }
 
   }
