@@ -4,7 +4,7 @@ export default class Constant extends wepy.mixin {
 
   data = {
     Type: { TEXT: 0, DATE: 1, TIME: 2, SELECT: 3 },
-    BtnType: { RELEASE: 0, UPDATE: 1, REMOVE: 2 }
+    BtnType: { RELEASE: 0, UPDATE: 1, REMOVE: 2 },
   }
 
 }

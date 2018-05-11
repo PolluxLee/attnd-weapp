@@ -1,0 +1,36 @@
+<style lang="scss">
+  @import '../assets/style/_variables.scss';
+  @import '../assets/style/_common.scss';
+
+  .entry {
+
+  }
+</style>
+
+<template>
+  <view class="entry">
+    
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import ALog from '../mixins/a-log'
+
+  export default class Index extends wepy.page {
+
+    mixins = [ALog]
+    data = {
+
+    }
+
+    onLoad() {
+
+    }
+
+    methods = {
+
+    }
+
+  }
+</script>

@@ -13,7 +13,7 @@
     <attndTitle><view slot="title">个人信息</view></attndTitle>
     <nameInput :model.sync="nameModel"></nameInput>
     <attndTitle><view slot="title">*建议填写真实姓名</view></attndTitle>
-
+    <saveBtn :btns.sync="btnModel"></saveBtn>
   </view>
 </template>
 

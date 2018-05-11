@@ -72,36 +72,50 @@
 
   &__status {
     box-sizing: border-box;
-    height: 75rpx;
+    height: 70rpx;
     margin-bottom: 30rpx;
     display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
+    justify-content: center;
   }
 
   &__tab {
     box-sizing: border-box;
     color: $font;
-    font-size: 32rpx;
-    height: 100%;
+    font-size: 28rpx;
+    height: 70rpx;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
+    background: white;
+    border-radius: 10rpx;
     &--yell, &--resp {
-      display: inline-block;
-      vertical-align: center;
-      border-bottom: 6rpx solid $font;
-      margin-right: 20rpx;
+      box-sizing: border-box;
+      padding-left: 30rpx;
+      padding-right: 30rpx;
+      line-height: 70rpx;
+    }
+    &--yell {
+      border-top-left-radius: 10rpx;
+      border-bottom-left-radius: 10rpx;
+    }
+    &--resp {
+      border-top-right-radius: 10rpx;
+      border-bottom-right-radius: 10rpx;
+    }
+    &--yell-active, &--resp-active {
+      background: $theme;
+      color: white
     }
   }
 
   &__search {
     box-sizing: border-box;
-    width: 350rpx;
-    height: 64rpx;
+    width: 420rpx;
+    height: 70rpx;
     background: white;
     @extend %box-edge;
     display: flex;
     align-items: center;
+    margin-right: 30rpx;
     image {
       width: 40rpx;
       height: 40rpx;
@@ -171,8 +185,10 @@
         <input placeholder="按考勤名字搜索" confirm-type="search"></input>
       </view>
       <view class="mine__tab">
-        <view class="mine__tab--yell">点名</view>
-        <view class="mine__tab--resp">签到</view>
+        <view class="mine__tab--yell {{attndStatus===0 ? 'mine__tab--yell-active' : ''}}"
+          @tap="onTagToggle({{0}})">点名</view>
+        <view class="mine__tab--resp {{attndStatus===1 ? 'mine__tab--resp-active' : ''}}"
+          @tap="onTagToggle({{1}})">签到</view>
       </view>
     </view>
     <view class="mine__list">
@@ -183,7 +199,6 @@
         <view class="mine__item--p">持续：10 mins</view>
         <view class="mine__item--p">发布者：老金</view>
         <view class="mine__item--p">位置：南亭猫咪主题餐厅</view>
-        <image class="mine__arrow" src="{{arrow}}" mode="scaleToFill"/>
         <view class="mine__config" @tap="onClickConfig">
           <image src="{{config}}" mode="scaleToFill"/>
         </view>
@@ -200,7 +215,7 @@
   export default class Mine extends wepy.page {
     mixins = [ALog, Icon]
     data = {
-
+      attndStatus: 0
     }
 
     onLoad() {
@@ -212,10 +227,19 @@
       onClickConfig() {
         wx.navigateTo({ url: 'config' })
       },
-
       //修改个人信息
       onClickSelfinfo() {
         wx.navigateTo({ url: 'selfinfo' })
+      },
+      //标签切换
+      onTagToggle(index) {
+        this.print(index)
+        switch (index) {
+          case 0: this.attndStatus = 0; break
+          case 1: this.attndStatus = 1; break
+          default: this.attndStatus = 0; break
+        }
+        this.$apply()
       }
     }
   }
