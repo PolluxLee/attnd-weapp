@@ -10,37 +10,48 @@
 
 <template>
   <view class="self">
-    <view class="self__title">个人信息</view>
-    <view class="self__item">
-      <view class="self__label">名字</view>
-      <view class="self__input">
-        <input />
-      </view>  
-    </view>
+    <attndTitle><view slot="title">个人信息</view></attndTitle>
+    <nameInput :model.sync="nameModel"></nameInput>
+    <attndTitle><view slot="title">*建议填写真实姓名</view></attndTitle>
+    
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
   import ALog from '../mixins/a-log'
+  import AttndTitle from '../components/attnd-title'
+  import AttndInput from '../components/attnd-input'
+  import AttndBtn from '../components/attnd-btn'
+  import Constant from '../mixins/constant'
 
-  export default class SelfInfo extends wepy.page {
+  export default class Selfinfo extends wepy.page {
 
-    mixins = [ALog]
+    mixins = [ALog, Constant]
     data = {
-
+      nameModel: {},
     }
 
     components = {
-
+      attndTitle: AttndTitle,
+      nameInput: AttndInput,
+      saveBtn: AttndBtn
     }
 
     onLoad() {
+      this.initData()
+    }
 
+    initData() {
+      this.nameModel = { type: this.Type.TEXT, label: '名字', readonly: false, length: 50, options: [], suffix: '', start: '', end: '', value: '' }
     }
 
     methods = {
 
+    }
+
+    events = {
+      
     }
 
   }

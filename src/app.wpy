@@ -1,4 +1,10 @@
 <style lang="scss">
+  @import './assets/style/_variables.scss';
+
+  page {
+    height: 100%;
+    background: #ebebeb;
+  }
 </style>
 
 <script>
@@ -11,10 +17,12 @@ export default class extends wepy.app {
       'pages/index',
       'pages/mine',
       'pages/attnd',
-      'pages/config'
+      'pages/config',
+      'pages/selfinfo'
     ],
     window: {
       backgroundTextStyle: 'light',
+      backgroundColor: '#fafafa',
       navigationBarBackgroundColor: '#00897B',
       navigationBarTitleText: '小小考勤',
       navigationBarTextStyle: 'white',

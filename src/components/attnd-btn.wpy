@@ -41,7 +41,12 @@
     data = {
       releaseBtn: false,
       updateBtn: false,
-      removeBtn: false
+      removeBtn: false,
+      model: {
+        name: '发布',
+        emit: 'release',
+        color: '#00897B'
+      }
     }
 
     props = {
@@ -63,7 +68,15 @@
     }
 
     methods = {
-
+      onClickRelease() {
+        this.$emit('onClickRelease');
+      },
+      onClickUpdate() {
+        this.$emit('onClickUpdate');
+      },
+      onClickRemove() {
+        this.$emit('onClickRemove');
+      }
     }
 
   }
