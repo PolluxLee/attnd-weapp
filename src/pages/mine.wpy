@@ -35,14 +35,14 @@
       color: black;
       white-space: nowrap;
       overflow-x: auto;
-      margin-top: 6rpx;
+      line-height: 60rpx;
     }
     &--location {
       font-size: 28rpx;
       color: $font;
       white-space: nowrap;
       overflow-x: auto;
-      margin-top: 6rpx;
+      line-height: 66rpx;
     }
   }
 
@@ -75,7 +75,7 @@
     height: 70rpx;
     margin-bottom: 30rpx;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
   }
 
   &__tab {
@@ -109,13 +109,12 @@
 
   &__search {
     box-sizing: border-box;
-    width: 420rpx;
+    width: 430rpx;
     height: 70rpx;
     background: white;
     @extend %box-edge;
     display: flex;
     align-items: center;
-    margin-right: 30rpx;
     image {
       width: 40rpx;
       height: 40rpx;
@@ -219,7 +218,7 @@
     }
 
     onLoad() {
-
+      wx.setNavigationBarTitle({ title: '我的' })
     }
 
     methods = {

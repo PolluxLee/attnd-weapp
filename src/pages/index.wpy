@@ -85,31 +85,18 @@
     }
 
     onLoad() {
-      // this.getWinHeight()
+
     }
 
     methods = {
       onClickYell() {
-        wx.navigateTo({
-          url: 'config'
-        })
+        wx.navigateTo({ url: 'config' })
       },
 
       onClickResp() {
-        wx.navigateTo({
-          url: 'attnd'
-        })
+        wx.navigateTo({ url: 'attnd' })
       }
     }
 
-    // getWinHeight() {
-    //   // 获取屏幕可用高度
-    //   try {
-    //     var res = wx.getSystemInfoSync()
-    //     this.winH = res.windowHeight
-    //   } catch (e) {
-    //     this.print(e)
-    //   }
-    // }
   }
 </script>

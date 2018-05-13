@@ -18,11 +18,12 @@ export default class extends wepy.app {
       'pages/mine',
       'pages/attnd',
       'pages/config',
-      'pages/selfinfo'
+      'pages/selfinfo',
+      'pages/entry'
     ],
     window: {
       backgroundTextStyle: 'light',
-      backgroundColor: '#fafafa',
+      backgroundColor: '#ebebeb',
       navigationBarBackgroundColor: '#00897B',
       navigationBarTitleText: '小小考勤',
       navigationBarTextStyle: 'white',
@@ -37,6 +38,7 @@ export default class extends wepy.app {
       position: 'bottom',
       list: [
         { pagePath: 'pages/index', text: '考勤' },
+        { pagePath: 'pages/entry', text: '分组' },
         { pagePath: 'pages/mine', text: '我的' },
       ]
     }

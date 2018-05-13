@@ -57,6 +57,8 @@
 
     onLoad() {
       this.initData()
+      //TODO: 根据考勤 id 得出不同 title
+      wx.setNavigationBarTitle({ title: '考勤配置' })
     }
 
     initData() {
