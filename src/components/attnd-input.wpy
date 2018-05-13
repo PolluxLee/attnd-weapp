@@ -79,10 +79,10 @@
         </picker>
         <picker wx:if="{{model.type===Type.SELECT && model.options.length > 0}}" 
           range="{{model.options}}"
-          @change="onPickerChange" mode="selector"
+          @change="onSelectorChange" mode="selector"
           disabled="{{model.readonly}}">
           <view class="picker">
-            {{model.options[model.value]}} {{model.suffix}}
+            {{model.value}} {{model.suffix}}
           </view>
         </picker>
       </view>  
@@ -133,6 +133,10 @@
       onPickerChange(event) {
         if (!event.detail.value) return
         this.model.value = event.detail.value
+      },
+      onSelectorChange(event) {
+        let index = event.detail.value
+        this.model.value = this.model.options[index]
       }
     }
 

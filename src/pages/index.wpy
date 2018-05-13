@@ -90,7 +90,7 @@
 
     methods = {
       onClickYell() {
-        wx.navigateTo({ url: 'config' })
+        wx.navigateTo({ url: 'config?id=1' })
       },
 
       onClickResp() {
