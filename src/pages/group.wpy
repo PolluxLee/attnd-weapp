@@ -1,6 +1,6 @@
 <style lang="scss">
-  @import '../../assets/style/_variables.scss';
-  @import '../../assets/style/_common.scss';
+  @import '../assets/style/_variables.scss';
+  @import '../assets/style/_common.scss';
 
   .group {
     box-sizing: border-box;
@@ -55,24 +55,6 @@
         margin-right: 10rpx;
       }
     }
-
-    &__plus {
-      position: fixed;
-      width: 100rpx;
-      height: 100rpx;
-      box-sizing: border-box;
-      border-radius: 50%;
-      background: $theme;
-      right: 30rpx;
-      bottom: 30rpx;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      image {
-        width: 50rpx;
-        height: 50rpx;
-      }
-    }
   }
 </style>
 
@@ -85,7 +67,7 @@
       </view>
     </view>
     <view class="group__list">
-      <view class="group__item">
+      <view class="group__item" @tap="onClickItem">
         <view class="group__content">计科 151（49）很长很长螺丝扣搭街坊垃圾上单李开复上来看大家顺利打开鸡分</view>
       </view>
       <view class="group__item">
@@ -94,17 +76,14 @@
       <view class="group__item">
         <view class="group__content">计科 151（49）</view>
       </view>
-      <view class="group__plus" @tap="onClickEntry">
-        <image src="{{plus}}" mode="scaleToFill"/>
-      </view>
     </view>
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
-  import ALog from '../../mixins/a-log'
-  import Icon from '../../assets/icon/icon'
+  import ALog from '../mixins/a-log'
+  import Icon from '../assets/icon/icon'
 
   export default class Group extends wepy.page {
 
@@ -118,8 +97,8 @@
     }
 
     methods = {
-      onClickEntry() {
-
+      onClickItem() {
+        wx.navigateTo({ url: 'groupinfo' })
       }
     }
 

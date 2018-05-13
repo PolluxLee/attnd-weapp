@@ -19,7 +19,8 @@ export default class extends wepy.app {
       'pages/attnd',
       'pages/config',
       'pages/selfinfo',
-      'pages/group'
+      'pages/group',
+      'pages/groupinfo'
     ],
     window: {
       backgroundTextStyle: 'light',
