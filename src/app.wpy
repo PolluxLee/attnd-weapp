@@ -19,7 +19,7 @@ export default class extends wepy.app {
       'pages/attnd',
       'pages/config',
       'pages/selfinfo',
-      'pages/entry'
+      'pages/group'
     ],
     window: {
       backgroundTextStyle: 'light',
@@ -38,7 +38,6 @@ export default class extends wepy.app {
       position: 'bottom',
       list: [
         { pagePath: 'pages/index', text: '考勤' },
-        { pagePath: 'pages/entry', text: '分组' },
         { pagePath: 'pages/mine', text: '我的' },
       ]
     }

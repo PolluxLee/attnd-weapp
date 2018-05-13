@@ -107,9 +107,21 @@
     }
   }
 
+  &__group {
+    box-sizing: border-box;
+    color: $font;
+    font-size: 28rpx;
+    height: 70rpx;
+    line-height: 70rpx;
+    padding-left: 20rpx;
+    padding-right: 20rpx;
+    background: #fafafa;
+    border-radius: 10rpx;
+  }
+
   &__search {
     box-sizing: border-box;
-    width: 430rpx;
+    width: 330rpx;
     height: 70rpx;
     background: white;
     @extend %box-edge;
@@ -189,6 +201,7 @@
         <view class="mine__tab--resp {{attndStatus===1 ? 'mine__tab--resp-active' : ''}}"
           @tap="onTagToggle({{1}})">签到</view>
       </view>
+      <view class="mine__group" @tap="onClickGroup">分组</view>
     </view>
     <view class="mine__list">
       <view class="mine__item">
@@ -239,6 +252,9 @@
           default: this.attndStatus = 0; break
         }
         this.$apply()
+      },
+      onClickGroup() {
+        wx.navigateTo({ url: 'group' })
       }
     }
   }

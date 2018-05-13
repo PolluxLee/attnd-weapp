@@ -1,0 +1,127 @@
+<style lang="scss">
+  @import '../assets/style/_variables.scss';
+  @import '../assets/style/_common.scss';
+
+  .group {
+    box-sizing: border-box;
+    position: relative;
+
+    &__list {
+      padding: 30rpx;
+    }
+
+    &__item {
+      margin-bottom: 20rpx;
+      background: white;
+      @extend %box-edge;
+      box-sizing: border-box;
+      padding-left: 30rpx;
+      padding-right: 30rpx;
+    }
+
+    &__content {
+      color: black;
+      font-size: 36rpx;
+      white-space: nowrap;
+      overflow-x: auto;
+      line-height: 120rpx;
+    }
+
+    &__search {
+      box-sizing: border-box;
+      padding: 30rpx;
+      width: 100%;
+      background: $theme;
+    }
+
+    &__input {
+      box-sizing: border-box;
+      width: 100%;
+      border-radius: 10rpx;
+      height: 70rpx;
+      padding: 6rpx 20rpx;
+      background: white;
+      display: flex;
+      align-items: center;
+      input {
+        height: 100%;
+        width: 600rpx;
+        font-size: 30rpx;
+        color: $font;
+      }
+      image {
+        width: 40rpx;
+        height: 40rpx;
+        margin-right: 10rpx;
+      }
+    }
+
+    &__plus {
+      position: fixed;
+      width: 100rpx;
+      height: 100rpx;
+      box-sizing: border-box;
+      border-radius: 50%;
+      background: $theme;
+      right: 30rpx;
+      bottom: 30rpx;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      image {
+        width: 50rpx;
+        height: 50rpx;
+      }
+    }
+  }
+</style>
+
+<template>
+  <view class="group">
+    <view class="group__search">
+      <view class="group__input">
+        <image src="{{search}}" mode="scaleToFill"/>
+        <input placeholder="按组名搜索"/>
+      </view>
+    </view>
+    <view class="group__list">
+      <view class="group__item">
+        <view class="group__content">计科 151（49）很长很长螺丝扣搭街坊垃圾上单李开复上来看大家顺利打开鸡分</view>
+      </view>
+      <view class="group__item">
+        <view class="group__content">计科 151（49）</view>
+      </view>
+      <view class="group__item">
+        <view class="group__content">计科 151（49）</view>
+      </view>
+      <view class="group__plus" @tap="onClickEntry">
+        <image src="{{plus}}" mode="scaleToFill"/>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import ALog from '../mixins/a-log'
+  import Icon from '../assets/icon/icon'
+
+  export default class Group extends wepy.page {
+
+    mixins = [ALog, Icon]
+    data = {
+
+    }
+
+    onLoad() {
+      wx.setNavigationBarTitle({ title: '人员分组' })
+    }
+
+    methods = {
+      onClickEntry() {
+
+      }
+    }
+
+  }
+</script>

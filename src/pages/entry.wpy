@@ -2,62 +2,12 @@
   @import '../assets/style/_variables.scss';
   @import '../assets/style/_common.scss';
 
-  .entry {
-    box-sizing: border-box;
-    padding: 30rpx;
-    position: relative;
 
-    &__item {
-      margin-bottom: 20rpx;
-      background: white;
-      @extend %box-edge;
-      box-sizing: border-box;
-      padding-left: 30rpx;
-      padding-right: 30rpx;
-    }
-
-    &__content {
-      color: black;
-      font-size: 36rpx;
-      white-space: nowrap;
-      overflow-x: auto;
-      line-height: 120rpx;
-    }
-
-    &__plus {
-      position: fixed;
-      width: 100rpx;
-      height: 100rpx;
-      box-sizing: border-box;
-      border-radius: 50%;
-      background: $theme;
-      right: 30rpx;
-      bottom: 30rpx;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      image {
-        width: 50rpx;
-        height: 50rpx;
-      }
-    }
-  }
 </style>
 
 <template>
   <view class="entry">
-    <view class="entry__item">
-      <view class="entry__content">计科 151（49）很长很长螺丝扣搭街坊垃圾上单李开复上来看大家顺利打开鸡分</view>
-    </view>
-    <view class="entry__item">
-      <view class="entry__content">计科 151（49）</view>
-    </view>
-    <view class="entry__item">
-      <view class="entry__content">计科 151（49）</view>
-    </view>
-    <view class="entry__plus">
-      <image src="{{plus}}" mode="scaleToFill"/>
-    </view>
+    
   </view>
 </template>
 
@@ -66,7 +16,7 @@
   import ALog from '../mixins/a-log'
   import Icon from '../assets/icon/icon'
 
-  export default class Index extends wepy.page {
+  export default class Entry extends wepy.page {
 
     mixins = [ALog, Icon]
     data = {
@@ -74,7 +24,7 @@
     }
 
     onLoad() {
-      wx.setNavigationBarTitle({ title: '人员分组' })
+      wx.setNavigationBarTitle({ title: '录入' })
     }
 
     methods = {
