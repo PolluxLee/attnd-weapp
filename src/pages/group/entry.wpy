@@ -1,6 +1,6 @@
 <style lang="scss">
-  @import '../assets/style/_variables.scss';
-  @import '../assets/style/_common.scss';
+  @import '../../assets/style/_variables.scss';
+  @import '../../assets/style/_common.scss';
 
 
 </style>
@@ -13,8 +13,8 @@
 
 <script>
   import wepy from 'wepy'
-  import ALog from '../mixins/a-log'
-  import Icon from '../assets/icon/icon'
+  import ALog from '../../mixins/a-log'
+  import Icon from '../../assets/icon/icon'
 
   export default class Entry extends wepy.page {
 

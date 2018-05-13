@@ -1,6 +1,6 @@
 <style lang="scss">
-  @import '../assets/style/_variables.scss';
-  @import '../assets/style/_common.scss';
+  @import '../../assets/style/_variables.scss';
+  @import '../../assets/style/_common.scss';
 
   .self {
     box-sizing: border-box;
@@ -19,11 +19,11 @@
 
 <script>
   import wepy from 'wepy'
-  import ALog from '../mixins/a-log'
-  import AttndTitle from '../components/attnd-title'
-  import AttndInput from '../components/attnd-input'
-  import AttndBtn from '../components/attnd-btn'
-  import Constant from '../mixins/constant'
+  import ALog from '../../mixins/a-log'
+  import AttndTitle from '../../components/attnd-title'
+  import AttndInput from '../../components/attnd-input'
+  import AttndBtn from '../../components/attnd-btn'
+  import Constant from '../../mixins/constant'
 
   export default class Selfinfo extends wepy.page {
 

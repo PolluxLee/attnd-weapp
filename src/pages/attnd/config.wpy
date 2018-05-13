@@ -1,6 +1,6 @@
 <style lang="scss">
-  @import '../assets/style/_variables.scss';
-  @import '../assets/style/_common.scss';
+  @import '../../assets/style/_variables.scss';
+  @import '../../assets/style/_common.scss';
 
   .config {
     box-sizing: border-box;
@@ -24,12 +24,12 @@
 
 <script>
   import wepy from 'wepy'
-  import ALog from '../mixins/a-log'
-  import AttndTitle from '../components/attnd-title'
-  import AttndInput from '../components/attnd-input'
-  import AttndBtn from '../components/attnd-btn'
-  import Constant from '../mixins/constant'
-  import Func from '../mixins/func'
+  import ALog from '../../mixins/a-log'
+  import AttndTitle from '../../components/attnd-title'
+  import AttndInput from '../../components/attnd-input'
+  import AttndBtn from '../../components/attnd-btn'
+  import Constant from '../../mixins/constant'
+  import Func from '../../mixins/func'
 
   export default class Config extends wepy.page {
 

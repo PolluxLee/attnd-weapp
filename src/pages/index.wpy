@@ -61,13 +61,13 @@
     <view class="home__yell">
       <view class="home__btn" @tap="onClickYell">
         <view class="home__circle home__circle--yell">点</view>
-        <view class="home__text">我要点名</view>
+        <view class="home__text">点名 / 发布考勤</view>
       </view>
     </view>
     <view class="home__resp">
       <view class="home__btn" @tap="onClickResp">
         <view class="home__circle home__circle--resp">签</view>
-        <view class="home__text">我要签到</view>
+        <view class="home__text">签到 / 输入口令</view>
       </view>
     </view>
   </view>
