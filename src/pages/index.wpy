@@ -85,12 +85,20 @@
     }
 
     onLoad() {
-
+      // this.print(this.$parent.globalData.userInfo)
+      wx.getLocation({
+        success: res => {
+          wx.showModal({
+            title: '提示',
+            content: `latitude: ${res.latitude}, longitude: ${res.longitude}`
+          })
+        }
+      })
     }
 
     methods = {
       onClickYell() {
-        wx.navigateTo({ url: 'config?id=1' })
+        wx.navigateTo({ url: 'config' })
       },
 
       onClickResp() {

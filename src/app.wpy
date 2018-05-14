@@ -45,7 +45,12 @@ export default class extends wepy.app {
   }
 
   globalData = {
-    userInfo: null
+    userInfo: null,
+    location: {
+      latitude: null,
+      longitude: null,
+      name: null
+    }
   }
 
   constructor () {
