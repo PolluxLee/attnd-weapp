@@ -4,13 +4,11 @@
 
   .attitle {
     &__title {
+      width: 100%;
       box-sizing: border-box;
-      height: 70rpx;
       color: $font;
       font-size: 28rpx;
-      padding-left: 20rpx;
-      display: flex;
-      align-items: center;
+      padding: 20rpx 20rpx;
     }
   }
 </style>

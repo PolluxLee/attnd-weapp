@@ -70,6 +70,9 @@
         <view class="home__text">签到 / 输入口令</view>
       </view>
     </view>
+    <view class="home__group">
+      
+    </view>
   </view>
 </template>
 
@@ -86,14 +89,14 @@
 
     onLoad() {
       // this.print(this.$parent.globalData.userInfo)
-      wx.getLocation({
-        success: res => {
-          wx.showModal({
-            title: '提示',
-            content: `latitude: ${res.latitude}, longitude: ${res.longitude}`
-          })
-        }
-      })
+      // wx.getLocation({
+      //   success: res => {
+      //     wx.showModal({
+      //       title: '提示',
+      //       content: `latitude: ${res.latitude}, longitude: ${res.longitude}`
+      //     })
+      //   }
+      // })
     }
 
     methods = {

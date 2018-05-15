@@ -5,6 +5,7 @@
   .atbtn {
     &__group {
       box-sizing: border-box;
+      width: 100%;
       margin-top: 30rpx;
       margin-bottom: 30rpx;
     }

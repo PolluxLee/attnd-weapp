@@ -4,6 +4,8 @@
 
   .config {
     box-sizing: border-box;
+    width: 750rpx;
+    overflow-x: hidden;
   }
 </style>
 
@@ -11,13 +13,16 @@
   <view class="config" wx:if="{{isShow}}">
     <attndTitle><view slot="title">考勤信息</view></attndTitle>
     <nameInput :model.sync="nameModel"></nameInput>
+    <attndTitle><view slot="title">* 若有历史考勤记录，可点击选择选取曾经使用过的考勤名称</view></attndTitle>    
     <datePicker :model.sync="dateModel"></datePicker>
     <timePicker :model.sync="timeModel"></timePicker>
     <lastInput :model.sync="lastModel"></lastInput>
+    <groupInput :model.sync="groupModel"></groupInput>
+    <attndTitle><view slot="title">* 输入考勤名单名称可新建考勤名单，新建的考勤名单里的人员由当次考勤确定；若已有历史名单，可点击选择选取</view></attndTitle>
     <attndTitle><view slot="title">个人信息</view></attndTitle>
     <authorInput :model.sync="authorModel"></authorInput>
     <locationInput :model.sync="locationModel"></locationInput>
-    <attndTitle><view slot="title">*签到有效范围为 200 米，上限 1000 人</view></attndTitle>
+    <attndTitle><view slot="title">* 签到有效范围为 200 米，上限 1000 人；因手机差异，获取的位置可能有一点偏差</view></attndTitle>
     <attndBtn :btns.sync="btnModel"></attndBtn>
   </view>
 </template>
@@ -40,6 +45,7 @@
       dateModel: {},
       timeModel: {},
       lastModel: {},
+      groupModel: {},
       authorModel: {},
       locationModel: {},
       btnModel: [],
@@ -53,6 +59,7 @@
       nameInput: AttndInput,
       datePicker: AttndInput,
       timePicker: AttndInput,
+      groupInput: AttndInput,
       lastInput: AttndInput,
       authorInput: AttndInput,
       locationInput: AttndInput
@@ -88,18 +95,21 @@
       this.getLocation()
 
       wx.showNavigationBarLoading()
-      this.nameModel = { type: this.Type.TEXT, label: '考勤名称', readonly: false, length: 50, options: [], suffix: '', start: '', end: '', value: '' }
-      this.dateModel = { type: this.Type.DATE, label: '日期', readonly: false, length: 50, options: [], suffix: '', start: '', end: '', value: '' }
-      this.timeModel = { type: this.Type.TIME, label: '时间', readonly: false, length: 50, options: [], suffix: '', start: '', end: '', value: '' }
-      this.lastModel = { type: this.Type.SELECT, label: '持续', readonly: false, length: 50, options: [], suffix: '分钟', start: '', end: '', value: '', }
-      this.authorModel = { type: this.Type.TEXT, label: '发布者', readonly: false, length: 50, options: [], suffix: '', start: '', end: '', value: '' }
-      this.locationModel = { type: this.Type.TEXT, label: '位置', readonly: true, length: 50, options: [], suffix: '', start: '', end: '', value: '', }
-      this.lastModel.options = ['5','10','15','20','25','30']
+      this.nameModel = { type: this.Type.TEXT_SELECT, label: '考勤名称', readonly: false, length: 50, value: '', hint: '例如：计科151-计网', extra: '选择', options: ['计科151-计网','计科152-计网','计科151-操作系统','计科152-操作系统'] }
+      this.dateModel = { type: this.Type.DATE, label: '日期', readonly: false, options: [], start: '', value: '' }
+      this.timeModel = { type: this.Type.TIME, label: '时间', readonly: false, options: [], start: '', value: '' }
+      this.lastModel = { type: this.Type.SELECT, label: '持续', readonly: false, options: [], suffix: '分钟', value: '5', }
+      this.groupModel = { type: this.Type.TEXT_SELECT, label: '考勤名单', readonly: false, length: 50, value: '', hint: '例如：计科151', extra: '选择', options: [] }
+      this.authorModel = { type: this.Type.TEXT, label: '发布者', readonly: false, length: 50, value: '', hint: '' }
+      this.locationModel = { type: this.Type.TEXT, label: '位置', readonly: true, length: 50, value: '', hint: '' }
+      this.lastModel.options = ['5','10','15','20','30']
 
       if (!this.attndId) {
         wx.setNavigationBarTitle({ title: '发布考勤' })
-        this.dateModel.value = this.getCurTime('date')
-        this.timeModel.value = this.getCurTime('time')
+        this.dateModel.start = this.getCurTime('date')
+        this.dateModel.value = this.dateModel.start
+        this.timeModel.start = this.getCurTime('time')
+        this.timeModel.value = this.timeModel.start
         this.btnModel = [
           { name: '发布', emit: 'release', color: '#00897B' }
         ]

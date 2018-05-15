@@ -115,7 +115,7 @@
     line-height: 70rpx;
     padding-left: 20rpx;
     padding-right: 20rpx;
-    background: #fafafa;
+    background: white;
     border-radius: 10rpx;
   }
 
@@ -201,10 +201,10 @@
         <view class="mine__tab--resp {{attndStatus===1 ? 'mine__tab--resp-active' : ''}}"
           @tap="onTagToggle({{1}})">签到</view>
       </view>
-      <view class="mine__group" @tap="onClickGroup">分组</view>
+      <view class="mine__group" @tap="onClickGroup">名单</view>
     </view>
     <view class="mine__list">
-      <view class="mine__item">
+      <view class="mine__item" @tap="enterAttnd">
         <view class="mine__item--title">嵌入式</view>
         <view class="mine__item--p mine__item--p-pwd">口令：DR125SDR5</view>
         <view class="mine__item--p">时间：2018/05/07 13:50</view>
@@ -235,6 +235,9 @@
     }
 
     methods = {
+      enterAttnd() {
+        wx.navigateTo({ url: 'attnd' })
+      },
       //考勤配置按钮
       onClickConfig() {
         wx.navigateTo({ url: 'config' })

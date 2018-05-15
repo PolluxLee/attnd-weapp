@@ -3,12 +3,14 @@
   @import '../assets/style/_common.scss';
 
   .atinput {
+    width: 100%;
     &__item {
       box-sizing: border-box;
       height: 90rpx;
       display: flex;
       background: white;
       margin-bottom: 2rpx;
+      width: 100%;
     }
 
     &__label {
@@ -26,7 +28,7 @@
     &__input {
       height: 100%;
       width: 570rpx;
-      color: $font;
+      color: black;
       font-size: 30rpx;
       padding-left: 30rpx;
       padding-right: 30rpx;
@@ -45,19 +47,50 @@
           align-items: center;
         }
       }
+
+      &--extra {
+        height: 100%;
+        width: 570rpx;
+        color: black;
+        font-size: 30rpx;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        input {
+          width: 440rpx;
+          height: 90%;
+          padding-left: 30rpx;
+          padding-right: 30rpx;
+          box-sizing: border-box;
+          border-right: 1rpx solid $bg;
+        }
+        picker {
+          .picker {
+            width: 130rpx;
+            height: 70rpx;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            color: $theme;
+          }
+        }
+      }
     }
   }
 </style>
 
 <template>
   <view class="atinput">
-    <view class="atinput__item">
+    <view class="atinput__item"  wx:if="{{model.type!==Type.TEXT_SELECT}}">
       <view class="atinput__label">{{model.label}}</view>
       <view class="atinput__input">
         <input wx:if="{{model.type===Type.TEXT}}"
           value="{{model.value}}"
           disabled="{{model.readonly}}"
           maxlength="{{model.length}}"
+          placeholder="{{model.hint}}"
+          placeholder-style="color: #a5a5a5"
           @input="onInputChange"/>
         <picker wx:if="{{model.type===Type.TIME}}" 
           @change="onPickerChange" 
@@ -77,7 +110,7 @@
             {{model.value}}
           </view>
         </picker>
-        <picker wx:if="{{model.type===Type.SELECT && model.options.length > 0}}" 
+        <picker wx:if="{{model.type===Type.SELECT}}" 
           range="{{model.options}}"
           @change="onSelectorChange" mode="selector"
           disabled="{{model.readonly}}">
@@ -85,9 +118,27 @@
             {{model.value}} {{model.suffix}}
           </view>
         </picker>
-      </view>  
+      </view>
     </view>
-
+    <view class="atinput__item"  wx:if="{{model.type===Type.TEXT_SELECT}}">
+      <view class="atinput__label">{{model.label}}</view>
+      <view class="atinput__input--extra">
+        <input
+          value="{{model.value}}"
+          disabled="{{model.readonly}}"
+          maxlength="{{model.length}}"
+          placeholder="{{model.hint}}"
+          placeholder-style="color: #a5a5a5"/>
+        <picker 
+          range="{{model.options}}"
+          @change="onSelectorChange" mode="selector"
+          disabled="{{model.readonly}}">
+          <view class="picker">
+            {{model.extra}}
+          </view>
+        </picker>
+      </view>
+    </view>
   </view>
 </template>
 
