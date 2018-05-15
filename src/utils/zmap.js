@@ -7,6 +7,20 @@ var QQMapWX = require('./qqmap-wx-jssdk.js')
 // 实例化 API 核心类
 var qqMap = new QQMapWX({ key: key.map })
 
+// 获取经纬度等信息
+zmap.getLocation = () => {
+  return new Promise((resolve, reject) => {
+    wx.getLocation({
+      success: res => {
+        resolve(res)
+      },
+      fail: err => {
+        reject(err)
+      }
+    })
+  })
+}
+
 // 通过经纬度获取地址名称
 zmap.getAddrName = (latitude, longitude) => {
   return new Promise((resolve, reject) => {

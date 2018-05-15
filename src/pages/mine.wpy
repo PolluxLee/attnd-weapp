@@ -185,8 +185,8 @@
     <view class="mine__info" @tap="onClickSelfinfo">
       <image class="mine__avator" src="http://os5w1n6kc.bkt.clouddn.com/mini-05.jpg" mode="scaleToFill"></image>
       <view class="mine__selfinfo">
-        <view class="mine__selfinfo--name">巴西拳王</view>
-        <view class="mine__selfinfo--location">我的位置：南亭猫咪主题餐厅一楼二楼三楼四楼五楼好长的地址</view>
+        <view class="mine__selfinfo--name">{{name}}</view>
+        <view class="mine__selfinfo--location">{{addrName}}</view>
       </view>
       <image class="mine__arrow" src="{{arrow}}" mode="scaleToFill"/>
     </view>
@@ -211,9 +211,6 @@
         <view class="mine__item--p">持续：10 mins</view>
         <view class="mine__item--p">发布者：老金</view>
         <view class="mine__item--p">位置：南亭猫咪主题餐厅</view>
-        <view class="mine__config" @tap="onClickConfig">
-          <image src="{{config}}" mode="scaleToFill"/>
-        </view>
       </view>
     </view>
   </view>
@@ -223,24 +220,59 @@
   import wepy from 'wepy'
   import Icon from '../assets/icon/icon'
   import ALog from '../mixins/a-log'
+  import mock from '../utils/mock'
+  import zmap from '../utils/zmap'
 
   export default class Mine extends wepy.page {
     mixins = [ALog, Icon]
     data = {
-      attndStatus: 0
+      attndStatus: 0,
+      name: '...',
+      addrName: '...',
     }
 
     onLoad() {
       wx.setNavigationBarTitle({ title: '我的' })
+      this.getSelfInfo()
+      this.getAddrName()
+    }
+
+    // 获取个人信息
+    getSelfInfo() {
+      mock.getSelfInfo()
+        .then(data => {
+          let name = data.data.name
+          let ID = data.data.stu_id
+          this.name = name
+          this.$apply()
+        })
+        .catch(err => {
+          this.print(err)
+        })
+    }
+
+    // 获取位置
+    async getAddrName() {
+      let latitude = 0
+      let longitude = 0
+      let addrName = ''
+      await zmap.getLocation()
+        .then(res => { latitude = res.latitude; longitude = res.longitude })
+        .catch(err => console.log(err))
+      await zmap.getAddrName(latitude, longitude)
+        .then(res => { this.addrName = res; this.$apply() })
+        .catch(err => console.log(err))
+      return
+    }
+
+    // 获取考勤列表
+    getAttndList() {
+      
     }
 
     methods = {
       enterAttnd() {
         wx.navigateTo({ url: 'attnd' })
-      },
-      //考勤配置按钮
-      onClickConfig() {
-        wx.navigateTo({ url: 'config' })
       },
       //修改个人信息
       onClickSelfinfo() {

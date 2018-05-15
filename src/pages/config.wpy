@@ -70,29 +70,7 @@
       this.initData()
     }
 
-    getLocation() {
-      wx.getLocation({
-        success: res => {
-          this.print({ lat: res.latitude, long: res.longitude })
-          zmap.getAddrName(res.latitude, res.longitude)
-            .then(data => {
-              this.print(data)
-              this.locationModel.value = data
-              this.$apply()
-            })
-            .catch(err => {
-              this.print(err)
-            })
-        },
-        fail: err => {
-          this.print(err)
-
-        }
-      })
-    }
-
     initData() {
-      this.getLocation()
 
       wx.showNavigationBarLoading()
       this.nameModel = { type: this.Type.TEXT_SELECT, label: '考勤名称', readonly: false, length: 50, value: '', hint: '例如：计科151-计网', extra: '选择', options: ['计科151-计网','计科152-计网','计科151-操作系统','计科152-操作系统'] }

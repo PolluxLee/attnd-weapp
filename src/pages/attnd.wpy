@@ -99,6 +99,7 @@
       <view class="attnd__p">时间：2018/05/07 13:50</view>
       <view class="attnd__p">持续：10 mins</view>
       <view class="attnd__p">发布者：老金</view>
+      <view class="attnd__p">名单：计科 151</view>
       <view class="attnd__p">位置：南亭猫咪主题餐厅</view>
       <image class="attnd__remove" src="{{remove}}" mode="scaleToFill"/>
     </view>
@@ -106,8 +107,8 @@
       <view class="attnd__item">
         <view class="attnd__item--avator">机</view>
         <view class="attnd__item--info">
-          <view class="attnd__item--name">机长</view>
-          <view class="attnd__item--location">位置：南亭猫咪主题餐厅</view>
+          <view class="attnd__item--name">机长 (1506100006)</view>
+          <view class="attnd__item--location">距离：18m</view>
         </view>
         <view class="attnd__item--icon" @tap="toggleIcon">
           <icon type="{{icon===0?'success':'warn'}}" size="{{40 * rpxScale}}" color="{{icon===0?'#00897B':'#f44336'}}"/>

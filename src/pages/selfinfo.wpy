@@ -12,8 +12,10 @@
   <view class="self">
     <attndTitle><view slot="title">个人信息</view></attndTitle>
     <nameInput :model.sync="nameModel"></nameInput>
-    <attndTitle><view slot="title">*建议填写真实姓名</view></attndTitle>
-    <saveBtn :btns.sync="btnModel"></saveBtn>
+    <attndTitle><view slot="title">* 建议填写真实姓名</view></attndTitle>
+    <idInput :model.sync="idModel"></idInput>
+    <attndTitle><view slot="title">* ID 可以填写学号或者工号</view></attndTitle>
+    <saveBtn :btns.sync="btnModel" @tap="onClickSave"></saveBtn>
   </view>
 </template>
 
@@ -24,18 +26,21 @@
   import AttndInput from '../components/attnd-input'
   import AttndBtn from '../components/attnd-btn'
   import Constant from '../mixins/constant'
+  import mock from '../utils/mock'
 
   export default class Selfinfo extends wepy.page {
 
     mixins = [ALog, Constant]
     data = {
       nameModel: {},
+      idModel: {},
       btnModel: []
     }
 
     components = {
       attndTitle: AttndTitle,
       nameInput: AttndInput,
+      idInput: AttndInput,
       saveBtn: AttndBtn
     }
 
@@ -44,9 +49,10 @@
     }
 
     initData() {
-      this.nameModel = { type: this.Type.TEXT, label: '名字', readonly: false, length: 50, options: [], suffix: '', start: '', end: '', value: '' }
+      this.nameModel = { type: this.Type.TEXT, label: '名字', readonly: false, length: 50, value: '' }
+      this.idModel = { type: this.Type.TEXT, label: 'ID', readonly: false, length: 50, value: '' }
       this.btnModel = [
-        { name: '保存', emit: 'save', color: '#00897B' },
+        { name: '保存', emit: 'save-btn', color: '#00897B' },
       ]
     }
 
@@ -55,8 +61,22 @@
     }
 
     events = {
-      onClickBtn(emit) {
-        
+      // 更新个人信息
+      'save-btn': event => {
+        let data = {
+          'name': this.nameModel.value,
+          'stu_id': this.idModel.value
+        }
+        if (!data['name']) {
+          wx.showModal({ title: '提示', content: '名字不能为空' })
+          return
+        }
+        wx.showLoading({ title: '正在保存', mask: true })
+        mock.post('', data)
+          .then(_ => {
+            wx.hideLoading()
+            wx.showToast({ title: '成功', icon: 'success', mask: true, duration: 2000 })
+          })
       }
     }
 

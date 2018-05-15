@@ -178,7 +178,6 @@
 
     methods = {
       onInputChange(event) {
-        if (!event.detail.value) return
         this.model.value = event.detail.value
       },
       onPickerChange(event) {
