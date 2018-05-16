@@ -96,11 +96,11 @@
       <view class="atmodal__item">
         <view class="atmodal__input">
           <input
-            value="{{model.content.value}}"
-            disabled="{{model.content.readonly}}"
-            maxlength="{{model.content.length}}"
-            placeholder="{{model.content.hint}}"
-            @input="onInputChange"
+            value="{{model.value}}"
+            disabled="{{model.readonly}}"
+            maxlength="{{model.length}}"
+            placeholder="{{model.hint}}"
+            @input="onModalInput"
             placeholder-style="color: #a5a5a5"/>
         </view>
       </view>
@@ -121,13 +121,24 @@
 
     mixins = [ALog]
     data = {
-      model: {
-        title: '口令',
-        content: { hint: '', value: '', length: 50, readonly: false }, // 日后扩展
-        confirmCallback: () => {},
-        cancelCallback: () => {}
-      },
       isShow: false,
+    }
+
+    props = {
+      // TODO: 扩展不同类型组件的嵌入
+      model: {
+        type: Object,
+        default: {
+          title: '',
+          hint: '', 
+          value: '', 
+          length: 50, 
+          readonly: false,
+          confirmCallback: () => {},
+          cancelCallback: () => {}
+        },
+        twoWay: true
+      }
     }
 
     onLoad() {
@@ -135,11 +146,15 @@
     }
 
     methods = {
+      onModalInput(event) {
+        this.model.value = event.detail.value
+      },
       onCancel() {
         this.isShow = false
       },
       onConfirm() {
-        wx.navigateTo({ url: 'attnd' })
+        if (!this.model.value) return
+        this.model.confirmCallback(this.model.value)
         this.isShow = false
       },
       showModal() {

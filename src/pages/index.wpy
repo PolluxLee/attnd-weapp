@@ -73,7 +73,7 @@
     <view class="home__group">
       
     </view>
-    <attndModal></attndModal>
+    <attndModal :model.sync="model"></attndModal>
   </view>
 </template>
 
@@ -86,7 +86,20 @@
 
     mixins = [ALog]
     data = {
-
+      model: {
+        title: '口令',
+        hint: '', 
+        value: '', 
+        length: 50, 
+        readonly: false,
+        confirmCallback: res => {
+          console.log('confirm')
+          let password = res
+          if (!password) return
+          wx.navigateTo({ url: `attnd?${password}` })
+        },
+        cancelCallback: () => {}
+      }
     }
 
     onLoad() {
@@ -97,12 +110,17 @@
       attndModal: AttndModal
     }
 
+    confirmCallback() {
+      let password = this.model.value
+      if (!password) return
+      wx.navigateTo({ url: `attnd?${password}` })
+    }
+
     methods = {
       onClickYell() {
         wx.navigateTo({ url: 'config' })
       },
-
-      onClickResp: () => {
+      onClickResp() {
         this.$invoke('attndModal','showModal')
       }
     }
