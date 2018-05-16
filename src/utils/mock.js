@@ -31,6 +31,24 @@ mock.getSelfInfo = (url, data) => {
   })
 }
 
+mock.getGroupList = () => {
+  return new Promise((resolve, reject) => {
+    setTimeout(_ => {
+      let data = ['计科151','计科152','网络151','网络152','软件151','软件152']
+      resolve(data)
+    }, 1000)
+  })
+}
+
+mock.getAttndNames = () => {
+  return new Promise((resolve, reject) => {
+    setTimeout(_ => {
+      let data = ['计科151-C++','计科152-计网','网络151-操作系统','网络152-阿历克斯大家了发就是利空打击flak就我欸如','软件151-哈哈哈','软件152-666']
+      resolve(data)
+    }, 1000)
+  })
+}
+
 mock.getAttndList = (url, data) => {
   return new Promise((resolve, reject) => {
     setTimeout(_ => {

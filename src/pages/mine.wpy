@@ -204,12 +204,13 @@
       <view class="mine__group" @tap="onClickGroup">名单</view>
     </view>
     <view class="mine__list">
-      <view class="mine__item" @tap="enterAttnd">
-        <view class="mine__item--title">嵌入式</view>
-        <view class="mine__item--p mine__item--p-pwd">口令：DR125SDR5</view>
+      <view class="mine__item" @tap="enterAttnd" 
+        wx:for-items="{{attndList}}" wx:for-item="attnd" wx:key="id">
+        <view class="mine__item--title">{{attnd.attnd_name}}</view>
+        <view class="mine__item--p mine__item--p-pwd">口令：{{attnd.cipher}}</view>
         <view class="mine__item--p">时间：2018/05/07 13:50</view>
-        <view class="mine__item--p">持续：10 mins</view>
-        <view class="mine__item--p">发布者：老金</view>
+        <view class="mine__item--p">持续：{{attnd.last}} 分钟</view>
+        <view class="mine__item--p">发布者：{{attnd.teacher_name}}</view>
         <view class="mine__item--p">位置：南亭猫咪主题餐厅</view>
       </view>
     </view>
@@ -222,6 +223,8 @@
   import ALog from '../mixins/a-log'
   import mock from '../utils/mock'
   import zmap from '../utils/zmap'
+  import { Type, BtnType, URL } from '../share/consts'
+  import { getTimeFormat, getCurTime, getTimeMsFromTimeS, getTimeSFromTimeMs } from '../share/funcs'
 
   export default class Mine extends wepy.page {
     mixins = [ALog, Icon]
@@ -229,6 +232,7 @@
       attndStatus: 0,
       name: '...',
       addrName: '...',
+      attndList: []
     }
 
     onLoad() {
@@ -267,7 +271,12 @@
 
     // 获取考勤列表
     getAttndList() {
-      
+      let attnds = []
+      mock.getAttndList()
+        .then(data => {
+          attnds = data.data.attnds
+          this.attndList = attnds
+        })
     }
 
     methods = {

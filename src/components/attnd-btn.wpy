@@ -32,13 +32,13 @@
 <script>
   import wepy from 'wepy'
   import ALog from '../mixins/a-log'
-  import Constant from '../mixins/constant'
+  import { Type, BtnType, URL } from '../share/consts'
 
   export default class AttndBtn extends wepy.component {
 
-    mixins = [ALog, Constant]
+    mixins = [ALog]
     data = {
-
+      Type: Type
     }
 
     props = {

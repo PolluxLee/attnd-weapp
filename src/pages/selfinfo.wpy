@@ -9,12 +9,10 @@
 </style>
 
 <template>
-  <view class="self">
+  <view class="self" wx:if="{{isShow}}">
     <attndTitle><view slot="title">个人信息</view></attndTitle>
     <nameInput :model.sync="nameModel"></nameInput>
-    <attndTitle><view slot="title">* 建议填写真实姓名</view></attndTitle>
     <idInput :model.sync="idModel"></idInput>
-    <attndTitle><view slot="title">* ID 可以填写学号或者工号</view></attndTitle>
     <saveBtn :btns.sync="btnModel" @tap="onClickSave"></saveBtn>
   </view>
 </template>
@@ -25,13 +23,15 @@
   import AttndTitle from '../components/attnd-title'
   import AttndInput from '../components/attnd-input'
   import AttndBtn from '../components/attnd-btn'
-  import Constant from '../mixins/constant'
+  import { Type, BtnType, URL } from '../share/consts'
+  import { getTimeFormat, getCurTime, getTimeMsFromTimeS, getTimeSFromTimeMs } from '../share/funcs'
   import mock from '../utils/mock'
 
   export default class Selfinfo extends wepy.page {
 
-    mixins = [ALog, Constant]
+    mixins = [ALog]
     data = {
+      isShow: false,
       nameModel: {},
       idModel: {},
       btnModel: []
@@ -49,11 +49,12 @@
     }
 
     initData() {
-      this.nameModel = { type: this.Type.TEXT, label: '名字', readonly: false, length: 50, value: '' }
-      this.idModel = { type: this.Type.TEXT, label: 'ID', readonly: false, length: 50, value: '' }
+      this.nameModel = { type: Type.TEXT, label: '名字', readonly: false, length: 50, value: '', hint: '请填写真实姓名' }
+      this.idModel = { type: Type.TEXT, label: 'ID', readonly: false, length: 50, value: '', hint: '可以填写学号或工号' }
       this.btnModel = [
         { name: '保存', emit: 'save-btn', color: '#00897B' },
       ]
+      this.isShow = true
     }
 
     methods = {
@@ -75,7 +76,7 @@
         mock.post('', data)
           .then(_ => {
             wx.hideLoading()
-            wx.showToast({ title: '成功', icon: 'success', mask: true, duration: 2000 })
+            wx.showToast({ title: '成功', icon: 'success', mask: true, duration: 1000 })
           })
       }
     }

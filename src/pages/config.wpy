@@ -33,13 +33,15 @@
   import AttndTitle from '../components/attnd-title'
   import AttndInput from '../components/attnd-input'
   import AttndBtn from '../components/attnd-btn'
-  import Constant from '../mixins/constant'
-  import Func from '../mixins/func'
+  import { Type, BtnType, URL } from '../share/consts'
+  import { getTimeFormat, getCurTime, getTimeMsFromTimeS, getTimeSFromTimeMs } from '../share/funcs'
   import zmap from '../utils/zmap'
+  import mock from '../utils/mock'
+  import zajax from '../utils/zajax'
 
   export default class Config extends wepy.page {
 
-    mixins = [Func, ALog, Constant]
+    mixins = [ALog]
     data = {
       nameModel: {},
       dateModel: {},
@@ -49,7 +51,6 @@
       authorModel: {},
       locationModel: {},
       btnModel: [],
-      attndId: '',
       isShow: false
     }
 
@@ -66,70 +67,80 @@
     }
 
     onLoad(option) {
-      this.attndId = option.id
+      wx.setNavigationBarTitle({ title: '发布考勤' })
+      wx.showNavigationBarLoading()
+      setTimeout(() => { wx.hideNavigationBarLoading() }, 1000);
       this.initData()
     }
 
     initData() {
-
-      wx.showNavigationBarLoading()
-      this.nameModel = { type: this.Type.TEXT_SELECT, label: '考勤名称', readonly: false, length: 50, value: '', hint: '例如：计科151-计网', extra: '选择', options: ['计科151-计网','计科152-计网','计科151-操作系统','计科152-操作系统'] }
-      this.dateModel = { type: this.Type.DATE, label: '日期', readonly: false, options: [], start: '', value: '' }
-      this.timeModel = { type: this.Type.TIME, label: '时间', readonly: false, options: [], start: '', value: '' }
-      this.lastModel = { type: this.Type.SELECT, label: '持续', readonly: false, options: [], suffix: '分钟', value: '5', }
-      this.groupModel = { type: this.Type.TEXT_SELECT, label: '考勤名单', readonly: false, length: 50, value: '', hint: '例如：计科151', extra: '选择', options: [] }
-      this.authorModel = { type: this.Type.TEXT, label: '发布者', readonly: false, length: 50, value: '', hint: '' }
-      this.locationModel = { type: this.Type.TEXT, label: '位置', readonly: true, length: 50, value: '', hint: '' }
+      this.nameModel = { type: Type.TEXT_SELECT, label: '考勤名称', readonly: false, length: 50, value: '', hint: '例如：计科151-计网', extra: '选择', options: ['计科151-计网','计科152-计网','计科151-操作系统','计科152-操作系统'] }
+      this.dateModel = { type: Type.DATE, label: '日期', readonly: false, options: [], value: '' }
+      this.timeModel = { type: Type.TIME, label: '时间', readonly: false, options: [], value: '' }
+      this.lastModel = { type: Type.SELECT, label: '持续', readonly: false, options: [], suffix: '分钟', value: '5', }
+      this.groupModel = { type: Type.TEXT_SELECT, label: '考勤名单', readonly: false, length: 50, value: '', hint: '例如：计科151', extra: '选择', options: [] }
+      this.authorModel = { type: Type.TEXT, label: '发布者', readonly: false, length: 50, value: '', hint: '' }
+      this.locationModel = { type: Type.TEXT, label: '位置', readonly: true, length: 50, value: '', hint: '' }
       this.lastModel.options = ['5','10','15','20','30']
 
-      if (!this.attndId) {
-        wx.setNavigationBarTitle({ title: '发布考勤' })
-        this.dateModel.start = this.getCurTime('date')
-        this.dateModel.value = this.dateModel.start
-        this.timeModel.start = this.getCurTime('time')
-        this.timeModel.value = this.timeModel.start
-        this.btnModel = [
-          { name: '发布', emit: 'release', color: '#00897B' }
-        ]
-        this.isShow = true
-        wx.hideNavigationBarLoading()
-        return
-      }
-
-      wx.setNavigationBarTitle({ title: '考勤配置' })
-      this.getAttndData().then(data => {
-        
-        this.nameModel.value = data.name
-        this.dateModel.value = data.date
-        this.timeModel.value = data.time
-        this.lastModel.value = data.last
-        this.authorModel.value = data.author
-        this.locationModel.value = data.location
-
-        this.btnModel = [
-          { name: '更新', emit: 'update', color: '#00897B' },
-          { name: '删除', emit: 'remove', color: '#E6433E' },
-        ]
-        this.isShow = true
-        wx.hideNavigationBarLoading()
-        this.$apply()
-      })
-      
+      this.dateModel.value = getCurTime('date')
+      this.timeModel.value = getCurTime('time')
+      this.btnModel = [
+        { name: '发布', emit: 'release-btn', color: '#00897B' }
+      ]
+      this.isShow = true
+      this.getGroupList()
+      this.getAttndNames()
+      this.getAuthorName()
+      this.getAddrName()
     }
 
-    getAttndData() {
-      return new Promise((resolve, reject) => {
-        setTimeout(() => {
-          resolve({
-            name: 'C++',
-            date: '2018-05-13',
-            time: '22:44',
-            last: '5',
-            author: 'kzz',
-            location: 'gzhu'
-          })
-        }, 1000);
-      })
+    // 获取历史考勤名字列表
+    getAttndNames() {
+      mock.getAttndNames()
+        .then(data => {
+          this.groupModel.options = data
+          this.$apply()
+        })
+    }
+
+    // 获取考勤名单名字列表
+    getGroupList() {
+      mock.getGroupList()
+        .then(data => {
+          this.nameModel.options = data
+          this.$apply()
+        })
+    }
+
+    // 获取我的名字
+    getAuthorName() {
+      mock.getSelfInfo()
+        .then(data => {
+          this.authorModel.value = data.data.name ? data.data.name : ''
+          this.$apply()
+        })
+    }
+
+    // 获取位置
+    async getAddrName() {
+      let latitude = 0
+      let longitude = 0
+      let addrName = ''
+      await zmap.getLocation()
+        .then(res => { latitude = res.latitude; longitude = res.longitude })
+        .catch(err => console.log(err))
+      if (!latitude && !longitude) {
+        wx.showModal({ title: '提示', content: '获取位置失败，请稍后再试' })
+        return
+      }
+      await zmap.getAddrName(latitude, longitude)
+        .then(res => { this.locationModel.value = res; this.$apply() })
+        .catch(err => {
+          console.log(err)
+          wx.showModal({ title: '提示', content: '获取位置失败，请稍后再试' })
+        })
+      return
     }
 
     methods = {
@@ -137,9 +148,17 @@
     }
 
     events = {
-      onClickBtn(emit) {
-        
+      // 发布考勤
+      'release-btn': event => {
+        zajax.get('https://www.zahub.top')
+          .then(data => console.log(data))
+          .catch(err => console.log(err))
       }
+    }
+
+    // 检查字段
+    checkData() {
+
     }
 
   }
