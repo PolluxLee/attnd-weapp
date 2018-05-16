@@ -15,6 +15,7 @@
     padding: 30rpx;
     display: flex;
     position: relative;
+    animation: fade-out 1s;
   }
 
   &__avator {
@@ -76,6 +77,7 @@
     margin-bottom: 30rpx;
     display: flex;
     justify-content: space-between;
+    animation: fade-out 1s;
   }
 
   &__tab {
@@ -160,6 +162,7 @@
     display: flex;
     flex-direction: column;
     position: relative;
+    animation: fade-out 1s;
     &--title {
       white-space: nowrap;
       font-size: 40rpx;
@@ -204,14 +207,14 @@
       <view class="mine__group" @tap="onClickGroup">名单</view>
     </view>
     <view class="mine__list">
-      <view class="mine__item" @tap="enterAttnd" 
+      <view class="mine__item" @tap="onClickAttnd" 
         wx:for-items="{{attndList}}" wx:for-item="attnd" wx:key="id">
         <view class="mine__item--title">{{attnd.attnd_name}}</view>
         <view class="mine__item--p mine__item--p-pwd">口令：{{attnd.cipher}}</view>
-        <view class="mine__item--p">时间：2018/05/07 13:50</view>
+        <view class="mine__item--p">时间：{{attnd.start_time}}</view>
         <view class="mine__item--p">持续：{{attnd.last}} 分钟</view>
         <view class="mine__item--p">发布者：{{attnd.teacher_name}}</view>
-        <view class="mine__item--p">位置：南亭猫咪主题餐厅</view>
+        <view class="mine__item--p">位置：{{attnd.location.addr_name}}</view>
       </view>
     </view>
   </view>
@@ -232,13 +235,15 @@
       attndStatus: 0,
       name: '...',
       addrName: '...',
-      attndList: []
+      attndList: [],
+      startTime: ''
     }
 
     onLoad() {
       wx.setNavigationBarTitle({ title: '我的' })
       this.getSelfInfo()
       this.getAddrName()
+      this.getAttndList()
     }
 
     // 获取个人信息
@@ -271,16 +276,20 @@
 
     // 获取考勤列表
     getAttndList() {
-      let attnds = []
       mock.getAttndList()
         .then(data => {
-          attnds = data.data.attnds
-          this.attndList = attnds
+          this.attndList = data.data.attnds
+          this.attndList.map(el => {
+            let date = new Date(getTimeMsFromTimeS(el.start_time))
+            el.start_time = `${getTimeFormat(date, 'date', '/')} ${getTimeFormat(date, 'time', ':')}`
+            return el
+          })
+          this.$apply()
         })
     }
 
     methods = {
-      enterAttnd() {
+      onClickAttnd() {
         wx.navigateTo({ url: 'attnd' })
       },
       //修改个人信息

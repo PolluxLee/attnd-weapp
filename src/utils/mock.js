@@ -67,7 +67,8 @@ mock.getAttndList = (url, data) => {
                     "location": {
                         "latitude": 35.4,
                         "longitude": 174.4,
-                        "accuracy": 30
+                        "accuracy": 30,
+                        "addr_name": '南亭猫咪主题餐厅'
                     },
                     "teacher_name": "wjx"
                 },
@@ -80,7 +81,8 @@ mock.getAttndList = (url, data) => {
                     "location": {
                         "latitude": 36.4,
                         "longitude": 175.4,
-                        "accuracy": 30
+                        "accuracy": 30,
+                        "addr_name": '广州大学图书馆副楼'
                     },
                     "teacher_name": "lzp"
                 }

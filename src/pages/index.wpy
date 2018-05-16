@@ -11,6 +11,7 @@
       box-sizing: border-box;
       height: 450rpx;
       width: 100%;
+      animation: fade-out 1s;
     }
 
     &__yell { margin-bottom: 50rpx; }
