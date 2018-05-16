@@ -214,7 +214,7 @@
         <view class="mine__item--p">时间：{{attnd.start_time}}</view>
         <view class="mine__item--p">持续：{{attnd.last}} 分钟</view>
         <view class="mine__item--p">发布者：{{attnd.teacher_name}}</view>
-        <view class="mine__item--p">位置：{{attnd.location.addr_name}}</view>
+        <view class="mine__item--p">位置：{{attnd.addr_name}}</view>
       </view>
     </view>
   </view>
@@ -241,14 +241,29 @@
 
     onLoad() {
       wx.setNavigationBarTitle({ title: '我的' })
-      this.getSelfInfo()
-      this.getAddrName()
-      this.getAttndList()
+      this.getData()
+    }
+
+    onShow() {
+      this.getData()
+    }
+
+    // Promise 并行开始，串行结束
+    async getData() {
+      wx.showNavigationBarLoading()
+      let a = this.getSelfInfo()
+      let b = this.getAddrName()
+      let c = this.getAttndList()
+      await a
+      await b
+      await c
+      wx.hideNavigationBarLoading()
+      return
     }
 
     // 获取个人信息
     getSelfInfo() {
-      mock.getSelfInfo()
+      return mock.getSelfInfo()
         .then(data => {
           let name = data.data.name
           let ID = data.data.stu_id
@@ -269,14 +284,19 @@
         .then(res => { latitude = res.latitude; longitude = res.longitude })
         .catch(err => console.log(err))
       await zmap.getAddrName(latitude, longitude)
-        .then(res => { this.addrName = res; this.$apply() })
+        .then(res => {
+          if (res) {
+            this.addrName = res
+            this.$apply() 
+          }   
+        })
         .catch(err => console.log(err))
       return
     }
 
     // 获取考勤列表
     getAttndList() {
-      mock.getAttndList()
+      return mock.getAttndList()
         .then(data => {
           this.attndList = data.data.attnds
           this.attndList.map(el => {
@@ -289,14 +309,23 @@
     }
 
     methods = {
-      onClickAttnd() {
-        wx.navigateTo({ url: 'attnd' })
+      // Refresh 页面
+      onRefresh() {
+
       },
-      //修改个人信息
+
+      // 进入考勤情况
+      onClickAttnd(id) {
+        let url = `attnd${Number.isInteger(id)? '?'+id : ''}`  
+        wx.navigateTo({ url })
+      },
+
+      // 进入个人信息
       onClickSelfinfo() {
         wx.navigateTo({ url: 'selfinfo' })
       },
-      //标签切换
+
+      //[考勤] [签到] 标签切换
       onTagToggle(index) {
         this.print(index)
         switch (index) {
@@ -306,6 +335,7 @@
         }
         this.$apply()
       },
+
       onClickGroup() {
         wx.navigateTo({ url: 'group' })
       }

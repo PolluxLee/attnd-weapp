@@ -1,0 +1,151 @@
+<style lang="scss">
+  @import '../assets/style/_variables.scss';
+  @import '../assets/style/_common.scss';
+
+  .atmodal {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    &__mask {
+      width: 100%;
+      height: 100%;
+      background: black;
+      opacity: 0.5;
+      overflow: hidden;
+      z-index: 1000;
+      position: fixed;  
+      top: 0;
+      left: 0;
+    }
+
+    &__box {
+      width: 650rpx;
+      box-sizing: border-box;
+      position: fixed;
+      z-index: 2000;
+      top: 25%;
+      background: white;
+      opacity: 1;
+      padding: 50rpx;
+      border-radius: 6rpx;
+      animation: 0.2s ease-out stretch-out;
+    }
+
+    &__title {
+      width: 100%;
+      font-size: 50rpx;
+      color: black;
+      margin-bottom: 50rpx;
+    }
+
+    &__item {
+      box-sizing: border-box;
+      height: 82rpx;
+      display: flex;
+      background: white;
+      margin-bottom: 10rpx;
+      width: 100%;
+      border: 1rpx solid #f3f3f3;
+      border-radius: 5rpx;
+    }
+
+    &__input {
+      height: 100%;
+      width: 100%;
+      color: black;
+      font-size: 32rpx;
+      padding-left: 15rpx;
+      padding-right: 15rpx;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      input {
+        width: 100%;
+        height: 90%;
+      }
+    }
+
+    &__btn {
+      box-sizing: border-box;
+      margin-top: 60rpx;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    &__cancel, &__confirm {
+      font-size: 32rpx;
+      box-sizing: border-box;
+      padding: 10rpx 30rpx;
+      border-radius: 6rpx;
+    }
+    &__cancel:active, &__confirm:active {
+      background: $light-grey;
+    }
+    &__cancel { color: black; }
+    &__confirm { color: $theme; }
+  }
+  
+</style>
+
+<template>
+  <view class="atmodal" wx:if="{{isShow}}">
+    <view class="atmodal__mask" @tap="onCancel">
+    </view>
+    <view class="atmodal__box">
+      <view class="atmodal__title">{{model.title}}</view>
+      <view class="atmodal__item">
+        <view class="atmodal__input">
+          <input
+            value="{{model.content.value}}"
+            disabled="{{model.content.readonly}}"
+            maxlength="{{model.content.length}}"
+            placeholder="{{model.content.hint}}"
+            @input="onInputChange"
+            placeholder-style="color: #a5a5a5"/>
+        </view>
+      </view>
+      <view class="atmodal__btn">
+        <view class="atmodal__cancel" @tap="onCancel">取消</view>
+        <view class="atmodal__confirm" @tap="onConfirm">确定</view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import ALog from '../mixins/a-log'
+  import { TypeInModal } from '../share/consts'
+
+  export default class AttndModal extends wepy.component {
+
+    mixins = [ALog]
+    data = {
+      model: {
+        title: '口令',
+        content: { hint: '', value: '', length: 50, readonly: false }, // 日后扩展
+        confirmCallback: () => {},
+        cancelCallback: () => {}
+      },
+      isShow: false,
+    }
+
+    onLoad() {
+
+    }
+
+    methods = {
+      onCancel() {
+        this.isShow = false
+      },
+      onConfirm() {
+        wx.navigateTo({ url: 'attnd' })
+        this.isShow = false
+      },
+      showModal() {
+        this.isShow = true
+      }
+    }
+
+  }
+</script>

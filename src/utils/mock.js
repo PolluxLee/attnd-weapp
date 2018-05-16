@@ -3,7 +3,6 @@ const mock = {}
 mock.post = (url, data) => {
   return new Promise((resolve, reject) => {
     setTimeout(_ => {
-      console.log(data)
       resolve()
     }, 1000)
   })
@@ -68,8 +67,9 @@ mock.getAttndList = (url, data) => {
                         "latitude": 35.4,
                         "longitude": 174.4,
                         "accuracy": 30,
-                        "addr_name": '南亭猫咪主题餐厅'
                     },
+                    "addr_name": '南亭猫咪主题餐厅',
+                    "group_name": '',
                     "teacher_name": "wjx"
                 },
                 {
@@ -82,10 +82,41 @@ mock.getAttndList = (url, data) => {
                         "latitude": 36.4,
                         "longitude": 175.4,
                         "accuracy": 30,
-                        "addr_name": '广州大学图书馆副楼'
                     },
+                    "addr_name": '广州大学图书馆副楼',
+                    "group_name": '',
                     "teacher_name": "lzp"
-                }
+                },
+                {
+                  "attnd_id": 14475,
+                  "cipher": "CX6q52",
+                  "attnd_name": "计算机网络",
+                  "start_time": 1520975105,
+                  "last": 5,
+                  "location": {
+                      "latitude": 36.4,
+                      "longitude": 175.4,
+                      "accuracy": 30,
+                  },
+                  "addr_name": '广州大学图书馆副楼',
+                  "group_name": '',
+                  "teacher_name": "lzp"
+                },
+                {
+                  "attnd_id": 14475,
+                  "cipher": "CX6q52",
+                  "attnd_name": "计算机网络",
+                  "start_time": 1520975105,
+                  "last": 5,
+                  "location": {
+                      "latitude": 36.4,
+                      "longitude": 175.4,
+                      "accuracy": 30,
+                  },
+                  "addr_name": '广州大学图书馆副楼',
+                  "group_name": '',
+                  "teacher_name": "lzp"
+                },
             ]
         }
       }

@@ -128,7 +128,8 @@
           disabled="{{model.readonly}}"
           maxlength="{{model.length}}"
           placeholder="{{model.hint}}"
-          placeholder-style="color: #a5a5a5"/>
+          placeholder-style="color: #a5a5a5"
+          @input="onInputChange"/>
         <picker 
           range="{{model.options}}"
           @change="onSelectorChange" mode="selector"

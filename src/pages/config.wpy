@@ -34,7 +34,7 @@
   import AttndInput from '../components/attnd-input'
   import AttndBtn from '../components/attnd-btn'
   import { Type, BtnType, URL } from '../share/consts'
-  import { getTimeFormat, getCurTime, getTimeMsFromTimeS, getTimeSFromTimeMs } from '../share/funcs'
+  import { getTimeFormat, getCurTime, getTimeMsFromTimeS, getTimeSFromTimeMs, dateToTimeS, isNumber } from '../share/funcs'
   import zmap from '../utils/zmap'
   import mock from '../utils/mock'
   import zajax from '../utils/zajax'
@@ -51,7 +51,14 @@
       authorModel: {},
       locationModel: {},
       btnModel: [],
-      isShow: false
+      isShow: false,
+      
+      location: {
+        latitude: 0,
+        longitude: 0,
+        accuracy: 0,
+        addr_name: ''
+      }
     }
 
     components = {
@@ -68,12 +75,11 @@
 
     onLoad(option) {
       wx.setNavigationBarTitle({ title: '发布考勤' })
-      wx.showNavigationBarLoading()
-      setTimeout(() => { wx.hideNavigationBarLoading() }, 1000);
       this.initData()
     }
 
     initData() {
+      this.getData()
       this.nameModel = { type: Type.TEXT_SELECT, label: '考勤名称', readonly: false, length: 50, value: '', hint: '例如：计科151-计网', extra: '选择', options: ['计科151-计网','计科152-计网','计科151-操作系统','计科152-操作系统'] }
       this.dateModel = { type: Type.DATE, label: '日期', readonly: false, options: [], value: '' }
       this.timeModel = { type: Type.TIME, label: '时间', readonly: false, options: [], value: '' }
@@ -88,34 +94,45 @@
       this.btnModel = [
         { name: '发布', emit: 'release-btn', color: '#00897B' }
       ]
-      this.isShow = true
-      this.getGroupList()
-      this.getAttndNames()
-      this.getAuthorName()
-      this.getAddrName()
+      this.isShow = true  
+    }
+
+    // Promise 并行开始，串行结束
+    async getData() {
+      wx.showNavigationBarLoading()
+      let a = this.getGroupList()
+      let b = this.getAttndNames()
+      let c = this.getAuthorName()
+      let d = this.getAddrName()
+      await a
+      await b
+      await c
+      await d
+      wx.hideNavigationBarLoading()
+      return
     }
 
     // 获取历史考勤名字列表
     getAttndNames() {
-      mock.getAttndNames()
-        .then(data => {
-          this.groupModel.options = data
-          this.$apply()
-        })
-    }
-
-    // 获取考勤名单名字列表
-    getGroupList() {
-      mock.getGroupList()
+      return mock.getAttndNames()
         .then(data => {
           this.nameModel.options = data
           this.$apply()
         })
     }
 
+    // 获取考勤名单名字列表
+    getGroupList() {
+      return mock.getGroupList()
+        .then(data => {
+          this.groupModel.options = data
+          this.$apply()
+        })
+    }
+
     // 获取我的名字
     getAuthorName() {
-      mock.getSelfInfo()
+      return mock.getSelfInfo()
         .then(data => {
           this.authorModel.value = data.data.name ? data.data.name : ''
           this.$apply()
@@ -126,16 +143,28 @@
     async getAddrName() {
       let latitude = 0
       let longitude = 0
-      let addrName = ''
+      let accuracy = 0
       await zmap.getLocation()
-        .then(res => { latitude = res.latitude; longitude = res.longitude })
+        .then(res => { 
+          latitude = res.latitude 
+          longitude = res.longitude 
+          accuracy = res.accuracy
+        })
         .catch(err => console.log(err))
       if (!latitude && !longitude) {
         wx.showModal({ title: '提示', content: '获取位置失败，请稍后再试' })
         return
       }
+      this.location.latitude = latitude
+      this.location.longitude = longitude
+      this.location.accuracy = accuracy
+      this.$apply()
       await zmap.getAddrName(latitude, longitude)
-        .then(res => { this.locationModel.value = res; this.$apply() })
+        .then(res => { 
+          this.locationModel.value = res
+          this.location.addr_name = res
+          this.$apply() 
+        })
         .catch(err => {
           console.log(err)
           wx.showModal({ title: '提示', content: '获取位置失败，请稍后再试' })
@@ -150,15 +179,41 @@
     events = {
       // 发布考勤
       'release-btn': event => {
-        zajax.get('https://www.zahub.top')
-          .then(data => console.log(data))
-          .catch(err => console.log(err))
+        let data = {
+          "attnd_name": this.nameModel.value,
+          "start_time": dateToTimeS(`${this.dateModel.value} ${this.timeModel.value}`),
+          "last": +this.lastModel.value,
+          "location": {
+              "latitude": this.location.latitude,
+              "longitude": this.location.longitude,
+              "accuracy": this.location.accuracy
+          },
+          "addr_name": this.location.addr_name,
+          "group_name": this.groupModel.value,
+          "teacher_name": this.authorModel.value
+        }
+        if (!this.checkData(data)) return
+        wx.showLoading({ title: '正在保存', mask: true })
+        mock.post('', data)
+          .then(_ => {
+            wx.hideLoading()
+            wx.showToast({ title: '成功', icon: 'success', mask: true, duration: 1000 })
+          })
       }
     }
 
     // 检查字段
-    checkData() {
+    checkData(data) {
+      if (!data.attnd_name) { wx.showModal({ title: '提示', content: `[${this.nameModel.label}] 未正确填写` }); return false }
+      if (!data.teacher_name) { wx.showModal({ title: '提示', content: `[${this.authorModel.label}] 未正确填写` }); return false }
+      if (!isNumber(data.last)) { wx.showModal({ title: '提示', content: `[${this.lastModel.label}] 未正确填写` }); return false }
+      if (!isNumber(data.start_time)) { wx.showModal({ title: '提示', content: `[日期或时间] 未正确填写` }); return false }
+      if (!data.group_name) { wx.showModal({ title: '提示', content: `[${this.groupModel.label}] 未正确填写` }); return false }
+      if (!isNumber(data.location.latitude) || !isNumber(data.location.longitude) || !isNumber(data.location.accuracy) || !data.addr_name) {
+        wx.showModal({ title: '提示', content: `位置信息未获取，请稍后再试` }); return false
+      }
 
+      return true
     }
 
   }

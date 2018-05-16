@@ -1,3 +1,4 @@
+// date format
 export function getTimeFormat(date, type, split) {
   const year = date.getFullYear()
   const month = date.getMonth() + 1
@@ -24,10 +25,25 @@ export function getCurTime(type, split) {
   return getTimeFormat(date, type, split)
 }
 
+// timeS to timeMs
 export function getTimeMsFromTimeS(timeS) {
   return timeS * 1000
 }
 
+// timeMs to timeS
 export function getTimeSFromTimeMs(timeMs) {
   return Math.floor(timeMs / 1000)
+}
+
+//date string to timeS
+export function dateToTimeS(dateString) {
+  let timeMs = Date.parse(dateString);
+  return Math.floor(timeMs / 1000);
+}
+
+//check isNumber
+export function isNumber(num) {
+  if (typeof num === 'number' && !Number.isNaN(num) && Number.isFinite(num))
+    return true
+  return false
 }

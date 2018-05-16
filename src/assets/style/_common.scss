@@ -13,3 +13,12 @@
     opacity: 1;
   } 
 }
+
+@keyframes stretch-out {
+  0% {
+    transform: scaleY(0);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
