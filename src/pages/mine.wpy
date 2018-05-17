@@ -150,7 +150,7 @@
       justify-content: center;
       align-items: center;
     }
-    &--del {
+    &--clear {
       width: 30rpx;
       height: 30rpx;
     }
@@ -204,9 +204,9 @@
     <view class="mine__status">
       <view class="mine__search">
         <image class="mine__search--icon" src="{{search}}" mode="scaleToFill"/>
-        <input placeholder="按考勤名字搜索" confirm-type="search"></input>
+        <input placeholder="按考勤名字搜索" confirm-type="search" value="{{query}}" @input="onQueryInput"/>
         <view>
-          <image class="mine__search--del" src="{{del}}" mode="scaleToFill"/>
+          <image class="mine__search--clear" src="{{clear}}" mode="scaleToFill" @tap="onQueryClear"/>
         </view>
       </view>
       <view class="mine__tab">
@@ -241,11 +241,11 @@
   export default class Mine extends wepy.page {
     mixins = [ALog, Icon]
     data = {
-      attndStatus: 0,
       name: '...',
       addrName: '...',
       attndList: [],
-      startTime: ''
+      attndStatus: 0,
+      query: ''
     }
 
     onLoad() {
@@ -318,22 +318,22 @@
     }
 
     methods = {
-      // Refresh 页面
-      onRefresh() {
-
-      },
-
-      // 进入考勤情况
       onClickAttnd(id) {
         let url = `attnd${Number.isInteger(id)? '?'+id : ''}`  
         wx.navigateTo({ url })
       },
-
-      // 进入个人信息
       onClickSelfinfo() {
         wx.navigateTo({ url: 'selfinfo' })
       },
-
+      onClickGroup() {
+        wx.navigateTo({ url: 'group' })
+      },
+      onQueryInput(event) {
+        this.query = event.detail.value
+      },
+      onQueryClear() {
+        this.query = ''
+      },
       //[考勤] [签到] 标签切换
       onTagToggle(index) {
         this.print(index)
@@ -344,10 +344,6 @@
         }
         this.$apply()
       },
-
-      onClickGroup() {
-        wx.navigateTo({ url: 'group' })
-      }
     }
   }
 </script>
