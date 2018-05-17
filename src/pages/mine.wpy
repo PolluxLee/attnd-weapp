@@ -129,22 +129,30 @@
     @extend %box-edge;
     display: flex;
     align-items: center;
-    image {
+    &--icon {
       width: 40rpx;
       height: 40rpx;
-      display: inline-block;
-      vertical-align: center;
       box-sizing: border-box;
       padding: 2rpx;
       margin: 0 10rpx;
     }
     input {
-      display: inline-block;
-      vertical-align: center;
       font-size: 28rpx;
       color: $font;
-      width: 280rpx;
+      width: 230rpx;
       height: 48rpx;
+    }
+    view {
+      width: 40rpx;
+      height: 70rpx;
+      padding: 2rpx;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    &--del {
+      width: 30rpx;
+      height: 30rpx;
     }
   }
 
@@ -195,8 +203,11 @@
     </view>
     <view class="mine__status">
       <view class="mine__search">
-        <image src="{{search}}" mode="scaleToFill"/>
+        <image class="mine__search--icon" src="{{search}}" mode="scaleToFill"/>
         <input placeholder="按考勤名字搜索" confirm-type="search"></input>
+        <view>
+          <image class="mine__search--del" src="{{del}}" mode="scaleToFill"/>
+        </view>
       </view>
       <view class="mine__tab">
         <view class="mine__tab--yell {{attndStatus===0 ? 'mine__tab--yell-active' : ''}}"
