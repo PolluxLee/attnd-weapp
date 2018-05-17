@@ -45,6 +45,10 @@
     }
 
     onLoad() {
+      wx.showNavigationBarLoading()
+      setTimeout(() => {
+        wx.hideNavigationBarLoading()
+      }, 1000);
       this.initData()
     }
 

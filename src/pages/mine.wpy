@@ -209,12 +209,10 @@
     <view class="mine__list">
       <view class="mine__item" @tap="onClickAttnd" 
         wx:for-items="{{attndList}}" wx:for-item="attnd" wx:key="id">
-        <view class="mine__item--title">{{attnd.attnd_name}}</view>
+        <view class="mine__item--title">{{attnd.attnd_name}}（计科151）</view>
         <view class="mine__item--p mine__item--p-pwd">口令：{{attnd.cipher}}</view>
         <view class="mine__item--p">时间：{{attnd.start_time}}</view>
-        <view class="mine__item--p">持续：{{attnd.last}} 分钟</view>
-        <view class="mine__item--p">发布者：{{attnd.teacher_name}}</view>
-        <view class="mine__item--p">位置：{{attnd.addr_name}}</view>
+        <view class="mine__item--p">地点：{{attnd.addr_name}}</view>
       </view>
     </view>
   </view>

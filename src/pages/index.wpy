@@ -70,9 +70,6 @@
         <view class="home__text">签到 / 输入口令</view>
       </view>
     </view>
-    <view class="home__group">
-      
-    </view>
     <attndModal :model.sync="model"></attndModal>
   </view>
 </template>
@@ -86,32 +83,31 @@
 
     mixins = [ALog]
     data = {
-      model: {
+      model: {}
+    }
+
+    onLoad() {
+      this.model = {
         title: '口令',
         hint: '', 
         value: '', 
         length: 50, 
         readonly: false,
-        confirmCallback: res => {
-          console.log('confirm')
-          let password = res
-          if (!password) return
-          wx.navigateTo({ url: `attnd?${password}` })
-        },
+        confirmCallback: this.confirmCallback,
         cancelCallback: () => {}
       }
     }
 
-    onLoad() {
-
+    onHide() {
+      this.$invoke('attndModal','hideModal')
     }
 
     components = {
       attndModal: AttndModal
     }
 
-    confirmCallback() {
-      let password = this.model.value
+    confirmCallback(res) {
+      let password = res
       if (!password) return
       wx.navigateTo({ url: `attnd?${password}` })
     }
@@ -121,6 +117,7 @@
         wx.navigateTo({ url: 'config' })
       },
       onClickResp() {
+        this.model.value = ''
         this.$invoke('attndModal','showModal')
       }
     }

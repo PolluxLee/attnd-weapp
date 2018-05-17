@@ -45,7 +45,7 @@
       background: white;
       margin-bottom: 10rpx;
       width: 100%;
-      border: 1rpx solid #f3f3f3;
+      border: 1rpx solid $bg;
       border-radius: 5rpx;
     }
 
@@ -77,9 +77,9 @@
       box-sizing: border-box;
       padding: 10rpx 30rpx;
       border-radius: 6rpx;
-    }
-    &__cancel:active, &__confirm:active {
-      background: $light-grey;
+      &:active {
+        background: $light-grey;
+      }
     }
     &__cancel { color: black; }
     &__confirm { color: $theme; }
@@ -136,8 +136,7 @@
           readonly: false,
           confirmCallback: () => {},
           cancelCallback: () => {}
-        },
-        twoWay: true
+        }
       }
     }
 
@@ -159,6 +158,9 @@
       },
       showModal() {
         this.isShow = true
+      },
+      hideModal() {
+        this.isShow = false
       }
     }
 

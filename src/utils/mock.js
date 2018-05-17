@@ -42,7 +42,16 @@ mock.getGroupList = () => {
 mock.getAttndNames = () => {
   return new Promise((resolve, reject) => {
     setTimeout(_ => {
-      let data = ['计科151-C++','计科152-计网','网络151-操作系统','网络152-阿历克斯大家了发就是利空打击flak就我欸如','软件151-哈哈哈','软件152-666']
+      let data = ['C++','计网','操作系统','阿历克斯大家了发就是利空打击flak就我欸如','哈哈哈','666']
+      resolve(data)
+    }, 1000)
+  })
+}
+
+mock.getHistoryLocation = () => {
+  return new Promise((resolve, reject) => {
+    setTimeout(_ => {
+      let data = ['理南404', '文新211', '电子楼417']
       resolve(data)
     }, 1000)
   })

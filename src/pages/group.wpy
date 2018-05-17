@@ -93,7 +93,7 @@
     }
 
     onLoad() {
-      wx.setNavigationBarTitle({ title: '人员分组' })
+      wx.setNavigationBarTitle({ title: '名单' })
     }
 
     methods = {

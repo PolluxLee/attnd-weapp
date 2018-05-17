@@ -12,17 +12,16 @@
 <template>
   <view class="config" wx:if="{{isShow}}">
     <attndTitle><view slot="title">考勤信息</view></attndTitle>
-    <nameInput :model.sync="nameModel"></nameInput>
-    <attndTitle><view slot="title">* 若有历史考勤记录，可点击选择选取曾经使用过的考勤名称</view></attndTitle>    
+    <nameInput :model.sync="nameModel"></nameInput>  
     <datePicker :model.sync="dateModel"></datePicker>
     <timePicker :model.sync="timeModel"></timePicker>
     <lastInput :model.sync="lastModel"></lastInput>
     <groupInput :model.sync="groupModel"></groupInput>
-    <attndTitle><view slot="title">* 输入考勤名单名称可新建考勤名单，新建的考勤名单里的人员由当次考勤确定；若已有历史名单，可点击选择选取</view></attndTitle>
+    <attndTitle><view slot="title">* 输入考勤名单名称可新建考勤名单，新建的考勤名单里的成员由当次考勤确定；若已有历史名单，可点击选择选取</view></attndTitle>
     <attndTitle><view slot="title">个人信息</view></attndTitle>
     <authorInput :model.sync="authorModel"></authorInput>
     <locationInput :model.sync="locationModel"></locationInput>
-    <attndTitle><view slot="title">* 签到有效范围为 200 米，上限 1000 人；因手机差异，获取的位置可能有一点偏差</view></attndTitle>
+    <attndTitle><view slot="title">* 签到有效范围为 200 米，上限 1000 人</view></attndTitle>
     <attndBtn :btns.sync="btnModel"></attndBtn>
   </view>
 </template>
@@ -80,13 +79,13 @@
 
     initData() {
       this.getData()
-      this.nameModel = { type: Type.TEXT_SELECT, label: '考勤名称', readonly: false, length: 50, value: '', hint: '例如：计科151-计网', extra: '选择', options: ['计科151-计网','计科152-计网','计科151-操作系统','计科152-操作系统'] }
+      this.nameModel = { type: Type.TEXT_SELECT, label: '考勤名称', readonly: false, length: 50, value: '', hint: '例如：计网', extra: '选择', options: [] }
       this.dateModel = { type: Type.DATE, label: '日期', readonly: false, options: [], value: '' }
       this.timeModel = { type: Type.TIME, label: '时间', readonly: false, options: [], value: '' }
       this.lastModel = { type: Type.SELECT, label: '持续', readonly: false, options: [], suffix: '分钟', value: '5', }
       this.groupModel = { type: Type.TEXT_SELECT, label: '考勤名单', readonly: false, length: 50, value: '', hint: '例如：计科151', extra: '选择', options: [] }
       this.authorModel = { type: Type.TEXT, label: '发布者', readonly: false, length: 50, value: '', hint: '' }
-      this.locationModel = { type: Type.TEXT, label: '位置', readonly: true, length: 50, value: '', hint: '' }
+      this.locationModel = { type: Type.TEXT_SELECT, label: '地点', readonly: false, length: 50, value: '', hint: '例如：理南404', extra: '选择', options: []}
       this.lastModel.options = ['5','10','15','20','30']
 
       this.dateModel.value = getCurTime('date')
@@ -103,11 +102,13 @@
       let a = this.getGroupList()
       let b = this.getAttndNames()
       let c = this.getAuthorName()
-      let d = this.getAddrName()
+      let d = this.getLocation()
+      let e = this.getHistoryLocation()
       await a
       await b
       await c
       await d
+      await e
       wx.hideNavigationBarLoading()
       return
     }
@@ -130,6 +131,15 @@
         })
     }
 
+    // 获取历史常用位置列表
+    getHistoryLocation() {
+      return mock.getHistoryLocation()
+        .then(data => {
+          this.locationModel.options = data
+          this.$apply()
+        })
+    }
+
     // 获取我的名字
     getAuthorName() {
       return mock.getSelfInfo()
@@ -140,36 +150,15 @@
     }
 
     // 获取位置
-    async getAddrName() {
-      let latitude = 0
-      let longitude = 0
-      let accuracy = 0
-      await zmap.getLocation()
+    getLocation() {
+      return zmap.getLocation()
         .then(res => { 
-          latitude = res.latitude 
-          longitude = res.longitude 
-          accuracy = res.accuracy
+          this.location.latitude = res.latitude
+          this.location.longitude = res.longitude
+          this.location.accuracy = res.accuracy
+          this.$apply()
         })
         .catch(err => console.log(err))
-      if (!latitude && !longitude) {
-        wx.showModal({ title: '提示', content: '获取位置失败，请稍后再试' })
-        return
-      }
-      this.location.latitude = latitude
-      this.location.longitude = longitude
-      this.location.accuracy = accuracy
-      this.$apply()
-      await zmap.getAddrName(latitude, longitude)
-        .then(res => { 
-          this.locationModel.value = res
-          this.location.addr_name = res
-          this.$apply() 
-        })
-        .catch(err => {
-          console.log(err)
-          wx.showModal({ title: '提示', content: '获取位置失败，请稍后再试' })
-        })
-      return
     }
 
     methods = {
@@ -179,6 +168,7 @@
     events = {
       // 发布考勤
       'release-btn': event => {
+        wx.showLoading({ title: '正在保存', mask: true })
         let data = {
           "attnd_name": this.nameModel.value,
           "start_time": dateToTimeS(`${this.dateModel.value} ${this.timeModel.value}`),
@@ -193,7 +183,6 @@
           "teacher_name": this.authorModel.value
         }
         if (!this.checkData(data)) return
-        wx.showLoading({ title: '正在保存', mask: true })
         mock.post('', data)
           .then(_ => {
             wx.hideLoading()

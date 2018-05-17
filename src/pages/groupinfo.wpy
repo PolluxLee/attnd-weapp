@@ -4,7 +4,9 @@
 
   .groupinfo {
     box-sizing: border-box;
-    padding: 30rpx;
+    padding: 46rpx;
+    height: 100%;
+    background: white;
 
     &__header {
       box-sizing: border-box;
@@ -42,6 +44,12 @@
       top: 15rpx;
     }
 
+    &__count {
+      margin-bottom: 30rpx;
+      font-size: 30rpx;
+      color: $font;
+    }
+
     &__plus {
       position: fixed;
       width: 100rpx;
@@ -49,8 +57,8 @@
       box-sizing: border-box;
       border-radius: 50%;
       background: $theme;
-      right: 30rpx;
-      bottom: 30rpx;
+      right: 48rpx;
+      bottom: 48rpx;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -62,7 +70,6 @@
 
     &__item {
       display: flex;
-      justify-content: space-between;
       width: 100%;
       height: 100rpx;
       margin-bottom: 30rpx;
@@ -91,7 +98,7 @@
         font-size: 30rpx;
         margin: 4rpx 0;
       }
-      &--location {
+      &--id {
         white-space: nowrap;
         color: $font;
         font-size: 24rpx;
@@ -116,8 +123,9 @@
 <template>
   <view class="groupinfo">
     <view class="groupinfo__header">
-      <view class="groupinfo__title">嵌入式</view>
-      <view class="groupinfo__p">组长：老金</view>
+      <view class="groupinfo__title">计科 151</view>
+      <view class="groupinfo__p">管理者：老金</view>
+      <view class="groupinfo__p">人数：49</view>
       <image class="groupinfo__remove" src="{{remove}}" mode="scaleToFill"/>
     </view>
     <view class="groupinfo__list">
@@ -125,10 +133,7 @@
         <view class="groupinfo__item--avator">机</view>
         <view class="groupinfo__item--info">
           <view class="groupinfo__item--name">机长</view>
-          <view class="groupinfo__item--location">位置：南亭猫咪主题餐厅</view>
-        </view>
-        <view class="groupinfo__item--icon">
-          <image src="{{remove2}}" mode="scaleToFill"/>
+          <view class="groupinfo__item--id">ID: 1506100006</view>
         </view>
       </view>
     </view>
