@@ -71,6 +71,7 @@
       </view>
     </view>
     <attndModal :model.sync="model"></attndModal>
+    <toast />
   </view>
 </template>
 
@@ -78,15 +79,19 @@
   import wepy from 'wepy'
   import ALog from '../mixins/a-log'
   import AttndModal from '../components/attnd-modal'
+  import AToast from '../mixins/a-toast'
+  import Toast from 'wepy-com-toast'
+  import { ToastType } from '../share/consts'
 
   export default class Index extends wepy.page {
 
-    mixins = [ALog]
+    mixins = [ALog, AToast]
     data = {
       model: {}
     }
 
     onLoad() {
+      this.toast(ToastType.LOADING, '加载中', 5000)
       this.model = {
         title: '口令',
         hint: '', 
@@ -103,7 +108,8 @@
     }
 
     components = {
-      attndModal: AttndModal
+      attndModal: AttndModal,
+      toast: Toast
     }
 
     confirmCallback(res) {

@@ -23,6 +23,7 @@
     <locationInput :model.sync="locationModel"></locationInput>
     <attndTitle><view slot="title">* 签到有效范围为 200 米，上限 1000 人</view></attndTitle>
     <attndBtn :btns.sync="btnModel"></attndBtn>
+    <toast />
   </view>
 </template>
 
@@ -37,6 +38,9 @@
   import zmap from '../utils/zmap'
   import mock from '../utils/mock'
   import zajax from '../utils/zajax'
+  import AToast from '../mixins/a-toast'
+  import Toast from 'wepy-com-toast'
+  import { ToastType } from '../share/consts'
 
   export default class Config extends wepy.page {
 
@@ -69,7 +73,8 @@
       groupInput: AttndInput,
       lastInput: AttndInput,
       authorInput: AttndInput,
-      locationInput: AttndInput
+      locationInput: AttndInput,
+      toast: Toast
     }
 
     onLoad(option) {

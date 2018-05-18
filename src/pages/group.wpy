@@ -62,7 +62,7 @@
   <view class="group">
     <view class="group__search">
       <view class="group__input">
-        <image src="{{search}}" mode="scaleToFill"/>
+        <image src="{{Icon.search}}" mode="scaleToFill"/>
         <input placeholder="按组名搜索"/>
       </view>
     </view>
@@ -77,19 +77,27 @@
         <view class="group__content">计科 151（49）</view>
       </view>
     </view>
+    <toast />
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
   import ALog from '../mixins/a-log'
-  import Icon from '../assets/icon/icon'
+  import { Icon } from '../assets/icon/icon'
+  import AToast from '../mixins/a-toast'
+  import Toast from 'wepy-com-toast'
+  import { ToastType } from '../share/consts'
 
   export default class Group extends wepy.page {
 
-    mixins = [ALog, Icon]
+    mixins = [ALog, AToast]
     data = {
+      Icon: Icon,
+    }
 
+    components = {
+      toast: Toast
     }
 
     onLoad() {

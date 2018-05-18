@@ -194,19 +194,19 @@
 <template>
   <view class="mine">
     <view class="mine__info" @tap="onClickSelfinfo">
-      <image class="mine__avator" src="http://os5w1n6kc.bkt.clouddn.com/mini-05.jpg" mode="scaleToFill"></image>
+      <image class="mine__avator" src="http://os5w1n6kc.bkt.clouddn.com/mini-05.jpg" mode="scaleToFill" />
       <view class="mine__selfinfo">
         <view class="mine__selfinfo--name">{{name}}</view>
         <view class="mine__selfinfo--location">{{addrName}}</view>
       </view>
-      <image class="mine__arrow" src="{{arrow}}" mode="scaleToFill"/>
+      <image class="mine__arrow" src="{{Icon.arrow}}" mode="scaleToFill"/>
     </view>
     <view class="mine__status">
       <view class="mine__search">
-        <image class="mine__search--icon" src="{{search}}" mode="scaleToFill"/>
+        <image class="mine__search--icon" src="{{Icon.search}}" mode="scaleToFill"/>
         <input placeholder="按考勤名字搜索" confirm-type="search" value="{{query}}" @input="onQueryInput"/>
         <view>
-          <image class="mine__search--clear" src="{{clear}}" mode="scaleToFill" @tap="onQueryClear"/>
+          <image class="mine__search--clear" src="{{Icon.clear}}" mode="scaleToFill" @tap="onQueryClear"/>
         </view>
       </view>
       <view class="mine__tab">
@@ -226,26 +226,35 @@
         <view class="mine__item--p">地点：{{attnd.addr_name}}</view>
       </view>
     </view>
+    <toast />
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
-  import Icon from '../assets/icon/icon'
+  import { Icon } from '../assets/icon/icon'
   import ALog from '../mixins/a-log'
   import mock from '../utils/mock'
   import zmap from '../utils/zmap'
   import { Type, BtnType, URL } from '../share/consts'
   import { getTimeFormat, getCurTime, getTimeMsFromTimeS, getTimeSFromTimeMs } from '../share/funcs'
+  import AToast from '../mixins/a-toast'
+  import Toast from 'wepy-com-toast'
+  import { ToastType } from '../share/consts'
 
   export default class Mine extends wepy.page {
-    mixins = [ALog, Icon]
+    mixins = [ALog, AToast]
     data = {
+      Icon: Icon,
       name: '...',
       addrName: '...',
       attndList: [],
       attndStatus: 0,
       query: ''
+    }
+
+    components = {
+      toast: Toast
     }
 
     onLoad() {

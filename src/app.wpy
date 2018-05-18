@@ -8,82 +8,108 @@
 </style>
 
 <script>
-import wepy from 'wepy'
-import 'wepy-async-function'
+  import wepy from 'wepy'
+  import 'wepy-async-function'
+  import zajax from './utils/zajax'
+  import { URL } from './share/consts'
 
-export default class extends wepy.app {
-  config = {
-    pages: [
-      'pages/index',
-      'pages/mine',
-      'pages/attnd',
-      'pages/config',
-      'pages/selfinfo',
-      'pages/group',
-      'pages/groupinfo'
-    ],
-    window: {
-      backgroundTextStyle: 'light',
-      backgroundColor: '#ebebeb',
-      navigationBarBackgroundColor: '#00897B',
-      navigationBarTitleText: '小小考勤',
-      navigationBarTextStyle: 'white',
-      backgroundTextStyle: 'dark'
-    },
-    tabBar: {
-      color: '#757575',
-      selectedColor: '#00897B',
-      borderStyle: 'black',
-      position: 'bottom',
-      list: [
-        { pagePath: 'pages/index', text: '考勤' },
-        { pagePath: 'pages/mine', text: '我的' },
-      ]
-    }
-  }
-
-  globalData = {
-    userInfo: null,
-    location: {
-      latitude: null,
-      longitude: null,
-      name: null
-    }
-  }
-
-  constructor () {
-    super()
-    this.use('requestfix')
-  }
-
-  onLaunch() {
-    // this.testAsync()
-  }
-
-  sleep (s) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve('promise resolved')
-      }, s * 1000)
-    })
-  }
-
-  async testAsync () {
-    const data = await this.sleep(3)
-    console.log(data)
-  }
-
-  getUserInfo(cb) {
-    const that = this
-    if (this.globalData.userInfo) {
-      return this.globalData.userInfo
-    }
-    wepy.getUserInfo({
-      success (res) {
-        that.globalData.userInfo = res.userInfo
-        cb && cb(res.userInfo)
+  export default class extends wepy.app {
+    config = {
+      pages: [
+        'pages/index',
+        'pages/mine',
+        'pages/attnd',
+        'pages/config',
+        'pages/selfinfo',
+        'pages/group',
+        'pages/groupinfo'
+      ],
+      window: {
+        backgroundTextStyle: 'light',
+        backgroundColor: '#ebebeb',
+        navigationBarBackgroundColor: '#00897B',
+        navigationBarTitleText: '小小考勤',
+        navigationBarTextStyle: 'white',
+        backgroundTextStyle: 'dark'
+      },
+      tabBar: {
+        color: '#757575',
+        selectedColor: '#00897B',
+        borderStyle: 'black',
+        position: 'bottom',
+        list: [
+          { pagePath: 'pages/index', text: '考勤' },
+          { pagePath: 'pages/mine', text: '我的' },
+        ]
       }
-    })
+    }
+
+    globalData = {
+      location: {
+        latitude: null,
+        longitude: null,
+        name: null
+      }
+    }
+
+    constructor () {
+      super()
+      this.use('requestfix')
+      // 拦截request请求
+      this.intercept('request', {
+          // 发出请求时的回调函数
+          config (p) {
+              // 对所有request请求中的OBJECT参数对象统一附加时间戳属性
+              p.timestamp = +new Date();
+              console.log('config request: ', p);
+              // 必须返回OBJECT参数对象，否则无法发送请求到服务端
+              return p;
+          },
+
+          // 请求成功后的回调函数
+          success (p) {
+              // 可以在这里对收到的响应数据对象进行加工处理
+              console.log('request success: ', p);
+              // 必须返回响应数据对象，否则后续无法对响应数据进行处理
+              return p;
+          },
+
+          //请求失败后的回调函数
+          fail (p) {
+              console.log('request fail: ', p);
+              // 必须返回响应数据对象，否则后续无法对响应数据进行处理
+              return p;
+          },
+
+          // 请求完成时的回调函数(请求成功或失败都会被执行)
+          complete (p) {
+              console.log('request complete: ', p);
+          }
+      });
+    }
+
+    onLaunch() {
+      this.login()
+    }
+
+    login() {
+      wx.login({
+        success: res => {
+          if (res.code) {
+            zajax.postFD(URL.login, { code: res.code })
+              .then(res => {
+                wx.setStorageSync('cookie', res.header['Set-Cookie'])
+                wx.setStorageSync('userInfo', res.data.data)
+              })
+              .catch(err => {
+                console.log(err)
+              })
+          } else {
+            console.log('登录失败！' + res)
+          }
+        }
+      });
+    }
+
   }
-}
 </script>

@@ -14,6 +14,7 @@
     <nameInput :model.sync="nameModel"></nameInput>
     <idInput :model.sync="idModel"></idInput>
     <saveBtn :btns.sync="btnModel" @tap="onClickSave"></saveBtn>
+    <toast />
   </view>
 </template>
 
@@ -26,10 +27,14 @@
   import { Type, BtnType, URL } from '../share/consts'
   import { getTimeFormat, getCurTime, getTimeMsFromTimeS, getTimeSFromTimeMs } from '../share/funcs'
   import mock from '../utils/mock'
+  import zajax from '../utils/zajax'
+  import AToast from '../mixins/a-toast'
+  import Toast from 'wepy-com-toast'
+  import { ToastType } from '../share/consts'
 
   export default class Selfinfo extends wepy.page {
 
-    mixins = [ALog]
+    mixins = [ALog, AToast]
     data = {
       isShow: false,
       nameModel: {},
@@ -41,25 +46,80 @@
       attndTitle: AttndTitle,
       nameInput: AttndInput,
       idInput: AttndInput,
-      saveBtn: AttndBtn
+      saveBtn: AttndBtn,
+      toast: Toast
     }
 
     onLoad() {
-      wx.showNavigationBarLoading()
-      setTimeout(() => {
-        wx.hideNavigationBarLoading()
-      }, 1000);
       this.initData()
     }
 
     initData() {
+      wx.showNavigationBarLoading()
       this.nameModel = { type: Type.TEXT, label: '名字', readonly: false, length: 50, value: '', hint: '请填写真实姓名' }
       this.idModel = { type: Type.TEXT, label: 'ID', readonly: false, length: 50, value: '', hint: '可以填写学号或工号' }
       this.btnModel = [
         { name: '保存', emit: 'save-btn', color: '#00897B' },
       ]
-      this.isShow = true
+      this.getData()
     }
+
+    // 获取用户信息
+    async getData() {
+      let openid = wx.getStorageSync('userInfo').openid
+      this.print(`openid: ${openid}`)
+      if (!openid) {
+        wx.hideNavigationBarLoading()
+        this.isShow = true
+        this.$apply()
+        return
+      }
+      await zajax.get(URL.userInfo, { openid })
+        .then(res => {
+          let body = res.data
+          let code = body.code
+          if (code !== 1000) return
+          this.nameModel.value = body.data.name
+          this.idModel.value = body.data.stu_id
+          this.$apply()
+        })
+        .catch(err => {
+          this.print(err)
+        })
+      wx.hideNavigationBarLoading()
+      this.isShow = true
+      this.$apply()
+    }
+
+    //更新用户信息
+    async updateUserInfo() {
+      let data = {
+        'name': this.nameModel.value,
+        'stu_id': this.idModel.value
+      }
+      if (!data['name']) {
+        wx.showModal({ title: '提示', content: '名字不能为空' })
+        return
+      }
+      wx.showLoading({ title: '正在保存', mask: true })
+      await zajax.post(URL.userInfo, data)
+        .then(res => {
+          wx.hideLoading()
+          let body = res.data
+          let code = body.code
+          if (code !== 1000) {
+            // wx.showToast({ title: '失败', icon: 'none', mask: true, duration: 1000 })
+            this.toast(ToastType.FAIL, '失败')
+            return
+          }
+          // wx.showToast({ title: '成功', icon: 'none', mask: true, duration: 1000 })
+          this.toast(ToastType.FAIL, '成功')
+        })
+        .catch(err => {
+          this.print(err)
+        })
+    }
+
 
     methods = {
 
@@ -68,20 +128,7 @@
     events = {
       // 更新个人信息
       'save-btn': event => {
-        let data = {
-          'name': this.nameModel.value,
-          'stu_id': this.idModel.value
-        }
-        if (!data['name']) {
-          wx.showModal({ title: '提示', content: '名字不能为空' })
-          return
-        }
-        wx.showLoading({ title: '正在保存', mask: true })
-        mock.post('', data)
-          .then(_ => {
-            wx.hideLoading()
-            wx.showToast({ title: '成功', icon: 'success', mask: true, duration: 1000 })
-          })
+        this.updateUserInfo()
       }
     }
 

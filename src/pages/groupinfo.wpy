@@ -126,7 +126,7 @@
       <view class="groupinfo__title">计科 151</view>
       <view class="groupinfo__p">管理者：老金</view>
       <view class="groupinfo__p">人数：49</view>
-      <image class="groupinfo__remove" src="{{remove}}" mode="scaleToFill"/>
+      <image class="groupinfo__remove" src="{{Icon.remove}}" mode="scaleToFill"/>
     </view>
     <view class="groupinfo__list">
       <view class="groupinfo__item">
@@ -138,21 +138,29 @@
       </view>
     </view>
     <view class="groupinfo__plus">
-      <image src="{{plus}}" mode="scaleToFill"/>
+      <image src="{{Icon.plus}}" mode="scaleToFill"/>
     </view>
+    <toast />
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
   import ALog from '../mixins/a-log'
-  import Icon from '../assets/icon/icon'
+  import { Icon } from '../assets/icon/icon'
+  import AToast from '../mixins/a-toast'
+  import Toast from 'wepy-com-toast'
+  import { ToastType } from '../share/consts'
 
   export default class Groupinfo extends wepy.page {
 
-    mixins = [ALog, Icon]
+    mixins = [ALog, AToast]
     data = {
+      Icon: Icon,
+    }
 
+    components = {
+      toast: Toast
     }
 
     onLoad() {
