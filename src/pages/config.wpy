@@ -171,9 +171,14 @@
     }
 
     events = {
-      // 发布考勤
       'release-btn': event => {
-        wx.showLoading({ title: '正在保存', mask: true })
+        this.releaseAttnd()
+      }
+    }
+
+    // 发布考勤
+    releaseAttnd() {
+      wx.showLoading({ title: '正在保存', mask: true })
         let data = {
           "attnd_name": this.nameModel.value,
           "start_time": dateToTimeS(`${this.dateModel.value} ${this.timeModel.value}`),
@@ -193,7 +198,6 @@
             wx.hideLoading()
             wx.showToast({ title: '成功', icon: 'success', mask: true, duration: 1000 })
           })
-      }
     }
 
     // 检查字段

@@ -16,5 +16,6 @@ const PORT = 8888
 const PREFIX = `${HOST}:${PORT}`
 export const URL = {
   login: `${PREFIX}/api/login`,
-  userInfo: `${PREFIX}/api/user/info`
+  userInfo: `${PREFIX}/api/user/info`,
+  attnd: `${PREFIX}/api/attnd`,
 }

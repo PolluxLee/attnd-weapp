@@ -5,7 +5,7 @@ import { Icon } from '../assets/icon/icon'
 
 export default class AToast extends wepy.mixin {
 
-  toast(type, title, duration) {
+  showToast(type, title, duration) {
     if (!title) return
     let data = { title, duration }
     switch (type) {
@@ -21,5 +21,9 @@ export default class AToast extends wepy.mixin {
         break
     }
     this.$invoke('toast', 'show', data)
+  }
+
+  hideToast() {
+    this.$invoke('toast', 'hide')
   }
 }

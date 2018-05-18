@@ -91,7 +91,6 @@
     }
 
     onLoad() {
-      this.toast(ToastType.LOADING, '加载中', 5000)
       this.model = {
         title: '口令',
         hint: '', 

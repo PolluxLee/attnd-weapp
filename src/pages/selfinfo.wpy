@@ -109,11 +109,11 @@
           let code = body.code
           if (code !== 1000) {
             // wx.showToast({ title: '失败', icon: 'none', mask: true, duration: 1000 })
-            this.toast(ToastType.FAIL, '失败')
+            this.showToast(ToastType.FAIL, '失败', 2000)
             return
           }
           // wx.showToast({ title: '成功', icon: 'none', mask: true, duration: 1000 })
-          this.toast(ToastType.FAIL, '成功')
+          this.showToast(ToastType.FAIL, '成功', 2000)
         })
         .catch(err => {
           this.print(err)
