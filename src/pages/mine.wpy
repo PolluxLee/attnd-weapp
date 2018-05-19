@@ -206,7 +206,8 @@
         <image class="mine__search--icon" src="{{Icon.search}}" mode="scaleToFill"/>
         <input placeholder="按考勤名字搜索" confirm-type="search" value="{{query}}" @input="onQueryInput"/>
         <view>
-          <image class="mine__search--clear" src="{{Icon.clear}}" mode="scaleToFill" @tap="onQueryClear"/>
+          <image class="mine__search--clear" wx:if="{{query}}"
+            src="{{Icon.clear}}" mode="scaleToFill" @tap="onQueryClear"/>
         </view>
       </view>
       <view class="mine__tab">

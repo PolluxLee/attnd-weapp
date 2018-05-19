@@ -24,13 +24,14 @@
   import AttndTitle from '../components/attnd-title'
   import AttndInput from '../components/attnd-input'
   import AttndBtn from '../components/attnd-btn'
-  import { Type, BtnType, URL } from '../share/consts'
+  import { Type, BtnType, URL, CODE } from '../share/consts'
   import { getTimeFormat, getCurTime, getTimeMsFromTimeS, getTimeSFromTimeMs } from '../share/funcs'
   import mock from '../utils/mock'
   import zajax from '../utils/zajax'
   import AToast from '../mixins/a-toast'
   import Toast from 'wepy-com-toast'
   import { ToastType } from '../share/consts'
+  import zstore from '../utils/zstore'
 
   export default class Selfinfo extends wepy.page {
 
@@ -66,7 +67,7 @@
 
     // 获取用户信息
     async getData() {
-      let openid = wx.getStorageSync('userInfo').openid
+      let openid = zstore.get(zstore.openid)
       this.print(`openid: ${openid}`)
       if (!openid) {
         wx.hideNavigationBarLoading()

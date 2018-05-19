@@ -20,7 +20,7 @@
     <attndTitle><view slot="title">* 输入考勤名单名称可新建考勤名单，新建的考勤名单里的成员由当次考勤确定；若已有历史名单，可点击选择选取</view></attndTitle>
     <attndTitle><view slot="title">个人信息</view></attndTitle>
     <authorInput :model.sync="authorModel"></authorInput>
-    <locationInput :model.sync="locationModel"></locationInput>
+    <placeInput :model.sync="placeModel"></placeInput>
     <attndTitle><view slot="title">* 签到有效范围为 200 米，上限 1000 人</view></attndTitle>
     <attndBtn :btns.sync="btnModel"></attndBtn>
     <toast />
@@ -33,7 +33,7 @@
   import AttndTitle from '../components/attnd-title'
   import AttndInput from '../components/attnd-input'
   import AttndBtn from '../components/attnd-btn'
-  import { Type, BtnType, URL } from '../share/consts'
+  import { Type, BtnType, URL, CODE } from '../share/consts'
   import { getTimeFormat, getCurTime, getTimeMsFromTimeS, getTimeSFromTimeMs, dateToTimeS, isNumber } from '../share/funcs'
   import zmap from '../utils/zmap'
   import mock from '../utils/mock'
@@ -52,15 +52,14 @@
       lastModel: {},
       groupModel: {},
       authorModel: {},
-      locationModel: {},
+      placeModel: {},
       btnModel: [],
       isShow: false,
       
       location: {
-        latitude: 0,
-        longitude: 0,
-        accuracy: 0,
-        addr_name: ''
+        latitude: null,
+        longitude: null,
+        accuracy: null,
       }
     }
 
@@ -73,7 +72,7 @@
       groupInput: AttndInput,
       lastInput: AttndInput,
       authorInput: AttndInput,
-      locationInput: AttndInput,
+      placeInput: AttndInput,
       toast: Toast
     }
 
@@ -90,7 +89,7 @@
       this.lastModel = { type: Type.SELECT, label: '持续', readonly: false, options: [], suffix: '分钟', value: '5', }
       this.groupModel = { type: Type.TEXT_SELECT, label: '考勤名单', readonly: false, length: 50, value: '', hint: '例如：计科151', extra: '选择', options: [] }
       this.authorModel = { type: Type.TEXT, label: '发布者', readonly: false, length: 50, value: '', hint: '' }
-      this.locationModel = { type: Type.TEXT_SELECT, label: '地点', readonly: false, length: 50, value: '', hint: '例如：理南404', extra: '选择', options: []}
+      this.placeModel = { type: Type.TEXT_SELECT, label: '地点', readonly: false, length: 50, value: '', hint: '例如：理南404', extra: '选择', options: []}
       this.lastModel.options = ['5','10','15','20','30']
 
       this.dateModel.value = getCurTime('date')
@@ -140,7 +139,7 @@
     getHistoryLocation() {
       return mock.getHistoryLocation()
         .then(data => {
-          this.locationModel.options = data
+          this.placeModel.options = data
           this.$apply()
         })
     }
@@ -178,39 +177,53 @@
 
     // 发布考勤
     releaseAttnd() {
-      wx.showLoading({ title: '正在保存', mask: true })
-        let data = {
-          "attnd_name": this.nameModel.value,
-          "start_time": dateToTimeS(`${this.dateModel.value} ${this.timeModel.value}`),
-          "last": +this.lastModel.value,
-          "location": {
-              "latitude": this.location.latitude,
-              "longitude": this.location.longitude,
-              "accuracy": this.location.accuracy
-          },
-          "addr_name": this.location.addr_name,
-          "group_name": this.groupModel.value,
-          "teacher_name": this.authorModel.value
-        }
-        if (!this.checkData(data)) return
-        mock.post('', data)
-          .then(_ => {
-            wx.hideLoading()
-            wx.showToast({ title: '成功', icon: 'success', mask: true, duration: 1000 })
-          })
+      let checkRes = this.checkData()
+      if (!checkRes.status) {
+        wx.showModal({ title: '提示', content: checkRes.msg })
+        return
+      }
+      let reqData = {
+        "attnd_name": this.nameModel.value,
+        "start_time": dateToTimeS(`${this.dateModel.value} ${this.timeModel.value}`),
+        "last": +this.lastModel.value,
+        "location": {
+            "latitude": this.location.latitude,
+            "longitude": this.location.longitude,
+            "accuracy": this.location.accuracy
+        },
+        "addr_name": this.placeModel.value,
+        "group_name": this.groupModel.value,
+        "teacher_name": this.authorModel.value
+      }
+      this.showToast(ToastType.LOADING, '正在发布')
+      zajax.postFD(URL.attnd, reqData)
+        .then(res => {
+          this.hideToast()
+          let body = res.data
+          let code = body.code
+          if (code !== CODE.GLOBAL_SUCCESS) {   
+            this.showToast(ToastType.FAIL, '失败', 2000)
+            return
+          }
+          this.showToast(ToastType.FAIL, '失败', 2000)
+        })
+        .catch(err => {
+          this.showToast(ToastType.FAIL, '失败', 2000)
+          this.print(err)
+        })
     }
 
     // 检查字段
-    checkData(data) {
-      if (!data.attnd_name) { wx.showModal({ title: '提示', content: `[${this.nameModel.label}] 未正确填写` }); return false }
-      if (!data.teacher_name) { wx.showModal({ title: '提示', content: `[${this.authorModel.label}] 未正确填写` }); return false }
-      if (!isNumber(data.last)) { wx.showModal({ title: '提示', content: `[${this.lastModel.label}] 未正确填写` }); return false }
-      if (!isNumber(data.start_time)) { wx.showModal({ title: '提示', content: `[日期或时间] 未正确填写` }); return false }
-      if (!data.group_name) { wx.showModal({ title: '提示', content: `[${this.groupModel.label}] 未正确填写` }); return false }
-      if (!isNumber(data.location.latitude) || !isNumber(data.location.longitude) || !isNumber(data.location.accuracy) || !data.addr_name) {
-        wx.showModal({ title: '提示', content: `位置信息未获取，请稍后再试` }); return false
+    checkData() {
+      for (let key of this.location) {
+        if (!isNumber(this.location[key])) return { status: false, msg: `[位置信息] 未获取` }
       }
-
+      [this.nameModel, this.dateModel, this.timeModel, this.lastModel, this.groupModel, this.authorModel, this.placeModel]
+        .forEach(el => {
+          if (!el.value) {
+            return { status: false, msg: `[${el.label}] 未正确填写` }
+          }
+        });
       return true
     }
 

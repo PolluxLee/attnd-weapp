@@ -12,6 +12,7 @@
   import 'wepy-async-function'
   import zajax from './utils/zajax'
   import { URL } from './share/consts'
+  import zstore from './utils/zstore'
 
   export default class extends wepy.app {
     config = {
@@ -98,8 +99,11 @@
           if (res.code) {
             zajax.postFD(URL.login, { code: res.code })
               .then(res => {
-                wx.setStorageSync('cookie', res.header['Set-Cookie'])
-                wx.setStorageSync('userInfo', res.data.data)
+                zstore.set(zstore.cookie, res.header['Set-Cookie'])
+                let userInfo = res.data.data
+                zstore.set(zstore.userName, userInfo['name'])
+                zstore.set(zstore.stdId, userInfo['stu_id'])
+                zstore.set(zstore.openid, userInfo['openid'])
               })
               .catch(err => {
                 console.log(err)

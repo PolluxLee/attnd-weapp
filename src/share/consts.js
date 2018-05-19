@@ -19,3 +19,17 @@ export const URL = {
   userInfo: `${PREFIX}/api/user/info`,
   attnd: `${PREFIX}/api/attnd`,
 }
+
+// Status Code
+export const CODE = {
+  GLOBAL_SUCCESS: 1000,
+  GLOBAL_PARAM_INVALID: 1001,
+  GLOBAL_PARAM_ERROR: 1002,
+  GLOBAL_NOAUTH: 1003,
+  GLOBAL_SYS_ERROR: 1004,
+  GLOBAL_DB_ERROR: 1005,
+
+  GLOBAL_DB_FAILED: 1006,
+  USER_NOT_EXIST: 2001,
+  USER_EXIST: 2002,
+}
