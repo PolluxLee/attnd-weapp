@@ -41,6 +41,7 @@
   import AToast from '../mixins/a-toast'
   import Toast from 'wepy-com-toast'
   import { ToastType } from '../share/consts'
+  import zstore from '../utils/zstore'
 
   export default class Config extends wepy.page {
 
@@ -82,7 +83,7 @@
     }
 
     initData() {
-      this.getData()
+      wx.showNavigationBarLoading()
       this.nameModel = { type: Type.TEXT_SELECT, label: '考勤名称', readonly: false, length: 50, value: '', hint: '例如：计网', extra: '选择', options: [] }
       this.dateModel = { type: Type.DATE, label: '日期', readonly: false, options: [], value: '' }
       this.timeModel = { type: Type.TIME, label: '时间', readonly: false, options: [], value: '' }
@@ -98,19 +99,18 @@
         { name: '发布', emit: 'release-btn', color: '#00897B' }
       ]
       this.isShow = true  
+      this.getData()
     }
 
     // Promise 并行开始，串行结束
     async getData() {
-      wx.showNavigationBarLoading()
+      this.getAuthorName()
       let a = this.getGroupList()
       let b = this.getAttndNames()
-      let c = this.getAuthorName()
       let d = this.getLocation()
       let e = this.getHistoryLocation()
       await a
       await b
-      await c
       await d
       await e
       wx.hideNavigationBarLoading()
@@ -146,11 +146,9 @@
 
     // 获取我的名字
     getAuthorName() {
-      return mock.getSelfInfo()
-        .then(data => {
-          this.authorModel.value = data.data.name ? data.data.name : ''
-          this.$apply()
-        })
+      let name = zstore.get(zstore.userName)
+      this.authorModel.value = name
+      this.$apply()
     }
 
     // 获取位置
@@ -162,7 +160,7 @@
           this.location.accuracy = res.accuracy
           this.$apply()
         })
-        .catch(err => console.log(err))
+        .catch(err => this.print(err))
     }
 
     methods = {
