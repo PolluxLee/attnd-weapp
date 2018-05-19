@@ -82,6 +82,8 @@
   import AToast from '../mixins/a-toast'
   import Toast from 'wepy-com-toast'
   import { ToastType } from '../share/consts'
+  import { URL, CODE } from '../share/consts'
+  import zajax from '../utils/zajax'
 
   export default class Index extends wepy.page {
 
@@ -97,7 +99,27 @@
         value: '', 
         length: 50, 
         readonly: false,
-        confirmCallback: this.confirmCallback,
+        confirmCallback: res => {
+          let cipher = res
+          if (!cipher) return
+          this.showToast(ToastType.LOADING, '获取数据')
+          zajax.get(URL.attnd, { cipher })
+            .then(res => {
+              this.hideToast()
+              let body = res.data
+              let code = body.code
+              if (code !== CODE.GLOBAL_SUCCESS) {
+                this.showToast(ToastType.FAIL, '口令不正确', 1500)
+                return
+              }
+              let data = body.data
+              this.showToast(ToastType.SUCCESS, '成功', 1500)
+              this.print(data)
+            })
+            .catch(err => {
+              this.print(err)
+            })
+        },
         cancelCallback: () => {}
       }
     }
@@ -109,12 +131,6 @@
     components = {
       attndModal: AttndModal,
       toast: Toast
-    }
-
-    confirmCallback(res) {
-      let password = res
-      if (!password) return
-      wx.navigateTo({ url: `attnd?${password}` })
     }
 
     methods = {

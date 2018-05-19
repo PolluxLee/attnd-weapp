@@ -154,7 +154,6 @@
       onConfirm() {
         if (!this.model.value) return
         this.model.confirmCallback(this.model.value)
-        this.isShow = false
       },
       showModal() {
         this.isShow = true

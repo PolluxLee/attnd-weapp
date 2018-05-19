@@ -45,7 +45,7 @@
 
   export default class Config extends wepy.page {
 
-    mixins = [ALog]
+    mixins = [ALog, AToast]
     data = {
       nameModel: {},
       dateModel: {},
@@ -176,8 +176,9 @@
     // 发布考勤
     releaseAttnd() {
       let checkRes = this.checkData()
+      this.print(checkRes)
       if (!checkRes.status) {
-        wx.showModal({ title: '提示', content: checkRes.msg })
+        wx.showModal({ title: '提示', content: checkRes.msg || '表单未填写完整' })
         return
       }
       let reqData = {
@@ -194,7 +195,7 @@
         "teacher_name": this.authorModel.value
       }
       this.showToast(ToastType.LOADING, '正在发布')
-      zajax.postFD(URL.attnd, reqData)
+      zajax.post(URL.attnd, JSON.stringify(reqData))
         .then(res => {
           this.hideToast()
           let body = res.data
@@ -203,7 +204,7 @@
             this.showToast(ToastType.FAIL, '失败', 2000)
             return
           }
-          this.showToast(ToastType.FAIL, '失败', 2000)
+          this.showToast(ToastType.SUCCESS, '成功', 2000)
         })
         .catch(err => {
           this.showToast(ToastType.FAIL, '失败', 2000)
@@ -213,16 +214,16 @@
 
     // 检查字段
     checkData() {
-      for (let key of this.location) {
+      for (let key in this.location) {
         if (!isNumber(this.location[key])) return { status: false, msg: `[位置信息] 未获取` }
       }
-      [this.nameModel, this.dateModel, this.timeModel, this.lastModel, this.groupModel, this.authorModel, this.placeModel]
-        .forEach(el => {
-          if (!el.value) {
-            return { status: false, msg: `[${el.label}] 未正确填写` }
-          }
-        });
-      return true
+      let models = [this.nameModel, this.dateModel, this.timeModel, this.lastModel, this.groupModel, this.authorModel, this.placeModel]
+      for (let el of models) {
+        if (!el.value) {
+          return { status: false, msg: `[${el.label}] 未正确填写` }
+        }
+      }
+      return { status: true }
     }
 
   }

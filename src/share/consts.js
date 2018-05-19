@@ -14,6 +14,7 @@ export const ToastType = { SUCCESS: 0, FAIL: 1, LOADING: 2 }
 const HOST = 'http://liziyi.top'
 const PORT = 8888
 const PREFIX = `${HOST}:${PORT}`
+
 export const URL = {
   login: `${PREFIX}/api/login`,
   userInfo: `${PREFIX}/api/user/info`,
