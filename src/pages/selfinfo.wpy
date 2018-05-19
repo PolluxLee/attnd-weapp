@@ -92,8 +92,8 @@
           if (code !== CODE.GLOBAL_SUCCESS) return
           this.nameModel.value = body.data.name
           this.idModel.value = body.data.stu_id
-          zstore.set(zstore.userName, this.nameModel.value)
-          zstore.set(zstore.stuId, this.idModel.value)
+          zstore.set(zstore.userName, this.nameModel.value ? this.nameModel.value : '')
+          zstore.set(zstore.stuId, this.idModel.value ? this.nameModel.value : '')
           this.$apply()
         })
         .catch(err => {
@@ -117,7 +117,7 @@
       this.showToast(ToastType.LOADING, '正在保存')
       await zajax.post(URL.userInfo, data)
         .then(res => {
-          this.hideToast()
+          // this.hideToast()
           let body = res.data
           let code = body.code
           if (code !== CODE.GLOBAL_SUCCESS) {
@@ -125,9 +125,9 @@
             return
           }
           let userInfo = body.data
-          zstore.set(zstore.userName, userInfo['name'])
-          zstore.set(zstore.stuId, userInfo['stu_id'])
-          this.showToast(ToastType.FAIL, '成功', 2000)
+          zstore.set(zstore.userName, data.name)
+          zstore.set(zstore.stuId, data.stu_id)
+          this.showToast(ToastType.SUCCESS, '成功', 2000)
         })
         .catch(err => {
           this.print(err)

@@ -105,7 +105,7 @@
           this.showToast(ToastType.LOADING, '获取数据')
           zajax.get(URL.attnd, { cipher })
             .then(res => {
-              this.hideToast()
+              // this.hideToast()
               let body = res.data
               let code = body.code
               if (code !== CODE.GLOBAL_SUCCESS) {
