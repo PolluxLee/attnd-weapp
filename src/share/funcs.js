@@ -37,8 +37,13 @@ export function getTimeSFromTimeMs(timeMs) {
 
 //date string to timeS
 export function dateToTimeS(dateString) {
-  let timeMs = Date.parse(dateString);
-  return Math.floor(timeMs / 1000);
+  let timeMs = Date.parse(dateString)
+  return Math.floor(timeMs / 1000)
+}
+
+//date string to timeMs
+export function dateToTimeMs(dateString) {
+  return Date.parse(dateString)
 }
 
 //check isNumber

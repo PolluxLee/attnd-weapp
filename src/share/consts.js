@@ -19,6 +19,8 @@ export const URL = {
   login: `${PREFIX}/api/login`,
   userInfo: `${PREFIX}/api/user/info`,
   attnd: `${PREFIX}/api/attnd`,
+  historyNames: `${PREFIX}/api/attnd/hisname`,
+  groupNames: `${PREFIX}/api/group/name`,
 }
 
 // Status Code
@@ -33,4 +35,6 @@ export const CODE = {
   GLOBAL_DB_FAILED: 1006,
   USER_NOT_EXIST: 2001,
   USER_EXIST: 2002,
+
+  ATTND_NOT_EXIST: 3001,
 }

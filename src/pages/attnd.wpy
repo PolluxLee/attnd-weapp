@@ -46,10 +46,33 @@
       top: 15rpx;
     }
 
-    &__count {
-      margin-bottom: 30rpx;
-      font-size: 30rpx;
+    &__oper {
       color: $font;
+      box-sizing: border-box;
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      font-size: 30rpx;
+    }
+
+    &__count {
+      margin-right: 100rpx;
+      padding-bottom: 30rpx;
+    }
+
+    &__filter {
+      padding-bottom: 30rpx;
+      &--text {
+        display: inline-block;
+        vertical-align: center;
+        margin-right: 6rpx;
+      }
+      &--img {
+        width: 30rpx;
+        height: 30rpx;
+        display: inline-block;
+        vertical-align: center;
+      }
     }
 
     &__item {
@@ -123,7 +146,7 @@
 </style>
 
 <template>
-  <view class="attnd">
+  <view class="attnd" wx:if="{{isShow}}">
     <view class="attnd__header">
       <view class="attnd__title">嵌入式</view>
       <view class="attnd__p attnd__p--pwd">口令：DR125SDR5</view>
@@ -135,7 +158,13 @@
       <image class="attnd__remove" src="{{Icon.remove}}" mode="scaleToFill"/>
     </view>
     <view class="attnd__list">
-      <view class="attnd__count">人数：1 / 49</view>
+      <view class="attnd__oper">
+        <view class="attnd__count">人数：1 / 49</view>
+        <view class="attnd__filter" @tap="toggleFilter">
+          <view class="attnd__filter--text">{{filter ? '未到' : '全部'}}</view>
+          <image class="attnd__filter--img" src="{{Icon.triangle}}" mode="scaleToFill"/>
+        </view>
+      </view>
       <view class="attnd__item">
         <view class="attnd__item--avator">机</view>
         <view class="attnd__item--info">
@@ -159,7 +188,8 @@
   import { Icon } from '../assets/icon/icon'
   import AToast from '../mixins/a-toast'
   import Toast from 'wepy-com-toast'
-  import { ToastType } from '../share/consts'
+  import { ToastType, URL, CODE } from '../share/consts'
+  import zajax from '../utils/zajax'
 
   export default class Attnd extends wepy.page {
 
@@ -169,22 +199,78 @@
       winW: 0,    //屏幕可用宽度 px
       rpxScale: 0.5,    //rpx 与 px 关系：1rpx = winW px / 750 = (winW/750)px = rpxScale px
       icon: 0,
+      isShow: true,
+      cipher: '',
+      filter: false
     }
 
     components = {
       toast: Toast
     }
 
-    onLoad() {
-      wx.setNavigationBarTitle({
-        title: '考勤情况'
-      })
+    onLoad(option) {
+      this.cipher = option.query ? option.query : ''
+      wx.setNavigationBarTitle({ title: '考勤情况' })
       this.getWinWidth()
+    }
+
+    // 获取考勤信息
+    async getData() {
+      wx.showNavigationBarLoading()
+      this.showToast(ToastType.LOADING, '加载中')
+      await zajax.get(URL.attnd, { cipher: this.cipher })
+        .then(res =>{
+          let body = res.data
+          let code = body.code
+          this.hideToast()
+          // 考勤不存在或其他失败情况
+          if (code !== CODE.GLOBAL_SUCCESS) {
+            wx.showModal({
+              title: '提示',
+              content: '口令不正确或考勤不存在',
+              success: function(res) {
+                if (res.confirm || res.cancel) {
+                  wx.navigateBack()
+                }
+              }
+            })
+          }
+          let data = body.data
+        })
+        .catch(err => {
+          this.print(err)
+        })
+
+      wx.hideNavigationBarLoading()
+    }
+
+    // 获取考勤基本信息
+    getAttndInfo() {
+
+    }
+
+    // 获取签到者列表
+    getResponserList() {
+
     }
 
     methods = {
       toggleIcon() {
         this.icon = 1 - this.icon
+      },
+      toggleFilter() {
+        wx.showActionSheet({
+          itemList: ['全部', '未到'],
+          success: res => {
+            let tapIndex = res.tapIndex
+            if (tapIndex === 0) this.filter = false
+            else if (tapIndex === 1) this.filter = true
+            this.$apply()
+          },
+          fail: res => {
+            console.log(res.errMsg)
+          }
+        })
       }
     }
 

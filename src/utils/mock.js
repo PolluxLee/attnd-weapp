@@ -20,7 +20,7 @@ mock.getSelfInfo = (url, data) => {
             "id": 1,
             "openid": "fdsafe51515",
             "stu_id": "1506100006",
-            "name": "lzp",
+            "name": "黎梓毅",
             "remark": {},
             "status": 0
         }

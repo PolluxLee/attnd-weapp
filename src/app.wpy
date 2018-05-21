@@ -101,9 +101,11 @@
               .then(res => {
                 zstore.set(zstore.cookie, res.header['Set-Cookie'] ? res.header['Set-Cookie'] : '')
                 let userInfo = res.data.data
+                console.log(userInfo)
                 zstore.set(zstore.userName, userInfo['name'] ? userInfo['name'] : '')
                 zstore.set(zstore.stdId, userInfo['stu_id'] ? userInfo['stu_id'] : '')
                 zstore.set(zstore.openid, userInfo['openid'] ? userInfo['openid'] : '')
+                zstore.set(zstore.id, userInfo['id'] ? userInfo['id'] : '')
               })
               .catch(err => {
                 console.log(err)

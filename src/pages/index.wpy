@@ -139,9 +139,12 @@
       },
       onClickResp() {
         this.model.value = ''
-        this.$invoke('attndModal','showModal')
+        // this.$invoke('attndModal','showModal')
+        wx.navigateTo({url: 'attnd'})
       }
     }
+
+    // 获取考勤信息
 
   }
 </script>

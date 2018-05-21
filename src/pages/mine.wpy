@@ -23,6 +23,12 @@
     height: 140rpx;
     border-radius: 5rpx;
     margin-right: 30rpx;
+    background: $theme;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 80rpx;
   }
 
   &__selfinfo {
@@ -194,7 +200,7 @@
 <template>
   <view class="mine">
     <view class="mine__info" @tap="onClickSelfinfo">
-      <image class="mine__avator" src="http://os5w1n6kc.bkt.clouddn.com/mini-05.jpg" mode="scaleToFill" />
+      <view class="mine__avator">{{avator}}</view>
       <view class="mine__selfinfo">
         <view class="mine__selfinfo--name">{{name}}</view>
         <view class="mine__selfinfo--location">{{addrName}}</view>
@@ -248,7 +254,8 @@
     data = {
       Icon: Icon,
       name: '...',
-      addrName: '...',
+      addrName: '',
+      avator: '',
       attndList: [],
       attndStatus: 0,
       query: ''
@@ -287,6 +294,8 @@
           let name = data.data.name
           let ID = data.data.stu_id
           this.name = name
+          // this.avator = String.prototype.toUpperCase.call(name[0])
+          this.avator = name[0].toUpperCase()
           this.$apply()
         })
         .catch(err => {

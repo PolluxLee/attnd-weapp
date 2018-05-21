@@ -105,10 +105,10 @@
     // Promise 并行开始，串行结束
     async getData() {
       this.getAuthorName()
-      let a = this.getGroupList()
-      let b = this.getAttndNames()
-      let d = this.getLocation()
-      let e = this.getHistoryLocation()
+      let a = this.getAttndNames()
+      let b = this.getGroupList()
+      let d = this.getHistoryLocation()
+      let e = this.getLocation()
       await a
       await b
       await d
@@ -119,23 +119,37 @@
 
     // 获取历史考勤名字列表
     getAttndNames() {
-      return mock.getAttndNames()
-        .then(data => {
-          this.nameModel.options = data
-          this.$apply()
+      return zajax.get(URL.historyNames)
+        .then(res => {
+          let body = res.data
+          let code = body.code
+          if (code === CODE.GLOBAL_SUCCESS) {
+            let options = body.data
+            if (Array.isArray(options)) this.nameModel.options = options
+          }
+        })
+        .catch(err => {
+          this.print(err)
         })
     }
 
     // 获取考勤名单名字列表
     getGroupList() {
-      return mock.getGroupList()
-        .then(data => {
-          this.groupModel.options = data
-          this.$apply()
+      return zajax.get(URL.groupNames)
+        .then(res => {
+          let body = res.data
+          let code = body.code
+          if (code === CODE.GLOBAL_SUCCESS) {
+            let options = body.data
+            if (Array.isArray(options)) this.groupModel.options = options
+          }
+        })
+        .catch(err => {
+          this.printf(err)
         })
     }
 
-    // 获取历史常用位置列表
+    // 获取历史常用地点列表
     getHistoryLocation() {
       return mock.getHistoryLocation()
         .then(data => {
@@ -183,7 +197,7 @@
       }
       let reqData = {
         "attnd_name": this.nameModel.value,
-        "start_time": dateToTimeS(`${this.dateModel.value} ${this.timeModel.value}`),
+        "start_time": dateToTimeMs(`${this.dateModel.value} ${this.timeModel.value}`),
         "last": +this.lastModel.value,
         "location": {
             "latitude": this.location.latitude,
