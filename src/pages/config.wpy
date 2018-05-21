@@ -34,7 +34,7 @@
   import AttndInput from '../components/attnd-input'
   import AttndBtn from '../components/attnd-btn'
   import { Type, BtnType, URL, CODE } from '../share/consts'
-  import { getTimeFormat, getCurTime, getTimeMsFromTimeS, getTimeSFromTimeMs, dateToTimeS, isNumber } from '../share/funcs'
+  import { getTimeFormat, getCurTime, getTimeMsFromTimeS, getTimeSFromTimeMs, dateToTimeMs, isNumber} from '../share/funcs'
   import zmap from '../utils/zmap'
   import mock from '../utils/mock'
   import zajax from '../utils/zajax'

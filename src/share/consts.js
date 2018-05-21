@@ -21,6 +21,7 @@ export const URL = {
   attnd: `${PREFIX}/api/attnd`,
   historyNames: `${PREFIX}/api/attnd/hisname`,
   groupNames: `${PREFIX}/api/group/name`,
+  attndList: `${PREFIX}/api/attndlist`,
 }
 
 // Status Code

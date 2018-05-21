@@ -144,7 +144,7 @@
     }
     input {
       font-size: 28rpx;
-      color: $font;
+      color: black;
       width: 230rpx;
       height: 48rpx;
     }
@@ -163,7 +163,6 @@
   }
 
   &__list {
-    margin-bottom: 30rpx;
     box-sizing: border-box;
   }
 
@@ -176,7 +175,7 @@
     display: flex;
     flex-direction: column;
     position: relative;
-    animation: fade-out 1s;
+    animation: fade-out 0.5s;
     &--title {
       white-space: nowrap;
       font-size: 40rpx;
@@ -192,6 +191,26 @@
       &-pwd {
         color: $red;
       }
+    }
+  }
+
+  &__baseline {
+    box-sizing: border-box;
+    padding-top: 30rpx;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    &--line {
+      height: 1rpx;
+      width: 200rpx;
+      background: $edge;
+    }
+    &--text {
+      color: $edge;
+      font-size: 30rpx;
+      box-sizing: border-box;
+      padding-left: 30rpx;
+      padding-right: 30rpx;
     }
   }
 }
@@ -210,27 +229,33 @@
     <view class="mine__status">
       <view class="mine__search">
         <image class="mine__search--icon" src="{{Icon.search}}" mode="scaleToFill"/>
-        <input placeholder="按考勤名字搜索" confirm-type="search" value="{{query}}" @input="onQueryInput"/>
+        <input placeholder="按考勤名字搜索" confirm-type="search" value="{{query}}" 
+          @input="onQueryInput" @confirm="onSearchConfirm"/>
         <view>
           <image class="mine__search--clear" wx:if="{{query}}"
             src="{{Icon.clear}}" mode="scaleToFill" @tap="onQueryClear"/>
         </view>
       </view>
       <view class="mine__tab">
-        <view class="mine__tab--yell {{attndStatus===0 ? 'mine__tab--yell-active' : ''}}"
-          @tap="onTagToggle({{0}})">点名</view>
-        <view class="mine__tab--resp {{attndStatus===1 ? 'mine__tab--resp-active' : ''}}"
-          @tap="onTagToggle({{1}})">签到</view>
+        <view class="mine__tab--yell {{attndType===1 ? 'mine__tab--yell-active' : ''}}"
+          @tap="onTagToggle({{1}})">点名</view>
+        <view class="mine__tab--resp {{attndType===2 ? 'mine__tab--resp-active' : ''}}"
+          @tap="onTagToggle({{2}})">签到</view>
       </view>
       <view class="mine__group" @tap="onClickGroup">名单</view>
     </view>
     <view class="mine__list">
       <view class="mine__item" @tap="onClickAttnd" 
         wx:for-items="{{attndList}}" wx:for-item="attnd" wx:key="id">
-        <view class="mine__item--title">{{attnd.attnd_name}}（计科151）</view>
+        <view class="mine__item--title">{{attnd.attnd_name}}{{attnd.group_name ? '（'+attnd.group_name+'）' : ''}}</view>
         <view class="mine__item--p mine__item--p-pwd">口令：{{attnd.cipher}}</view>
         <view class="mine__item--p">时间：{{attnd.start_time}}</view>
         <view class="mine__item--p">地点：{{attnd.addr_name}}</view>
+      </view>
+      <view class="mine__baseline" wx:if="{{!baselineLock && count===attndList.length}}">
+        <view class="mine__baseline--line" wx:if="{{count !== 0}}"></view>
+        <view class="mine__baseline--text">{{count===0 ? (attndType===1 ? '暂无考勤' : '暂无签到') : '没有更多了'}}</view>
+        <view class="mine__baseline--line" wx:if="{{count !== 0}}"></view>
       </view>
     </view>
     <toast />
@@ -243,22 +268,29 @@
   import ALog from '../mixins/a-log'
   import mock from '../utils/mock'
   import zmap from '../utils/zmap'
-  import { Type, BtnType, URL } from '../share/consts'
+  import { Type, BtnType, URL, CODE } from '../share/consts'
   import { getTimeFormat, getCurTime, getTimeMsFromTimeS, getTimeSFromTimeMs } from '../share/funcs'
   import AToast from '../mixins/a-toast'
   import Toast from 'wepy-com-toast'
   import { ToastType } from '../share/consts'
+  import zstore from '../utils/zstore'
+  import zajax from '../utils/zajax'
 
   export default class Mine extends wepy.page {
     mixins = [ALog, AToast]
     data = {
       Icon: Icon,
       name: '...',
-      addrName: '',
+      addrName: '...',
       avator: '',
       attndList: [],
-      attndStatus: 0,
-      query: ''
+
+      attndType: 1,  //考勤类别，1代表我的考勤，2代表我的签到
+      query: '',    //搜索参数
+      page: 1,    //第几页
+      pageSize: 10,   //每页数量
+      count: 0,   //列表项总数
+      baselineLock: true,   //加载锁
     }
 
     components = {
@@ -267,11 +299,17 @@
 
     onLoad() {
       wx.setNavigationBarTitle({ title: '我的' })
-      this.getData()
     }
 
     onShow() {
+      this.initData()
       this.getData()
+    }
+
+    initData() {
+      this.page = 1
+      this.pageSize = 10
+      this.query = ''
     }
 
     // Promise 并行开始，串行结束
@@ -289,12 +327,28 @@
 
     // 获取个人信息
     getSelfInfo() {
-      return mock.getSelfInfo()
-        .then(data => {
-          let name = data.data.name
-          let ID = data.data.stu_id
-          this.name = name
-          // this.avator = String.prototype.toUpperCase.call(name[0])
+      // 先从 storage 中获取
+      let name = zstore.get(zstore.userName)
+      if (name) {
+        this.name = name
+        this.avator = name[0].toUpperCase()
+        this.$apply()
+        return
+      }
+      // storage 中没有再从后端获取
+      let openid = zstore.get(zstore.openid)
+      this.print(`openid: ${openid}`)
+      if (!openid) {
+        this.isShow = true
+        this.$apply()
+        return
+      }
+      return zajax.get(URL.userInfo, { openid })
+        .then(res => {
+          let body = res.data
+          let code = body.code
+          if (code !== CODE.GLOBAL_SUCCESS) return
+          this.name = body.data.name
           this.avator = name[0].toUpperCase()
           this.$apply()
         })
@@ -307,14 +361,13 @@
     async getAddrName() {
       let latitude = 0
       let longitude = 0
-      let addrName = ''
       await zmap.getLocation()
         .then(res => { latitude = res.latitude; longitude = res.longitude })
         .catch(err => console.log(err))
       await zmap.getAddrName(latitude, longitude)
         .then(res => {
           if (res) {
-            this.addrName = res
+            this.addrName = res ? res : ''
             this.$apply() 
           }   
         })
@@ -323,17 +376,39 @@
     }
 
     // 获取考勤列表
-    getAttndList() {
-      return mock.getAttndList()
-        .then(data => {
-          this.attndList = data.data.attnds
+    async getAttndList() {
+      this.baselineLock = true
+      this.$apply()
+      wx.showNavigationBarLoading()
+      let reqData = {}
+      reqData.list_type = this.attndType
+      reqData.page = this.page
+      reqData.page_size = this.pageSize
+      reqData.query = this.query ? this.query : ''
+      this.page ++
+      this.$apply()
+      await zajax.get(URL.attndList, reqData)
+        .then(res => {
+          let body = res.data
+          let code = body.code
+          if (code !== CODE.GLOBAL_SUCCESS) return
+          this.attndList = body.data.attnds
+          this.count = body.data.count
           this.attndList.map(el => {
-            let date = new Date(getTimeMsFromTimeS(el.start_time))
+            let date = new Date(el.start_time)
             el.start_time = `${getTimeFormat(date, 'date', '/')} ${getTimeFormat(date, 'time', ':')}`
             return el
           })
-          this.$apply()
         })
+        .catch(err => {
+          this.print(err)
+        })
+      wx.hideNavigationBarLoading()
+      setTimeout(() => {
+        this.baselineLock = false
+        this.$apply()
+      }, 1000);
+      this.$apply()
     }
 
     methods = {
@@ -350,18 +425,27 @@
       onQueryInput(event) {
         this.query = event.detail.value
       },
-      onQueryClear() {
-        this.query = ''
-      },
       //[考勤] [签到] 标签切换
       onTagToggle(index) {
         this.print(index)
+        this.initData()
         switch (index) {
-          case 0: this.attndStatus = 0; break
-          case 1: this.attndStatus = 1; break
-          default: this.attndStatus = 0; break
+          case 1: this.attndType = 1; break
+          case 2: this.attndType = 2; break
+          default: this.attndType = 1; break
         }
-        this.$apply()
+        this.getAttndList()
+      },
+      //搜索框确认搜索
+      onSearchConfirm(event) {
+        let value = event.detail.value
+        if (!value) { this.query = ''; return }
+        this.page = 1
+        this.getAttndList()
+      },
+      onQueryClear() {
+        this.initData()
+        this.getAttndList()
       },
     }
   }

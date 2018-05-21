@@ -5,6 +5,10 @@ export function getTimeFormat(date, type, split) {
   const day = date.getDate()
   const hour = date.getHours()
   const minute = date.getMinutes()
+  let arr = [year, month, day, hour, minute]
+  for (let el of arr) {
+    if (!Number.isNumber(el)) return ''
+  }
   switch (true) {
     case type === 'date': 
       let str1 = split ? split : '-'
