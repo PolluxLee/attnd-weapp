@@ -17,6 +17,7 @@
       box-sizing: border-box;
       padding-left: 30rpx;
       padding-right: 30rpx;
+      animation: fade-out 1s;
     }
 
     &__content {
@@ -39,21 +40,39 @@
       width: 100%;
       border-radius: 10rpx;
       height: 70rpx;
-      padding: 6rpx 20rpx;
+      padding: 6rpx 0 6rpx 20rpx;
       background: white;
       display: flex;
       align-items: center;
       input {
         height: 100%;
-        width: 600rpx;
+        width: 550rpx;
         font-size: 30rpx;
-        color: $font;
+        color: black;
       }
-      image {
+      &--search {
         width: 40rpx;
         height: 40rpx;
         margin-right: 10rpx;
       }
+      &--clear {
+        height: 70rpx;
+        width: 60rpx;
+        margin-left: 10rpx;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        image {
+          width: 28rpx;
+          height: 28rpx;
+        }
+      }
+    }
+
+    &__baseline {
+      color: $hint;
+      font-size: 30rpx;
+      text-align: center;
     }
   }
 </style>
@@ -62,20 +81,22 @@
   <view class="group">
     <view class="group__search">
       <view class="group__input">
-        <image src="{{Icon.search}}" mode="scaleToFill"/>
-        <input placeholder="按组名搜索"/>
+        <image class="group__input--search" src="{{Icon.search}}" mode="scaleToFill"/>
+        <input placeholder="按组名搜索"  value="{{query}}" @input="onInput" 
+          placeholder-style="color: #a5a5a5" 
+          confirm-type="search"
+          @confirm="onSearch"/>
+        <view class="group__input--clear" @tap="onClickClear" wx:if="{{query}}">
+          <image src="{{Icon.clear}}" mode="scaleToFill"/>
+        </view>
       </view>
     </view>
     <view class="group__list">
-      <view class="group__item" @tap="onClickItem">
-        <view class="group__content">计科 151（49）很长很长螺丝扣搭街坊垃圾上单李开复上来看大家顺利打开鸡分</view>
+      <view class="group__item" wx:for-items="{{displayList}}" wx:for-item="item" wx:key="id"
+        @tap="onClickItem">
+        <view class="group__content">{{item.name}}</view>
       </view>
-      <view class="group__item">
-        <view class="group__content">计科 151（49）</view>
-      </view>
-      <view class="group__item">
-        <view class="group__content">计科 151（49）</view>
-      </view>
+      <view wx:if="{{displayList.length===0}}" class="group__baseline">{{baseLineMsg}}</view>
     </view>
     <toast />
   </view>
@@ -87,13 +108,18 @@
   import { Icon } from '../assets/icon/icon'
   import AToast from '../mixins/a-toast'
   import Toast from 'wepy-com-toast'
-  import { ToastType } from '../share/consts'
+  import { ToastType,URL, CODE } from '../share/consts'
+  import zajax from '../utils/zajax'
 
   export default class Group extends wepy.page {
 
     mixins = [ALog, AToast]
     data = {
       Icon: Icon,
+      query: '',
+      baseLineMsg: '',
+      groupList: [],
+      displayList: []
     }
 
     components = {
@@ -102,11 +128,50 @@
 
     onLoad() {
       wx.setNavigationBarTitle({ title: '名单' })
+      this.getData()
+    }
+
+    async getData() {
+      wx.showNavigationBarLoading()
+      await this.getGoupList()
+      wx.hideNavigationBarLoading()
+    }
+
+    async getGoupList() {
+      await zajax.get(URL.groupList)
+        .then(res => {
+          let body = res.data
+          let code = body.code
+          if (code === CODE.GLOBAL_SUCCESS) {
+            this.groupList = Array.isArray(body.data) ? body.data : []
+            this.displayList = Array.isArray(body.data) ? body.data : []
+          }
+          this.$apply()
+        })
+        .catch(err => {
+          this.print(err)
+        })
+      if (this.displayList.length === 0) {
+        this.baseLineMsg = '暂无名单信息'
+        this.$apply()
+      }
     }
 
     methods = {
       onClickItem() {
         wx.navigateTo({ url: 'groupinfo' })
+      },
+      onInput(event) {
+        this.query = event.detail.value
+      },
+      onClickClear(event) {
+        this.query = ''
+        this.displayList = this.groupList
+      },
+      onSearch(event) {
+        let value = event.detail.value
+        if (!value) return
+        this.displayList = this.groupList.filter(el => el.name.includes(value))
       }
     }
 

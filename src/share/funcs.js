@@ -7,7 +7,7 @@ export function getTimeFormat(date, type, split) {
   const minute = date.getMinutes()
   let arr = [year, month, day, hour, minute]
   for (let el of arr) {
-    if (!Number.isNumber(el)) return ''
+    if (!Number.isInteger(el)) return ''
   }
   switch (true) {
     case type === 'date': 

@@ -15,7 +15,6 @@
     padding: 30rpx;
     display: flex;
     position: relative;
-    animation: fade-out 1s;
   }
 
   &__avator {
@@ -83,7 +82,6 @@
     margin-bottom: 30rpx;
     display: flex;
     justify-content: space-between;
-    animation: fade-out 1s;
   }
 
   &__tab {
@@ -202,15 +200,16 @@
     align-items: center;
     &--line {
       height: 1rpx;
-      width: 200rpx;
-      background: $edge;
+      width: 50rpx;
+      background: $hint;
     }
     &--text {
-      color: $edge;
+      color: $hint;
       font-size: 30rpx;
       box-sizing: border-box;
-      padding-left: 30rpx;
-      padding-right: 30rpx;
+      padding-left: 10rpx;
+      padding-right: 10rpx;
+      text-align: center;
     }
   }
 }
@@ -230,6 +229,7 @@
       <view class="mine__search">
         <image class="mine__search--icon" src="{{Icon.search}}" mode="scaleToFill"/>
         <input placeholder="按考勤名字搜索" confirm-type="search" value="{{query}}" 
+          placeholder-style="color: #a5a5a5"
           @input="onQueryInput" @confirm="onSearchConfirm"/>
         <view>
           <image class="mine__search--clear" wx:if="{{query}}"
@@ -254,7 +254,7 @@
       </view>
       <view class="mine__baseline" wx:if="{{!baselineLock && count===attndList.length}}">
         <view class="mine__baseline--line" wx:if="{{count !== 0}}"></view>
-        <view class="mine__baseline--text">{{count===0 ? (attndType===1 ? '暂无考勤' : '暂无签到') : '没有更多了'}}</view>
+        <view class="mine__baseline--text">{{count===0 ? (attndType===1 ? '无考勤信息' : '无签到信息') : '没有更多了'}}</view>
         <view class="mine__baseline--line" wx:if="{{count !== 0}}"></view>
       </view>
     </view>
