@@ -23,6 +23,7 @@ export const URL = {
   groupNames: `${PREFIX}/api/group/name`,
   attndList: `${PREFIX}/api/attndlist`,
   groupList: `${PREFIX}/api/group/list`,
+  placeList: `${PREFIX}/api/attnd/hisaddr`,
 
 }
 

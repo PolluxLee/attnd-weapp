@@ -45,13 +45,7 @@
       }
     }
 
-    globalData = {
-      location: {
-        latitude: null,
-        longitude: null,
-        name: null
-      }
-    }
+    globalData = {}
 
     constructor () {
       super()

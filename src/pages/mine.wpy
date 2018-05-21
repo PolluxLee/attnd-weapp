@@ -179,9 +179,11 @@
       font-size: 40rpx;
       color: black;
       margin-bottom: 20rpx;
+      overflow-x: auto;
     }
     &--p {
       white-space: nowrap;
+      overflow-x: auto;
       font-size: 26rpx;
       color: $font;
       margin-top: 4rpx;
@@ -193,8 +195,8 @@
   }
 
   &__baseline {
+    animation: fade-out 0.5s;
     box-sizing: border-box;
-    padding-top: 30rpx;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -252,10 +254,13 @@
         <view class="mine__item--p">时间：{{attnd.start_time}}</view>
         <view class="mine__item--p">地点：{{attnd.addr_name}}</view>
       </view>
-      <view class="mine__baseline" wx:if="{{!baselineLock && count===attndList.length}}">
-        <view class="mine__baseline--line" wx:if="{{count !== 0}}"></view>
-        <view class="mine__baseline--text">{{count===0 ? (attndType===1 ? '无考勤信息' : '无签到信息') : '没有更多了'}}</view>
-        <view class="mine__baseline--line" wx:if="{{count !== 0}}"></view>
+      <view class="mine__baseline" wx:if="{{count!==0 && count===attndList.length}}">
+        <view class="mine__baseline--line"></view>
+        <view class="mine__baseline--text">{{baselineMsg}}</view>
+        <view class="mine__baseline--line"></view>
+      </view>
+      <view class="mine__baseline" wx:if="{{!emptyLock && count===0}}">
+        <view class="mine__baseline--text">{{attndType===1 ? emptyYellMsg : emptyRespMsg}}</view>
       </view>
     </view>
     <toast />
@@ -290,7 +295,10 @@
       page: 1,    //第几页
       pageSize: 10,   //每页数量
       count: 0,   //列表项总数
-      baselineLock: true,   //加载锁
+      emptyLock: true,   //空列表提示锁
+      baselineMsg: '没有更多了',
+      emptyYellMsg: '无考勤信息',
+      emptyRespMsg: '无签到信息',
     }
 
     components = {
@@ -335,26 +343,27 @@
         this.$apply()
         return
       }
+      wx.navigateTo({ url: 'selfinfo' })
       // storage 中没有再从后端获取
-      let openid = zstore.get(zstore.openid)
-      this.print(`openid: ${openid}`)
-      if (!openid) {
-        this.isShow = true
-        this.$apply()
-        return
-      }
-      return zajax.get(URL.userInfo, { openid })
-        .then(res => {
-          let body = res.data
-          let code = body.code
-          if (code !== CODE.GLOBAL_SUCCESS) return
-          this.name = body.data.name
-          this.avator = name[0].toUpperCase()
-          this.$apply()
-        })
-        .catch(err => {
-          this.print(err)
-        })
+      // let openid = zstore.get(zstore.openid)
+      // this.print(`openid: ${openid}`)
+      // if (!openid) {
+      //   this.isShow = true
+      //   this.$apply()
+      //   return
+      // }
+      // return zajax.get(URL.userInfo, { openid })
+      //   .then(res => {
+      //     let body = res.data
+      //     let code = body.code
+      //     if (code !== CODE.GLOBAL_SUCCESS) return
+      //     this.name = body.data.name
+      //     this.avator = name[0].toUpperCase()
+      //     this.$apply()
+      //   })
+      //   .catch(err => {
+      //     this.print(err)
+      //   })
     }
 
     // 获取位置
@@ -377,7 +386,7 @@
 
     // 获取考勤列表
     async getAttndList() {
-      this.baselineLock = true
+      this.emptyLock = true
       this.$apply()
       wx.showNavigationBarLoading()
       let reqData = {}
@@ -405,9 +414,9 @@
         })
       wx.hideNavigationBarLoading()
       setTimeout(() => {
-        this.baselineLock = false
+        this.emptyLock = false
         this.$apply()
-      }, 1000);
+      }, 200);
       this.$apply()
     }
 

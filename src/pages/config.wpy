@@ -107,7 +107,7 @@
       this.getAuthorName()
       let a = this.getAttndNames()
       let b = this.getGroupList()
-      let d = this.getHistoryLocation()
+      let d = this.getHistoryPlace()
       let e = this.getLocation()
       await a
       await b
@@ -123,10 +123,9 @@
         .then(res => {
           let body = res.data
           let code = body.code
-          if (code === CODE.GLOBAL_SUCCESS) {
-            let options = body.data
-            if (Array.isArray(options)) this.nameModel.options = options
-          }
+          if (code !== CODE.GLOBAL_SUCCESS) return
+          let options = body.data
+          if (Array.isArray(options)) this.nameModel.options = options
         })
         .catch(err => {
           this.print(err)
@@ -139,10 +138,9 @@
         .then(res => {
           let body = res.data
           let code = body.code
-          if (code === CODE.GLOBAL_SUCCESS) {
-            let options = body.data
-            if (Array.isArray(options)) this.groupModel.options = options
-          }
+          if (code !== CODE.GLOBAL_SUCCESS) return
+          let options = body.data
+          if (Array.isArray(options)) this.groupModel.options = options
         })
         .catch(err => {
           this.printf(err)
@@ -150,11 +148,17 @@
     }
 
     // 获取历史常用地点列表
-    getHistoryLocation() {
-      return mock.getHistoryLocation()
-        .then(data => {
-          this.placeModel.options = data
-          this.$apply()
+    getHistoryPlace() {
+      return zajax.get(URL.placeList)
+        .then(res => {
+          let body = res.data
+          let code = body.code
+          if (code !== CODE.GLOBAL_SUCCESS) return
+          let options = body.data
+          if (Array.isArray(options)) this.placeModel.options = options
+        })
+        .catch(err => {
+          this.print(err)
         })
     }
 
