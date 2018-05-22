@@ -197,7 +197,7 @@
             <view class="attnd__item--location">距离：{{stu.distance}}m</view>
           </view>
           <view class="attnd__item--icon" @tap="toggleSigninStatus">
-            <icon type="{{stu.attnd_status===1 ?'success':'warn'}}" size="{{40 * rpxScale}}" color="{{icon===0?'#00897B':'#f44336'}}"/>
+            <icon type="{{stu.attnd_status===1 ?'success':'warn'}}" size="{{40 * rpxScale}}" color="{{stu.attnd_status===1?'#00897B':'#f44336'}}"/>
             <view>{{stu.attnd_status===1 ?'已到':'未到'}}</view>
           </view>
         </view>
