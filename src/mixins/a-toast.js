@@ -14,7 +14,10 @@ export default class AToast extends wepy.mixin {
         break
       case ToastType.LOADING:
         data.img = Icon.loading
-        break;
+        break
+      case ToastType.HINT:
+        data.img = Icon.smile
+        break
       case ToastType.FAIL:
       default:
         data.img = Icon.failure

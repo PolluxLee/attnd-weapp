@@ -42,6 +42,7 @@
   import Toast from 'wepy-com-toast'
   import { ToastType } from '../share/consts'
   import zstore from '../utils/zstore'
+  import zmid from '../utils/zmid'
 
   export default class Config extends wepy.page {
 
@@ -89,7 +90,7 @@
       this.timeModel = { type: Type.TIME, label: '时间', readonly: false, options: [], value: '' }
       this.lastModel = { type: Type.SELECT, label: '持续', readonly: false, options: [], suffix: '分钟', value: '5', }
       this.groupModel = { type: Type.TEXT_SELECT, label: '考勤名单', readonly: false, length: 50, value: '', hint: '例如：计科151', extra: '选择', options: [] }
-      this.authorModel = { type: Type.TEXT, label: '发布者', readonly: false, length: 50, value: '', hint: '' }
+      this.authorModel = { type: Type.TEXT, label: '发布者', readonly: false, length: 50, value: '', hint: '填写你的名字' }
       this.placeModel = { type: Type.TEXT_SELECT, label: '地点', readonly: false, length: 50, value: '', hint: '例如：理南404', extra: '选择', options: []}
       this.lastModel.options = ['5','10','15','20','30']
 
@@ -98,19 +99,20 @@
       this.btnModel = [
         { name: '发布', emit: 'release-btn', color: '#00897B' }
       ]
-      this.isShow = true  
+      this.isShow = true
       this.getData()
     }
 
     // Promise 并行开始，串行结束
     async getData() {
-      this.getAuthorName()
-      let a = this.getAttndNames()
-      let b = this.getGroupList()
-      let d = this.getHistoryPlace()
+      let c = this.getAuthorName()
+      let a = this.getHistoryAttndNames()
+      let b = this.getHistoryGroupNames()
+      let d = this.getHistoryPlaceNames()
       let e = this.getLocation()
       await a
       await b
+      await c
       await d
       await e
       wx.hideNavigationBarLoading()
@@ -118,8 +120,8 @@
     }
 
     // 获取历史考勤名字列表
-    getAttndNames() {
-      return zajax.get(URL.historyNames)
+    getHistoryAttndNames() {
+      return zajax.get(URL.historyAttndNames)
         .then(res => {
           let body = res.data
           let code = body.code
@@ -128,13 +130,13 @@
           if (Array.isArray(options)) this.nameModel.options = options
         })
         .catch(err => {
-          this.print(err)
+          this.print(err, 'error')
         })
     }
 
     // 获取考勤名单名字列表
-    getGroupList() {
-      return zajax.get(URL.groupNames)
+    getHistoryGroupNames() {
+      return zajax.get(URL.historyGroupNames)
         .then(res => {
           let body = res.data
           let code = body.code
@@ -143,13 +145,13 @@
           if (Array.isArray(options)) this.groupModel.options = options
         })
         .catch(err => {
-          this.printf(err)
+          this.print(err, 'error')
         })
     }
 
     // 获取历史常用地点列表
-    getHistoryPlace() {
-      return zajax.get(URL.placeList)
+    getHistoryPlaceNames() {
+      return zajax.get(URL.historyPlaceNames)
         .then(res => {
           let body = res.data
           let code = body.code
@@ -158,14 +160,14 @@
           if (Array.isArray(options)) this.placeModel.options = options
         })
         .catch(err => {
-          this.print(err)
+          this.print(err, 'error')
         })
     }
 
     // 获取我的名字
-    getAuthorName() {
-      let name = zstore.get(zstore.userName)
-      this.authorModel.value = name
+    async getAuthorName() {
+      let name = (await zmid.getSelfinfo()).name
+      this.authorModel.value = name ? name : ''
       this.$apply()
     }
 
@@ -178,7 +180,7 @@
           this.location.accuracy = res.accuracy
           this.$apply()
         })
-        .catch(err => this.print(err))
+        .catch(err => this.print(err, 'error'))
     }
 
     methods = {
@@ -223,6 +225,7 @@
             return
           }
           this.showToast(ToastType.SUCCESS, '成功', 2000)
+          zmid.getSelfinfo()
         })
         .catch(err => {
           this.showToast(ToastType.FAIL, '失败', 2000)

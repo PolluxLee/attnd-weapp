@@ -8,7 +8,10 @@ export const BtnType = { RELEASE: 0, UPDATE: 1, REMOVE: 2 }
 export const TypeInModal = { NOTITLE_TEXT: 0, TEXT: 1 }
 
 // Toast 类型
-export const ToastType = { SUCCESS: 0, FAIL: 1, LOADING: 2 }
+export const ToastType = { SUCCESS: 0, FAIL: 1, LOADING: 2, HINT: 3 }
+
+// 签到状态
+export const Signin = { ARRIVED: 0, NOT_ARRIVED: 1 }
 
 // API URL
 const HOST = 'http://liziyi.top'
@@ -19,12 +22,15 @@ export const URL = {
   login: `${PREFIX}/api/login`,
   userInfo: `${PREFIX}/api/user/info`,
   attnd: `${PREFIX}/api/attnd`,
-  historyNames: `${PREFIX}/api/attnd/hisname`,
-  groupNames: `${PREFIX}/api/group/name`,
+  historyAttndNames: `${PREFIX}/api/attnd/hisname`,
+  historyGroupNames: `${PREFIX}/api/group/name`,
   attndList: `${PREFIX}/api/attndlist`,
+  group: `${PREFIX}/api/group`,
   groupList: `${PREFIX}/api/group/list`,
-  placeList: `${PREFIX}/api/attnd/hisaddr`,
-
+  groupUserList: `${PREFIX}/api/group/userlist`,
+  historyPlaceNames: `${PREFIX}/api/attnd/hisaddr`,
+  attndSituation: `${PREFIX}/api/attnd/situation`,
+  signIn: `${PREFIX}/api/attnd/signin`,
 }
 
 // Status Code

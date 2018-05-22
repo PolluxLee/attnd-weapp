@@ -84,6 +84,8 @@
   import { ToastType } from '../share/consts'
   import { URL, CODE } from '../share/consts'
   import zajax from '../utils/zajax'
+  import zstore from '../utils/zstore'
+  import zmid from '../utils/zmid'
 
   export default class Index extends wepy.page {
 
@@ -93,6 +95,10 @@
     }
 
     onLoad() {
+      this.initData()
+    }
+
+    initData() {
       this.model = {
         title: '口令',
         hint: '', 
@@ -102,23 +108,27 @@
         confirmCallback: res => {
           let cipher = res
           if (!cipher) return
-          this.showToast(ToastType.LOADING, '获取数据')
-          zajax.get(URL.attnd, { cipher })
-            .then(res => {
-              // this.hideToast()
-              let body = res.data
-              let code = body.code
-              if (code !== CODE.GLOBAL_SUCCESS) {
-                this.showToast(ToastType.FAIL, '口令不正确', 1500)
-                return
-              }
-              let data = body.data
-              this.showToast(ToastType.SUCCESS, '成功', 1500)
-              this.print(data)
-            })
-            .catch(err => {
-              this.print(err)
-            })
+          // 根据口令的第一个字母判断考勤类型，从而跳转到不同页面
+          if (cipher[0] === 'S') {
+
+          } else {
+            this.showToast(ToastType.LOADING, '获取数据')
+            zajax.get(URL.attnd, { cipher })
+              .then(res => {
+                this.showToast(ToastType.LOADING, '加载数据', 1000)
+                let body = res.data
+                let code = body.code
+                if (code !== CODE.GLOBAL_SUCCESS) {
+                  this.showToast(ToastType.FAIL, '口令不正确', 1000)
+                  return
+                }
+                this.$invoke('attndModal','hideModal')
+                wx.navigateTo({ url: `attnd?cipher=${cipher}` })
+              })
+              .catch(err => {
+                this.print(err, 'error')
+              })
+          }
         },
         cancelCallback: () => {}
       }
@@ -126,6 +136,13 @@
 
     onHide() {
       this.$invoke('attndModal','hideModal')
+    }
+
+    isNameEmpty() {
+      let name = zstore.get(zstore.userName)
+      let id = zstore.get(zstore.id)
+      if (!name || !id) return true
+      return false
     }
 
     components = {
@@ -139,8 +156,12 @@
       },
       onClickResp() {
         this.model.value = ''
-        // this.$invoke('attndModal','showModal')
-        wx.navigateTo({url: 'attnd'})
+        if (!zmid.checkSelfinfo()) {
+          this.showToast(ToastType.HINT, '完善信息', 1000)
+          wx.navigateTo({ url: 'selfinfo' })
+          return
+        }
+        this.$invoke('attndModal','showModal')
       }
     }
 

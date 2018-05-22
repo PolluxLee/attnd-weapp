@@ -1,11 +1,11 @@
 const zstore = {
   openid:  'openid',
-  userName:  'username',
-  stuId:  'stuid',
+  name:  'username',
+  stuid:  'stuid',
   cookie:  'cookie',
   id: 'id',
   set:  (key, value) => {
-    if (!value) return
+    if (value === null || value === undefined) return
     wx.setStorageSync(key, value)
   },
   get:  (key) => {

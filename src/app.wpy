@@ -13,6 +13,7 @@
   import zajax from './utils/zajax'
   import { URL } from './share/consts'
   import zstore from './utils/zstore'
+  import zmid from './utils/zmid'
 
   export default class extends wepy.app {
     config = {
@@ -91,15 +92,17 @@
       wx.login({
         success: res => {
           if (res.code) {
+            zmid.setSelfinfo({ openid: res.code })
             zajax.postFD(URL.login, { code: res.code })
               .then(res => {
-                zstore.set(zstore.cookie, res.header['Set-Cookie'] ? res.header['Set-Cookie'] : '')
+                if(res.header['Set-Cookie']) zstore.set(zstore.cookie, res.header['Set-Cookie'])
                 let userInfo = res.data.data
-                console.log(userInfo)
-                zstore.set(zstore.userName, userInfo['name'] ? userInfo['name'] : '')
-                zstore.set(zstore.stdId, userInfo['stu_id'] ? userInfo['stu_id'] : '')
-                zstore.set(zstore.openid, userInfo['openid'] ? userInfo['openid'] : '')
-                zstore.set(zstore.id, userInfo['id'] ? userInfo['id'] : '')
+                let name = userInfo.name
+                let stuid = userInfo.stu_id
+                let id = userInfo.id
+                let openid = userInfo.openid
+                console.warn(res)
+                zmid.setSelfinfo({ name, stuid, id, openid })
               })
               .catch(err => {
                 console.log(err)

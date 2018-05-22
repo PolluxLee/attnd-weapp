@@ -80,6 +80,7 @@
       width: 100%;
       height: 100rpx;
       margin-bottom: 30rpx;
+      animation: fade-out 0.5s;
       &--avator {
         width: 100rpx;
         height: 100rpx;
@@ -123,6 +124,7 @@
 
     &__list {
       margin-bottom: 150rpx;
+      animation: fade-out 0.5s;
     }
 
     &__resp {
@@ -142,44 +144,76 @@
         background: $theme-dark;
       }
     }
+
+    &__baseline {
+      animation: fade-out 0.5s;
+      box-sizing: border-box;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      &--line {
+        height: 1rpx;
+        width: 50rpx;
+        background: $hint;
+      }
+      &--text {
+        color: $hint;
+        font-size: 30rpx;
+        box-sizing: border-box;
+        padding-left: 10rpx;
+        padding-right: 10rpx;
+        text-align: center;
+      }
+    }
   }
 </style>
 
 <template>
-  <view class="attnd" wx:if="{{isShow}}">
-    <view class="attnd__header">
-      <view class="attnd__title">嵌入式</view>
-      <view class="attnd__p attnd__p--pwd">口令：DR125SDR5</view>
-      <view class="attnd__p">时间：2018/05/07 13:50</view>
-      <view class="attnd__p">持续：10 mins</view>
-      <view class="attnd__p">发布者：老金</view>
-      <view class="attnd__p">名单：计科 151</view>
-      <view class="attnd__p">位置：南亭猫咪主题餐厅</view>
-      <image class="attnd__remove" src="{{Icon.remove}}" mode="scaleToFill"/>
-    </view>
-    <view class="attnd__list">
-      <view class="attnd__oper">
-        <view class="attnd__count">人数：1 / 49</view>
-        <view class="attnd__filter" @tap="toggleFilter">
-          <view class="attnd__filter--text">{{filter ? '未到' : '全部'}}</view>
-          <image class="attnd__filter--img" src="{{Icon.triangle}}" mode="scaleToFill"/>
+  <scroll-view style="height: 100vh"
+    scroll-y="true" lower-threshold="50" bindscrolltolower="onScrollToLower">
+    <view class="attnd" wx:if="{{isShow}}">
+      <view class="attnd__header">
+        <view class="attnd__title">{{baseInfo.attnd_name}}</view>
+        <view class="attnd__p attnd__p--pwd">口令：{{baseInfo.cipher}}</view>
+        <view class="attnd__p">时间：{{baseInfo.start_time}}</view>
+        <view class="attnd__p">持续：{{baseInfo.last}} mins</view>
+        <view class="attnd__p">发布者：{{baseInfo.teacher_name}}</view>
+        <view class="attnd__p">名单：{{baseInfo.group_name}}</view>
+        <view class="attnd__p">地点：{{baseInfo.addr_name}}</view>
+        <image class="attnd__remove" src="{{Icon.remove}}" mode="scaleToFill"/>
+      </view>
+      <view class="attnd__list">
+        <view class="attnd__oper">
+          <view class="attnd__count">人数：1 / 49</view>
+          <view class="attnd__filter" @tap="toggleFilter">
+            <view class="attnd__filter--text">{{failOnlyFilter ? '未到' : '全部'}}</view>
+            <image class="attnd__filter--img" src="{{Icon.triangle}}" mode="scaleToFill"/>
+          </view>
+        </view>
+        <view class="attnd__item" wx:for-items="{{attndList}}" wx:for-item="stu" wx:key="id">
+          <view class="attnd__item--avator">{{stu.avator}}</view>
+          <view class="attnd__item--info">
+            <view class="attnd__item--name">{{stu.name}}{{stu.id ? '（'+ stu.stu_id +'）' : ''}}</view>
+            <view class="attnd__item--location">距离：{{stu.distance}}m</view>
+          </view>
+          <view class="attnd__item--icon" @tap="toggleSigninStatus">
+            <icon type="{{stu.attnd_status===1 ?'success':'warn'}}" size="{{40 * rpxScale}}" color="{{icon===0?'#00897B':'#f44336'}}"/>
+            <view>{{stu.attnd_status===1 ?'已到':'未到'}}</view>
+          </view>
+        </view>
+        <view class="attnd__baseline" wx:if="{{count!==0 && count===attndList.length}}">
+          <view class="attnd__baseline--line"></view>
+          <view class="attnd__baseline--text">{{baselineMsg}}</view>
+          <view class="attnd__baseline--line"></view>
+        </view>
+        <view class="attnd__baseline" wx:if="{{!emptyLock && attndList.length===0}}">
+          <view class="attnd__baseline--text">{{emptyMsg}}</view>
         </view>
       </view>
-      <view class="attnd__item">
-        <view class="attnd__item--avator">机</view>
-        <view class="attnd__item--info">
-          <view class="attnd__item--name">机长 (1506100006)</view>
-          <view class="attnd__item--location">距离：18m</view>
-        </view>
-        <view class="attnd__item--icon" @tap="toggleIcon">
-          <icon type="{{icon===0?'success':'warn'}}" size="{{40 * rpxScale}}" color="{{icon===0?'#00897B':'#f44336'}}"/>
-          <view>{{icon===0?'已到':'未到'}}</view>
-        </view>
-      </view>
+      <view class="attnd__resp" @tap="onSignIn">签到</view>
+      <toast />
     </view>
-    <view class="attnd__resp">签到</view>
-    <toast />
-  </view>
+  </scroll-view>
 </template>
 
 <script>
@@ -189,7 +223,9 @@
   import AToast from '../mixins/a-toast'
   import Toast from 'wepy-com-toast'
   import { ToastType, URL, CODE } from '../share/consts'
+  import { isNumber, getTimeFormat } from '../share/funcs'
   import zajax from '../utils/zajax'
+  import zmap from '../utils/zmap'
 
   export default class Attnd extends wepy.page {
 
@@ -198,80 +234,21 @@
       Icon: Icon,
       winW: 0,    //屏幕可用宽度 px
       rpxScale: 0.5,    //rpx 与 px 关系：1rpx = winW px / 750 = (winW/750)px = rpxScale px
-      icon: 0,
-      isShow: true,
+      isShow: false,
       cipher: '',
-      filter: false
+      baseInfo: {},
+      attndList: [],
+      page: 1,
+      pageSize: 10,
+      count: 0,
+      failOnlyFilter: false,
+      emptyLock: true,   //空列表提示锁
+      baselineMsg: '没有更多了',
+      emptyMsg: '无签到信息',
     }
 
     components = {
       toast: Toast
-    }
-
-    onLoad(option) {
-      this.cipher = option.query ? option.query : ''
-      wx.setNavigationBarTitle({ title: '考勤情况' })
-      this.getWinWidth()
-    }
-
-    // 获取考勤信息
-    async getData() {
-      wx.showNavigationBarLoading()
-      this.showToast(ToastType.LOADING, '加载中')
-      await zajax.get(URL.attnd, { cipher: this.cipher })
-        .then(res =>{
-          let body = res.data
-          let code = body.code
-          this.hideToast()
-          // 考勤不存在或其他失败情况
-          if (code !== CODE.GLOBAL_SUCCESS) {
-            wx.showModal({
-              title: '提示',
-              content: '口令不正确或考勤不存在',
-              success: function(res) {
-                if (res.confirm || res.cancel) {
-                  wx.navigateBack()
-                }
-              }
-            })
-          }
-          let data = body.data
-        })
-        .catch(err => {
-          this.print(err)
-        })
-
-      wx.hideNavigationBarLoading()
-    }
-
-    // 获取考勤基本信息
-    getAttndInfo() {
-
-    }
-
-    // 获取签到者列表
-    getResponserList() {
-
-    }
-
-    methods = {
-      toggleIcon() {
-        this.icon = 1 - this.icon
-      },
-      toggleFilter() {
-        wx.showActionSheet({
-          itemList: ['全部', '未到'],
-          success: res => {
-            let tapIndex = res.tapIndex
-            if (tapIndex === 0) this.filter = false
-            else if (tapIndex === 1) this.filter = true
-            this.$apply()
-          },
-          fail: res => {
-            console.log(res.errMsg)
-          }
-        })
-      }
     }
 
     getWinWidth() {
@@ -281,7 +258,168 @@
         this.winW = res.windowWidth
         this.rpxScale = this.winW / 750
       } catch (e) {
-        this.print(e)
+        this.print(e, 'error')
+      }
+    }
+
+    onLoad(option) {
+      console.log(option)
+      this.cipher = option.cipher ? option.cipher : ''
+      wx.setNavigationBarTitle({ title: '考勤情况' })
+      this.getWinWidth()
+      this.getData()
+    }
+
+    resetData() {
+      this.page = 1
+      this.failOnlyFilter = false
+      this.emptyLock = true
+      this.$apply()
+    }
+
+    // 获取考勤信息
+    async getData() {
+      wx.showNavigationBarLoading()
+      let a = this.getAttndInfo()
+      let b = this.getResponserList()
+      await a
+      this.isShow = true
+      this.$apply()
+      await b
+      wx.hideNavigationBarLoading()
+    }
+
+    // 获取考勤基本信息
+    getAttndInfo() {
+      return zajax.get(URL.attnd, { cipher: this.cipher })
+        .then(res =>{
+          let body = res.data
+          let code = body.code
+          if (code !== CODE.GLOBAL_SUCCESS) return
+          this.baseInfo = body.data
+          let date = new Date(this.baseInfo.start_time)
+          this.baseInfo.start_time = `${getTimeFormat(date, 'date', '/')} ${getTimeFormat(date, 'time', ':')}`
+          this.$apply()
+        })
+        .catch(err => {
+          this.print(err)
+        })
+    }
+
+    // 获取签到者列表
+    getResponserList(paging) {
+      let reqData = {
+        page: this.page,
+        page_size: this.pageSize,
+        fail_only: this.failOnlyFilter,
+        cipher: this.cipher ? this.cipher : ''
+      }
+      this.emptyLock = true
+      this.page++
+      this.$apply()
+      zajax.get(URL.attndSituation, reqData)
+        .then(res => {
+          let body = res.data
+          let code = body.code
+          if (code !== CODE.GLOBAL_SUCCESS) return
+          this.count = Number.isInteger(body.data.count) ? body.data.count : 0
+          body.data.attnds = Array.isArray(body.data.attnds) ? body.data.attnds : []
+          if (paging) this.attndList = this.attndList.concat(body.data.attnds)
+          else this.attndList = body.data.attnds
+          this.attndList = this.attndList.map(el => {
+            if (typeof el.name === 'string') {
+              el.avator = el.name[0].toUpperCase()
+            }
+            if (isNumber(el.distance)) el.distance = Math.floor(el.distance)
+            else el.distance = -1
+            return el
+          })
+          this.$apply()
+          this.print(this.attndList, 'warn')
+          this.isShow = true
+          setTimeout(() => { this.emptyLock = false; this.$apply() }, 200);
+          this.$apply()
+        })
+        .catch(err => {
+          this.print(err, 'error')
+        })
+    }
+
+    async signIn() {
+      this.showToast(ToastType.LOADING, '正在签到')
+      let latitude
+      let longitude
+      let accuracy
+      // 获取经纬度
+      await zmap.getLocation()
+        .then(res => {
+          latitude = res.latitude
+          longitude = res.longitude
+          accuracy = res.accuracy
+          this.print({latitude,longitude,accuracy}, 'warn')
+        })
+        .catch(err => {
+          this.print(err, 'error')
+        })
+
+      if (latitude === undefined || longitude === undefined || accuracy === undefined) {
+        this.showToast(ToastType.FAIL, '未获取位置')
+        return
+      }
+
+      // 提交签到
+      let reqData = {
+        cipher: this.cipher,
+        location: { latitude, longitude, accuracy }
+      }
+      await zajax.post(URL.signIn, reqData)
+        .then(res => {
+          let body = res.data
+          this.print(body, 'warn')
+          let code = body.code
+          if (code !== CODE.GLOBAL_SUCCESS) {
+            this.showToast(ToastType.FAIL, '签到失败')
+            return
+          }
+          this.showToast(ToastType.SUCCESS, '签到成功')
+        })
+        .catch(err => {
+          this.showToast(ToastType.FAIL, '签到失败')
+          this.print(err, 'error')
+        })
+
+      this.resetData()
+      this.getResponserList()
+    }
+
+    methods = {
+      toggleSigninStatus() {
+        
+      },
+      toggleFilter() {
+        wx.showActionSheet({
+          itemList: ['全部', '未到'],
+          success: res => {
+            let tapIndex = res.tapIndex
+            if (tapIndex === 0) this.failOnlyFilter = false
+            else if (tapIndex === 1) this.failOnlyFilter = true
+            // 重置页码
+            this.page = 1
+            this.count = 0
+            this.emptyLock = true
+            this.$apply()
+            this.getResponserList()
+          },
+          fail: res => {
+            console.log(res.errMsg)
+          }
+        })
+      },
+      onScrollToLower() {
+        this.getResponserList(true)
+      },
+      onSignIn() {
+        this.signIn()
       }
     }
 

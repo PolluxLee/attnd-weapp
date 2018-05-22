@@ -1,3 +1,4 @@
+import zstore from './zstore'
 const zajax = {
   get: () => {},
   post: () => {},
@@ -6,6 +7,9 @@ const zajax = {
 
 function createWxRequest(opts) {
   return new Promise((resolve, reject) => {
+    if (!zstore.get(zstore.openid)) {
+      reject('openid undefined')
+    }
     const requestTask = wx.request({
       ...opts,
       success: res => {

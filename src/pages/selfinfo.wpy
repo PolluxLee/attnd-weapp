@@ -4,7 +4,6 @@
 
   .self {
     box-sizing: border-box;
-    
   }
 </style>
 
@@ -32,6 +31,7 @@
   import Toast from 'wepy-com-toast'
   import { ToastType } from '../share/consts'
   import zstore from '../utils/zstore'
+  import zmid from '../utils/zmid'
 
   export default class Selfinfo extends wepy.page {
 
@@ -56,57 +56,28 @@
     }
 
     initData() {
-      wx.showNavigationBarLoading()
+      
       this.nameModel = { type: Type.TEXT, label: '名字', readonly: false, length: 50, value: '', hint: '请填写真实姓名' }
       this.idModel = { type: Type.TEXT, label: 'ID', readonly: false, length: 50, value: '', hint: '可以填写学号或工号' }
       this.btnModel = [
         { name: '保存', emit: 'save-btn', color: '#00897B' },
       ]
       this.getData()
+      this.isShow = true
     }
 
     // 获取用户信息
     async getData() {
-      // 先从 storage 中获取
-      let name = zstore.get(zstore.userName)
-      let stuId = zstore.get(zstore.stuId)
-      if (name && stuId) {
-        this.nameModel.value = name
-        this.idModel.value = stuId
-        this.$apply()
-        return
-      }
-      // storage 中没有再从后端获取
-      let openid = zstore.get(zstore.openid)
-      this.print(`openid: ${openid}`)
-      if (!openid) {
-        wx.hideNavigationBarLoading()
-        this.isShow = true
-        this.$apply()
-        return
-      }
-      await zajax.get(URL.userInfo, { openid })
-        .then(res => {
-          let body = res.data
-          let code = body.code
-          if (code !== CODE.GLOBAL_SUCCESS) return
-          this.nameModel.value = body.data.name
-          this.idModel.value = body.data.stu_id
-          zstore.set(zstore.userName, body.data.name ? body.data.name : '')
-          zstore.set(zstore.stuId, body.data.stu_id? body.data.stu_id : '')
-          zstore.set(zsotre.id, body.data.id ? body.data.id : '')
-          this.$apply()
-        })
-        .catch(err => {
-          this.print(err)
-        })
+      wx.showNavigationBarLoading()
+      await zmid.getSelfinfo().then(res => {
+        this.nameModel.value = res.name ? res.name : ''
+        this.idModel.value = res.stuid ? res.stuid : ''
+      })
       wx.hideNavigationBarLoading()
-      this.isShow = true
-      this.$apply()
     }
 
     //更新用户信息
-    async updateUserInfo() {
+    updateUserInfo() {
       let data = {
         'name': this.nameModel.value,
         'stu_id': this.idModel.value
@@ -116,24 +87,24 @@
         return
       }
       this.showToast(ToastType.LOADING, '正在保存')
-      await zajax.post(URL.userInfo, data)
-        .then(res => {
-          this.hideToast()
-          let body = res.data
-          let code = body.code
-          if (code !== CODE.GLOBAL_SUCCESS) {
-            this.showToast(ToastType.FAIL, '失败', 2000)
-            return
-          }
-          let userInfo = body.data
-          zstore.set(zstore.userName, userInfo.name ? userInfo.name : '')
-          zstore.set(zstore.stuId, userInfo.stu_id ? userInfo.stu_id : '')
-          zstore.set(zstore.id, userInfo.id ? userInfo.id : '')
-          this.showToast(ToastType.SUCCESS, '成功', 2000)
-        })
-        .catch(err => {
-          this.print(err)
-        })
+      zajax.post(URL.userInfo, data)
+      .then(res => {
+        this.hideToast()
+        let body = res.data
+        let code = body.code
+        if (code !== CODE.GLOBAL_SUCCESS) {
+          this.showToast(ToastType.FAIL, '保存失败', 2000)
+          return
+        }
+        let name = body.data.name
+        let stuid = body.data.stu_id
+        let id = body.data.id
+        zmid.setSelfinfo({ id, stuid, name })
+        this.showToast(ToastType.SUCCESS, '保存成功', 2000)
+      })
+      .catch(err => {
+        this.print(err, 'error')
+      })
     }
 
 

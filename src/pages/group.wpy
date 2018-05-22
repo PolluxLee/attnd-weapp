@@ -93,7 +93,7 @@
     </view>
     <view class="group__list">
       <view class="group__item" wx:for-items="{{displayList}}" wx:for-item="item" wx:key="id"
-        @tap="onClickItem">
+        @tap="onClickItem({{item.id}})">
         <view class="group__content">{{item.name}}</view>
       </view>
       <view wx:if="{{displayList.length===0}}" class="group__baseline">{{baseLineMsg}}</view>
@@ -149,7 +149,7 @@
           this.$apply()
         })
         .catch(err => {
-          this.print(err)
+          this.print(err, 'error')
         })
       if (this.displayList.length === 0) {
         this.baseLineMsg = '暂无名单信息'
@@ -158,8 +158,9 @@
     }
 
     methods = {
-      onClickItem() {
-        wx.navigateTo({ url: 'groupinfo' })
+      onClickItem(groupId) {
+        if (!Number.isInteger(groupId)) return
+        wx.navigateTo({ url: `groupinfo?${groupId}` })
       },
       onInput(event) {
         this.query = event.detail.value

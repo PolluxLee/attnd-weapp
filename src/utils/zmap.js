@@ -11,6 +11,7 @@ var qqMap = new QQMapWX({ key: key.map })
 zmap.getLocation = () => {
   return new Promise((resolve, reject) => {
     wx.getLocation({
+      type: 'gcj02',
       success: res => {
         resolve(res)
       },

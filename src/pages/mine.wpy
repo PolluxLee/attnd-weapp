@@ -218,53 +218,57 @@
 </style>
 
 <template>
-  <view class="mine">
-    <view class="mine__info" @tap="onClickSelfinfo">
-      <view class="mine__avator">{{avator}}</view>
-      <view class="mine__selfinfo">
-        <view class="mine__selfinfo--name">{{name}}</view>
-        <view class="mine__selfinfo--location">{{addrName}}</view>
+  <scroll-view style="height: 100vh"
+    scroll-y="true" lower-threshold="50" bindscrolltolower="onScrollToLower">
+    <view class="mine">
+      <view class="mine__info" @tap="onClickSelfinfo">
+        <view class="mine__avator">{{avator}}</view>
+        <view class="mine__selfinfo">
+          <view class="mine__selfinfo--name">{{name}}</view>
+          <view class="mine__selfinfo--location">{{addrName}}</view>
+        </view>
+        <image class="mine__arrow" src="{{Icon.arrow}}" mode="scaleToFill"/>
       </view>
-      <image class="mine__arrow" src="{{Icon.arrow}}" mode="scaleToFill"/>
-    </view>
-    <view class="mine__status">
-      <view class="mine__search">
-        <image class="mine__search--icon" src="{{Icon.search}}" mode="scaleToFill"/>
-        <input placeholder="按考勤名字搜索" confirm-type="search" value="{{query}}" 
-          placeholder-style="color: #a5a5a5"
-          @input="onQueryInput" @confirm="onSearchConfirm"/>
-        <view>
-          <image class="mine__search--clear" wx:if="{{query}}"
-            src="{{Icon.clear}}" mode="scaleToFill" @tap="onQueryClear"/>
+      <view class="mine__status">
+        <view class="mine__search">
+          <image class="mine__search--icon" src="{{Icon.search}}" mode="scaleToFill"/>
+          <input placeholder="按考勤名字搜索" confirm-type="search" value="{{query}}" 
+            placeholder-style="color: #a5a5a5"
+            @input="onQueryInput" @confirm="onSearchConfirm"/>
+          <view>
+            <image class="mine__search--clear" wx:if="{{query}}"
+              src="{{Icon.clear}}" mode="scaleToFill" @tap="onQueryClear"/>
+          </view>
+        </view>
+        <view class="mine__tab">
+          <view class="mine__tab--yell {{attndType===1 ? 'mine__tab--yell-active' : ''}}"
+            @tap="onTagToggle({{1}})">点名</view>
+          <view class="mine__tab--resp {{attndType===2 ? 'mine__tab--resp-active' : ''}}"
+            @tap="onTagToggle({{2}})">签到</view>
+        </view>
+        <view class="mine__group" @tap="onClickGroup">名单</view>
+      </view>
+      <view class="mine__list">
+        <view class="mine__item" wx:for-items="{{attndList}}" wx:for-item="attnd" wx:key="id"
+          @tap="onClickAttnd({{attnd.cipher}})">
+          <view class="mine__item--title">{{attnd.attnd_name}}{{attnd.group_name ? '（'+attnd.group_name+'）' : ''}}</view>
+          <view class="mine__item--p mine__item--p-pwd">口令：{{attnd.cipher}}</view>
+          <view class="mine__item--p">时间：{{attnd.start_time}}</view>
+          <view class="mine__item--p">地点：{{attnd.addr_name}}</view>
+        </view>
+        <view class="mine__baseline" wx:if="{{count!==0 && count===attndList.length}}">
+          <view class="mine__baseline--line"></view>
+          <view class="mine__baseline--text">{{baselineMsg}}</view>
+          <view class="mine__baseline--line"></view>
+        </view>
+        <view class="mine__baseline" wx:if="{{!emptyLock && attndList.length===0}}">
+          <view class="mine__baseline--text">{{attndType===1 ? emptyYellMsg : emptyRespMsg}}</view>
         </view>
       </view>
-      <view class="mine__tab">
-        <view class="mine__tab--yell {{attndType===1 ? 'mine__tab--yell-active' : ''}}"
-          @tap="onTagToggle({{1}})">点名</view>
-        <view class="mine__tab--resp {{attndType===2 ? 'mine__tab--resp-active' : ''}}"
-          @tap="onTagToggle({{2}})">签到</view>
-      </view>
-      <view class="mine__group" @tap="onClickGroup">名单</view>
+      <toast />
     </view>
-    <view class="mine__list">
-      <view class="mine__item" @tap="onClickAttnd" 
-        wx:for-items="{{attndList}}" wx:for-item="attnd" wx:key="id">
-        <view class="mine__item--title">{{attnd.attnd_name}}{{attnd.group_name ? '（'+attnd.group_name+'）' : ''}}</view>
-        <view class="mine__item--p mine__item--p-pwd">口令：{{attnd.cipher}}</view>
-        <view class="mine__item--p">时间：{{attnd.start_time}}</view>
-        <view class="mine__item--p">地点：{{attnd.addr_name}}</view>
-      </view>
-      <view class="mine__baseline" wx:if="{{count!==0 && count===attndList.length}}">
-        <view class="mine__baseline--line"></view>
-        <view class="mine__baseline--text">{{baselineMsg}}</view>
-        <view class="mine__baseline--line"></view>
-      </view>
-      <view class="mine__baseline" wx:if="{{!emptyLock && count===0}}">
-        <view class="mine__baseline--text">{{attndType===1 ? emptyYellMsg : emptyRespMsg}}</view>
-      </view>
-    </view>
-    <toast />
-  </view>
+  </scroll-view>
+  
 </template>
 
 <script>
@@ -280,6 +284,7 @@
   import { ToastType } from '../share/consts'
   import zstore from '../utils/zstore'
   import zajax from '../utils/zajax'
+  import zmid from '../utils/zmid'
 
   export default class Mine extends wepy.page {
     mixins = [ALog, AToast]
@@ -297,7 +302,7 @@
       count: 0,   //列表项总数
       emptyLock: true,   //空列表提示锁
       baselineMsg: '没有更多了',
-      emptyYellMsg: '无考勤信息',
+      emptyYellMsg: '无点名信息',
       emptyRespMsg: '无签到信息',
     }
 
@@ -316,7 +321,6 @@
 
     initData() {
       this.page = 1
-      this.pageSize = 10
       this.query = ''
     }
 
@@ -330,40 +334,16 @@
       await b
       await c
       wx.hideNavigationBarLoading()
-      return
     }
 
     // 获取个人信息
-    getSelfInfo() {
-      // 先从 storage 中获取
-      let name = zstore.get(zstore.userName)
+    async getSelfInfo() {
+      let name = (await zmid.getSelfinfo()).name
       if (name) {
         this.name = name
         this.avator = name[0].toUpperCase()
         this.$apply()
-        return
       }
-      wx.navigateTo({ url: 'selfinfo' })
-      // storage 中没有再从后端获取
-      // let openid = zstore.get(zstore.openid)
-      // this.print(`openid: ${openid}`)
-      // if (!openid) {
-      //   this.isShow = true
-      //   this.$apply()
-      //   return
-      // }
-      // return zajax.get(URL.userInfo, { openid })
-      //   .then(res => {
-      //     let body = res.data
-      //     let code = body.code
-      //     if (code !== CODE.GLOBAL_SUCCESS) return
-      //     this.name = body.data.name
-      //     this.avator = name[0].toUpperCase()
-      //     this.$apply()
-      //   })
-      //   .catch(err => {
-      //     this.print(err)
-      //   })
     }
 
     // 获取位置
@@ -371,29 +351,30 @@
       let latitude = 0
       let longitude = 0
       await zmap.getLocation()
-        .then(res => { latitude = res.latitude; longitude = res.longitude })
-        .catch(err => console.log(err))
+        .then(res => { latitude = res.latitude; longitude = res.longitude;this.print(res, 'warn') })
+        .catch(err => this.print(err, 'error'))
       await zmap.getAddrName(latitude, longitude)
         .then(res => {
           if (res) {
             this.addrName = res ? res : ''
             this.$apply() 
-          }   
+          }
         })
-        .catch(err => console.log(err))
+        .catch(err => this.print(err, 'error'))
       return
     }
 
     // 获取考勤列表
-    async getAttndList() {
+    async getAttndList(paging) {
       this.emptyLock = true
       this.$apply()
       wx.showNavigationBarLoading()
-      let reqData = {}
-      reqData.list_type = this.attndType
-      reqData.page = this.page
-      reqData.page_size = this.pageSize
-      reqData.query = this.query ? this.query : ''
+      let reqData = {
+        list_type: this.attndType,
+        page: this.page,
+        page_size: this.pageSize,
+        query: this.query ? this.query : ''
+      }
       this.page ++
       this.$apply()
       await zajax.get(URL.attndList, reqData)
@@ -401,8 +382,12 @@
           let body = res.data
           let code = body.code
           if (code !== CODE.GLOBAL_SUCCESS) return
-          this.attndList = body.data.attnds
-          this.count = body.data.count
+
+          this.count = Number.isInteger(body.data.count) ? body.data.count : 0
+          body.data.attnds = Array.isArray(body.data.attnds) ? body.data.attnds : []
+
+          if (paging) this.attndList = this.attndList.concat(body.data.attnds)
+          else this.attndList = body.data.attnds
           this.attndList.map(el => {
             let date = new Date(el.start_time)
             el.start_time = `${getTimeFormat(date, 'date', '/')} ${getTimeFormat(date, 'time', ':')}`
@@ -410,20 +395,18 @@
           })
         })
         .catch(err => {
-          this.print(err)
+          this.print(err, 'error')
         })
       wx.hideNavigationBarLoading()
-      setTimeout(() => {
-        this.emptyLock = false
-        this.$apply()
-      }, 200);
+      setTimeout(() => { this.emptyLock = false; this.$apply() }, 200)
       this.$apply()
     }
 
     methods = {
-      onClickAttnd(id) {
-        let url = `attnd${Number.isInteger(id)? '?'+id : ''}`  
-        wx.navigateTo({ url })
+      onClickAttnd(cipher) {
+        if (cipher) {
+          wx.navigateTo({ url: `attnd?cipher=${cipher}` })
+        }
       },
       onClickSelfinfo() {
         wx.navigateTo({ url: 'selfinfo' })
@@ -436,13 +419,12 @@
       },
       //[考勤] [签到] 标签切换
       onTagToggle(index) {
-        this.print(index)
-        this.initData()
         switch (index) {
           case 1: this.attndType = 1; break
           case 2: this.attndType = 2; break
           default: this.attndType = 1; break
         }
+        this.initData()
         this.getAttndList()
       },
       //搜索框确认搜索
@@ -455,6 +437,9 @@
       onQueryClear() {
         this.initData()
         this.getAttndList()
+      },
+      onScrollToLower() {
+        this.getAttndList(true)
       },
     }
   }
