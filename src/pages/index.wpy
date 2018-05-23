@@ -70,6 +70,7 @@
         <view class="home__text">签到 / 输入口令</view>
       </view>
     </view>
+    <button open-type="openSetting"></button>
     <attndModal :model.sync="model"></attndModal>
     <toast />
   </view>
@@ -85,6 +86,7 @@
   import zajax from '../utils/zajax'
   import zstore from '../utils/zstore'
   import zmid from '../utils/zmid'
+  import zlog from '../utils/zlog'
 
   export default class Index extends wepy.page {
 

@@ -25,6 +25,7 @@
   <view class="atbtn__group">
     <button wx:for-items="{{btns}}" wx:for-item="model" wx:key="id"
       class="atbtn__btn" style="background: {{model.color}}"
+      open-type="{{model.openType}}"
       @tap="onClick({{model}})">{{model.name}}</button>
   </view>
 </template>
@@ -50,6 +51,7 @@
 
     methods = {
       onClick(model) {
+        if (!model.emit) return
         this.$emit(model.emit)
       }
     }

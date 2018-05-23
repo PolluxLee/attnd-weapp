@@ -1,5 +1,6 @@
 import key from './key'
 import zlog from './zlog'
+import { isNumber } from '../share/funcs'
 const zmap = {}
 
 // 引入 SDK 核心类
@@ -18,7 +19,7 @@ zmap.getLocation = () => {
         resolve(res)
       },
       fail: err => {
-        zlog.error(res, 'wechat/getLocation')
+        zlog.error(err, 'wechat/getLocation')
         reject(err)
       }
     })
@@ -28,6 +29,10 @@ zmap.getLocation = () => {
 // 通过经纬度获取地址名称
 zmap.getAddrName = (latitude, longitude) => {
   return new Promise((resolve, reject) => {
+    if (!isNumber(latitude) || !isNumber(longitude)) {
+      zlog.warn({ latitude, longitude }, 'zmap/getAddrName')
+      return reject('getlocation fail')
+    }
     qqMap.reverseGeocoder({
       location: {
         latitude,

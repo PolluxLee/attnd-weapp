@@ -25,7 +25,8 @@
         'pages/config',
         'pages/selfinfo',
         'pages/group',
-        'pages/groupinfo'
+        'pages/groupinfo',
+        'pages/auth'
       ],
       window: {
         backgroundTextStyle: 'light',
@@ -55,6 +56,23 @@
 
     onLaunch() {
       this.login()
+      this.auth()
+    }
+
+    auth() {
+      wx.getSetting({
+        success(res) {
+          zlog.log(res)
+          if (!res.authSetting['scope.userLocation']) {
+            wx.authorize({
+              scope: 'scope.userLocation',
+              success: () => {
+                zlog.log(res.authSetting, 'app/authorize')
+              }
+            })
+          }
+        }
+      })
     }
 
     login() {

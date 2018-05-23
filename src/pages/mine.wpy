@@ -4,8 +4,8 @@
 
 .mine {
   box-sizing: border-box;
-  padding: 30rpx;
-
+  padding: 30rpx 30rpx 100rpx 30rpx;
+  
   &__info {
     box-sizing: border-box;
     background: white;
@@ -213,6 +213,10 @@
       padding-right: 10rpx;
       text-align: center;
     }
+    &--img {
+      width: 260rpx;
+      height: 260rpx;
+    }
   }
 }
 </style>
@@ -261,7 +265,9 @@
           <view class="mine__baseline--text">{{baselineMsg}}</view>
           <view class="mine__baseline--line"></view>
         </view>
-        <view class="mine__baseline" wx:if="{{!emptyLock && attndList.length===0}}">
+        <view class="mine__baseline" wx:if="{{!emptyLock && attndList.length===0}}" 
+          style="flex-direction: column">
+          <image class="mine__baseline--img" src="{{Icon.empty}}" mode="scaleToFill"/>
           <view class="mine__baseline--text">{{attndType===1 ? emptyYellMsg : emptyRespMsg}}</view>
         </view>
       </view>
@@ -348,8 +354,8 @@
 
     // 获取位置
     async getAddrName() {
-      let latitude = 0
-      let longitude = 0
+      let latitude
+      let longitude
       await zmap.getLocation()
         .then(res => { latitude = res.latitude; longitude = res.longitude })
         .catch(err => {})
@@ -407,7 +413,18 @@
         }
       },
       onClickSelfinfo() {
-        wx.navigateTo({ url: 'selfinfo' })
+        // wx.navigateTo({ url: 'selfinfo' })
+        wx.showActionSheet({
+          itemList: ['个人信息', '授权管理'],
+          success: res => {
+            let tapIndex = res.tapIndex
+            if (tapIndex === 0) wx.navigateTo({ url: 'selfinfo' })
+            else if (tapIndex === 1) wx.navigateTo({ url: 'auth' })
+          },
+          fail: res => {
+            zlog.log(res.errMsg)
+          }
+        })
       },
       onClickGroup() {
         wx.navigateTo({ url: 'group' })

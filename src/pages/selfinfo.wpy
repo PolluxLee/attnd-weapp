@@ -12,7 +12,7 @@
     <attndTitle><view slot="title">个人信息</view></attndTitle>
     <nameInput :model.sync="nameModel"></nameInput>
     <idInput :model.sync="idModel"></idInput>
-    <saveBtn :btns.sync="btnModel" @tap="onClickSave"></saveBtn>
+    <saveBtn :btns.sync="btnModel"></saveBtn>
     <toast />
   </view>
 </template>
@@ -40,7 +40,8 @@
       isShow: false,
       nameModel: {},
       idModel: {},
-      btnModel: []
+      btnModel: [],
+      authModel: []
     }
 
     components = {
@@ -48,10 +49,12 @@
       nameInput: AttndInput,
       idInput: AttndInput,
       saveBtn: AttndBtn,
+      authBtn: AttndBtn,
       toast: Toast
     }
 
     onLoad() {
+      wx.setNavigationBarTitle({ title: '个人信息' })
       this.initData()
     }
 
@@ -62,6 +65,9 @@
       this.btnModel = [
         { name: '保存', emit: 'save-btn', color: '#00897B' },
       ]
+      // this.btnModel = [
+      //   { name: '进入授权页', emit: 'auth-btn', color: '#00897B' },
+      // ]
       this.getData()
       this.isShow = true
     }
@@ -114,6 +120,9 @@
       // 更新个人信息
       'save-btn': event => {
         this.updateUserInfo()
+      },
+      'auth-btn': event => {
+        
       }
     }
 

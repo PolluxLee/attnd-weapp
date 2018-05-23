@@ -4,7 +4,7 @@
 
   .attnd {
     width: 100%;
-    padding: 46rpx;
+    padding: 46rpx 46rpx 100rpx 46rpx;
     box-sizing: border-box;
     background: white;
     height: 100%;

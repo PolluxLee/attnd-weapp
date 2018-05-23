@@ -82,6 +82,10 @@
       this.initData()
     }
 
+    onShow() {
+      this.getData()
+    }
+
     initData() {
       wx.showNavigationBarLoading()
       this.nameModel = { type: Type.TEXT_SELECT, label: '考勤名称', readonly: false, length: 50, value: '', hint: '例如：计网', extra: '选择', options: [] }
@@ -188,6 +192,11 @@
 
     // 发布考勤
     releaseAttnd() {
+      let checkLoc = this.chackLocation()
+      if (!checkLoc) {
+        wx.navigateTo({ url: 'auth' })
+        return
+      }
       let checkRes = this.checkData()
       if (!checkRes.status) {
         wx.showModal({ title: '提示', content: checkRes.msg || '表单未填写完整' })
@@ -224,11 +233,18 @@
         })
     }
 
-    // 检查字段
-    checkData() {
+    //检查位置
+    chackLocation() {
       for (let key in this.location) {
-        if (!isNumber(this.location[key])) return { status: false, msg: `[位置信息] 未获取` }
+        if (!isNumber(this.location[key])) {
+          return false
+        }
       }
+      return true
+    }
+
+    // 检查表单
+    checkData() {
       let models = [this.nameModel, this.dateModel, this.timeModel, this.lastModel, this.groupModel, this.authorModel, this.placeModel]
       for (let el of models) {
         if (!el.value) {
