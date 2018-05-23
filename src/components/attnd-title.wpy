@@ -23,11 +23,9 @@
 
 <script>
   import wepy from 'wepy'
-  import ALog from '../mixins/a-log'
 
   export default class AttndTitle extends wepy.component {
 
-    mixins = [ALog]
     data = {
 
     }

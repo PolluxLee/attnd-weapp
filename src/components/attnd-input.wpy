@@ -145,12 +145,10 @@
 
 <script>
   import wepy from 'wepy'
-  import ALog from '../mixins/a-log'
   import { Type, BtnType, URL } from '../share/consts'
 
   export default class AttndInput extends wepy.component {
 
-    mixins = [ALog]
     data = {
       Type: Type,
       BtnType: BtnType

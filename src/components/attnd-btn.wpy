@@ -31,12 +31,10 @@
 
 <script>
   import wepy from 'wepy'
-  import ALog from '../mixins/a-log'
   import { Type, BtnType, URL } from '../share/consts'
 
   export default class AttndBtn extends wepy.component {
 
-    mixins = [ALog]
     data = {
       Type: Type
     }
@@ -48,11 +46,7 @@
       }
     }
 
-    onLoad() {
-      setTimeout(() => {
-        this.print(this.btns)
-      }, 0);
-    }
+    onLoad() {}
 
     methods = {
       onClick(model) {

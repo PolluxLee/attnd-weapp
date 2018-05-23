@@ -104,7 +104,6 @@
 
 <script>
   import wepy from 'wepy'
-  import ALog from '../mixins/a-log'
   import { Icon } from '../assets/icon/icon'
   import AToast from '../mixins/a-toast'
   import Toast from 'wepy-com-toast'
@@ -113,7 +112,7 @@
 
   export default class Group extends wepy.page {
 
-    mixins = [ALog, AToast]
+    mixins = [AToast]
     data = {
       Icon: Icon,
       query: '',
@@ -148,9 +147,7 @@
           }
           this.$apply()
         })
-        .catch(err => {
-          this.print(err, 'error')
-        })
+        .catch(err => {})
       if (this.displayList.length === 0) {
         this.baseLineMsg = '暂无名单信息'
         this.$apply()

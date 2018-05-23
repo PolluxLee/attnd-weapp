@@ -1,4 +1,5 @@
 import zstore from './zstore'
+import zlog from './zlog'
 const zajax = {
   get: () => {},
   post: () => {},
@@ -13,9 +14,22 @@ function createWxRequest(opts) {
     const requestTask = wx.request({
       ...opts,
       success: res => {
+        zlog.log({
+          statusCode: res.statusCode,
+          url: opts.url.slice(opts.url.indexOf('/api')),
+          method: opts.method,
+          reqData: opts.data,
+          data: res.data
+        })
         resolve(res)
       },
       fail: err => {
+        zlog.log({
+          url: opts.url.slice(opts.url.indexOf('/api')),
+          method: opts.method,
+          reqData: opts.data,
+          err
+        })
         reject(err)
       }
     })

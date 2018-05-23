@@ -1,11 +1,13 @@
 import zajax from './zajax'
 import zstore from './zstore'
 import { URL, CODE } from '../share/consts'
+import zlog from './zlog'
 const zmid = {}
 
 // 设置个人信息到 storage
 // { id, openid, name, stuid }
 zmid.setSelfinfo = ({ id, openid, name, stuid }) => {
+  zlog.log({ id, openid, name, stuid }, 'zmid/setSelfinfo')
   if (Number.isInteger(id)) zstore.set(zstore.id, id)
   if (openid) zstore.set(zstore.openid, openid)
   if (name) zstore.set(zstore.name, name)
@@ -23,6 +25,7 @@ zmid.getOpenid = () => zstore.get(zstore.openid)
 
 // 验证个人信息
 zmid.checkSelfinfo = () => {
+  zlog.log({ id,name }, 'zmid/checkSelfinfo')
   let id = zstore.get(zstore.id)
   let name = zstore.get(zstore.name)
   if (typeof name === 'string' && name && Number.isInteger(id)) {
@@ -38,6 +41,7 @@ zmid.getSelfinfo = async function() {
   let stuid = zstore.get(zstore.stuid)
   let id = zstore.get(zstore.id)
   if (name && Number.isInteger(id)) {
+    zlog.log({ name, stuid, id }, 'zmid/getSelfinfo/zstore')
     return { name, stuid, id }
   }
   // 若 storage 没有，再从后端获取
@@ -45,6 +49,7 @@ zmid.getSelfinfo = async function() {
   await zajax.get(URL.userInfo, { openid })
   .then(res => {
     let body = res.data
+    zlog.log({ name, stuid, id }, 'zmid/getSelfinfo/backend')
     let code = body.code
     if (code !== CODE.GLOBAL_SUCCESS) return {}
     id = body.data.id
@@ -54,7 +59,7 @@ zmid.getSelfinfo = async function() {
     this.setSelfinfo({ id, name, stuid })
   })
   .catch(err => {
-    console.error(err)
+    zlog.error(err, 'zmid/getSelfinfo')
   })
 
   if (name && Number.isInteger(id)) {

@@ -218,7 +218,6 @@
 
 <script>
   import wepy from 'wepy'
-  import ALog from '../mixins/a-log'
   import { Icon } from '../assets/icon/icon'
   import AToast from '../mixins/a-toast'
   import Toast from 'wepy-com-toast'
@@ -229,7 +228,7 @@
 
   export default class Attnd extends wepy.page {
 
-    mixins = [ALog, AToast]
+    mixins = [AToast]
     data = {
       Icon: Icon,
       winW: 0,    //屏幕可用宽度 px
@@ -258,7 +257,7 @@
         this.winW = res.windowWidth
         this.rpxScale = this.winW / 750
       } catch (e) {
-        this.print(e, 'error')
+
       }
     }
 
@@ -301,9 +300,7 @@
           this.baseInfo.start_time = `${getTimeFormat(date, 'date', '/')} ${getTimeFormat(date, 'time', ':')}`
           this.$apply()
         })
-        .catch(err => {
-          this.print(err)
-        })
+        .catch(err => {})
     }
 
     // 获取签到者列表
@@ -335,14 +332,11 @@
             return el
           })
           this.$apply()
-          this.print(this.attndList, 'warn')
           this.isShow = true
           setTimeout(() => { this.emptyLock = false; this.$apply() }, 200);
           this.$apply()
         })
-        .catch(err => {
-          this.print(err, 'error')
-        })
+        .catch(err => {})
     }
 
     async signIn() {
@@ -356,11 +350,8 @@
           latitude = res.latitude
           longitude = res.longitude
           accuracy = res.accuracy
-          this.print({latitude,longitude,accuracy}, 'warn')
         })
-        .catch(err => {
-          this.print(err, 'error')
-        })
+        .catch(err => {})
 
       if (latitude === undefined || longitude === undefined || accuracy === undefined) {
         this.showToast(ToastType.FAIL, '未获取位置')
@@ -375,7 +366,6 @@
       await zajax.post(URL.signIn, reqData)
         .then(res => {
           let body = res.data
-          this.print(body, 'warn')
           let code = body.code
           if (code !== CODE.GLOBAL_SUCCESS) {
             this.showToast(ToastType.FAIL, '签到失败')
@@ -385,7 +375,6 @@
         })
         .catch(err => {
           this.showToast(ToastType.FAIL, '签到失败')
-          this.print(err, 'error')
         })
 
       this.resetData()

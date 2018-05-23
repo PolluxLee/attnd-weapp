@@ -147,7 +147,6 @@
 
 <script>
   import wepy from 'wepy'
-  import ALog from '../mixins/a-log'
   import { Icon } from '../assets/icon/icon'
   import AToast from '../mixins/a-toast'
   import Toast from 'wepy-com-toast'
@@ -156,7 +155,7 @@
 
   export default class Groupinfo extends wepy.page {
 
-    mixins = [ALog, AToast]
+    mixins = [AToast]
     data = {
       Icon: Icon,
       groupId: 0,
@@ -191,9 +190,7 @@
           this.groupInfo = body.data
           this.$apply()
         })
-        .catch(err => {
-          this.print(err, 'error')
-        })
+        .catch(err => {})
     }
 
     getUserList(paging) {
@@ -219,9 +216,7 @@
           })
           this.$apply()
         })
-        .catch(err => {
-          this.print(err, 'error')
-        })
+        .catch(err => {})
     }
 
     methods = {

@@ -274,7 +274,6 @@
 <script>
   import wepy from 'wepy'
   import { Icon } from '../assets/icon/icon'
-  import ALog from '../mixins/a-log'
   import mock from '../utils/mock'
   import zmap from '../utils/zmap'
   import { Type, BtnType, URL, CODE } from '../share/consts'
@@ -285,9 +284,10 @@
   import zstore from '../utils/zstore'
   import zajax from '../utils/zajax'
   import zmid from '../utils/zmid'
+  import zlog from '../utils/zlog'
 
   export default class Mine extends wepy.page {
-    mixins = [ALog, AToast]
+    mixins = [AToast]
     data = {
       Icon: Icon,
       name: '...',
@@ -351,8 +351,8 @@
       let latitude = 0
       let longitude = 0
       await zmap.getLocation()
-        .then(res => { latitude = res.latitude; longitude = res.longitude;this.print(res, 'warn') })
-        .catch(err => this.print(err, 'error'))
+        .then(res => { latitude = res.latitude; longitude = res.longitude })
+        .catch(err => {})
       await zmap.getAddrName(latitude, longitude)
         .then(res => {
           if (res) {
@@ -360,7 +360,7 @@
             this.$apply() 
           }
         })
-        .catch(err => this.print(err, 'error'))
+        .catch(err => {})
       return
     }
 
@@ -394,9 +394,7 @@
             return el
           })
         })
-        .catch(err => {
-          this.print(err, 'error')
-        })
+        .catch(err => {})
       wx.hideNavigationBarLoading()
       setTimeout(() => { this.emptyLock = false; this.$apply() }, 200)
       this.$apply()

@@ -29,7 +29,6 @@
 
 <script>
   import wepy from 'wepy'
-  import ALog from '../mixins/a-log'
   import AttndTitle from '../components/attnd-title'
   import AttndInput from '../components/attnd-input'
   import AttndBtn from '../components/attnd-btn'
@@ -46,7 +45,7 @@
 
   export default class Config extends wepy.page {
 
-    mixins = [ALog, AToast]
+    mixins = [AToast]
     data = {
       nameModel: {},
       dateModel: {},
@@ -129,9 +128,7 @@
           let options = body.data
           if (Array.isArray(options)) this.nameModel.options = options
         })
-        .catch(err => {
-          this.print(err, 'error')
-        })
+        .catch(err => {})
     }
 
     // 获取考勤名单名字列表
@@ -144,9 +141,7 @@
           let options = body.data
           if (Array.isArray(options)) this.groupModel.options = options
         })
-        .catch(err => {
-          this.print(err, 'error')
-        })
+        .catch(err => {})
     }
 
     // 获取历史常用地点列表
@@ -159,9 +154,7 @@
           let options = body.data
           if (Array.isArray(options)) this.placeModel.options = options
         })
-        .catch(err => {
-          this.print(err, 'error')
-        })
+        .catch(err => {})
     }
 
     // 获取我的名字
@@ -180,7 +173,7 @@
           this.location.accuracy = res.accuracy
           this.$apply()
         })
-        .catch(err => this.print(err, 'error'))
+        .catch(err => {})
     }
 
     methods = {
@@ -196,7 +189,6 @@
     // 发布考勤
     releaseAttnd() {
       let checkRes = this.checkData()
-      this.print(checkRes)
       if (!checkRes.status) {
         wx.showModal({ title: '提示', content: checkRes.msg || '表单未填写完整' })
         return
@@ -229,7 +221,6 @@
         })
         .catch(err => {
           this.showToast(ToastType.FAIL, '失败', 2000)
-          this.print(err)
         })
     }
 

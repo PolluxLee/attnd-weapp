@@ -1,5 +1,6 @@
-const zmap = {}
 import key from './key'
+import zlog from './zlog'
+const zmap = {}
 
 // 引入 SDK 核心类
 var QQMapWX = require('./qqmap-wx-jssdk.js')
@@ -13,9 +14,11 @@ zmap.getLocation = () => {
     wx.getLocation({
       type: 'gcj02',
       success: res => {
+        zlog.log(res, 'wechat/getLocation')
         resolve(res)
       },
       fail: err => {
+        zlog.error(res, 'wechat/getLocation')
         reject(err)
       }
     })
@@ -34,11 +37,12 @@ zmap.getAddrName = (latitude, longitude) => {
         let status = res.status
         let message = res.message
         let result = res.result
-        console.log(result)
         if (status !== 0) reject({ status, message })
+        zlog.log({status,message,result}, 'zmap/getAddrName')
         resolve(result.address)
       },
       fail: err => {
+        zlog.error(err, 'zmap/getAddrName')
         reject(err)
       }
     })

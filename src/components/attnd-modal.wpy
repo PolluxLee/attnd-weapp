@@ -114,12 +114,10 @@
 
 <script>
   import wepy from 'wepy'
-  import ALog from '../mixins/a-log'
   import { TypeInModal } from '../share/consts'
 
   export default class AttndModal extends wepy.component {
 
-    mixins = [ALog]
     data = {
       isShow: false,
     }

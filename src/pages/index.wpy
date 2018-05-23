@@ -77,7 +77,6 @@
 
 <script>
   import wepy from 'wepy'
-  import ALog from '../mixins/a-log'
   import AttndModal from '../components/attnd-modal'
   import AToast from '../mixins/a-toast'
   import Toast from 'wepy-com-toast'
@@ -89,7 +88,7 @@
 
   export default class Index extends wepy.page {
 
-    mixins = [ALog, AToast]
+    mixins = [AToast]
     data = {
       model: {}
     }
@@ -125,9 +124,7 @@
                 this.$invoke('attndModal','hideModal')
                 wx.navigateTo({ url: `attnd?cipher=${cipher}` })
               })
-              .catch(err => {
-                this.print(err, 'error')
-              })
+              .catch(err => {})
           }
         },
         cancelCallback: () => {}

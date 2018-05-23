@@ -19,7 +19,6 @@
 
 <script>
   import wepy from 'wepy'
-  import ALog from '../mixins/a-log'
   import AttndTitle from '../components/attnd-title'
   import AttndInput from '../components/attnd-input'
   import AttndBtn from '../components/attnd-btn'
@@ -32,10 +31,11 @@
   import { ToastType } from '../share/consts'
   import zstore from '../utils/zstore'
   import zmid from '../utils/zmid'
+  import zlog from '../utils/zlog'
 
   export default class Selfinfo extends wepy.page {
 
-    mixins = [ALog, AToast]
+    mixins = [AToast]
     data = {
       isShow: false,
       nameModel: {},
@@ -102,9 +102,7 @@
         zmid.setSelfinfo({ id, stuid, name })
         this.showToast(ToastType.SUCCESS, '保存成功', 2000)
       })
-      .catch(err => {
-        this.print(err, 'error')
-      })
+      .catch(err => {})
     }
 
 
