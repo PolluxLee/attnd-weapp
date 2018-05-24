@@ -127,6 +127,9 @@
 
     onLoad() {
       wx.setNavigationBarTitle({ title: '名单' })
+    }
+
+    onShow() {
       this.getData()
     }
 

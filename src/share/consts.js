@@ -25,12 +25,16 @@ export const URL = {
   historyAttndNames: `${PREFIX}/api/attnd/hisname`,
   historyGroupNames: `${PREFIX}/api/group/name`,
   attndList: `${PREFIX}/api/attndlist`,
+  removeAttnd: `${PREFIX}/api/attnd/del`,
   group: `${PREFIX}/api/group`,
   groupList: `${PREFIX}/api/group/list`,
   groupUserList: `${PREFIX}/api/group/userlist`,
+  removeGroup: `${PREFIX}/api/group/del`,
+  addUserToGroup: `${PREFIX}/api/group/user/add`,
   historyPlaceNames: `${PREFIX}/api/attnd/hisaddr`,
   attndSituation: `${PREFIX}/api/attnd/situation`,
   signIn: `${PREFIX}/api/attnd/signin`,
+
 }
 
 // Status Code
@@ -53,7 +57,9 @@ export const CODE = {
   ATTND_HAS_SIGNIN: 3003,
   ATTND_EXPIRED: 3004,
 
-  GROUP_NOTEXIS:4001,
+  GROUP_NOTEXIS: 4001,
+  GROUP_NOT_BELONG: 4002,
+  GROUP_DEL: 4003,
 
   ADD_FLAG: 1,
   UPD_FLAG: 2,

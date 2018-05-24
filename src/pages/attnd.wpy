@@ -183,7 +183,7 @@
         <view class="attnd__p">发布者：{{baseInfo.teacher_name}}</view>
         <view class="attnd__p">名单：{{baseInfo.group_name}}</view>
         <view class="attnd__p">地点：{{baseInfo.addr_name}}</view>
-        <image class="attnd__remove" src="{{Icon.remove}}" mode="scaleToFill"/>
+        <image class="attnd__remove" src="{{Icon.remove}}" mode="scaleToFill" @tap="onClickRemove"/>
       </view>
       <view class="attnd__list">
         <view class="attnd__oper">
@@ -331,7 +331,7 @@
     }
 
     // 获取签到者列表
-    getResponserList(paging) {
+    async getResponserList(paging) {
       let reqData = {
         page: this.page,
         page_size: this.pageSize,
@@ -341,7 +341,7 @@
       this.emptyLock = true
       this.page++
       this.$apply()
-      return zajax.get(URL.attndSituation, reqData)
+      await zajax.get(URL.attndSituation, reqData)
         .then(res => {
           let body = res.data
           let code = body.code
@@ -364,7 +364,7 @@
           this.$apply()
         })
         .catch(err => {})
-        wx.stopPullDownRefresh()
+      wx.stopPullDownRefresh()
     }
 
     //检查位置
@@ -431,6 +431,28 @@
       this.getResponserList()
     }
 
+    removeAttnd() {
+      let cipher = this.cipher
+      if (!cipher) {
+        this.showToast(ToastType.FAIL, '删除失败', 1000)
+        return
+      }
+      this.showToast(ToastType.LOADING, '加载中')
+      zajax.postFD(URL.removeAttnd, { cipher })
+        .then(res => {
+          this.hideToast()
+          let body = res.data
+          let code = body.code
+          if (code !== CODE.GLOBAL_SUCCESS) {
+            this.showToast(ToastType.FAIL, '删除失败', 1000)
+            return
+          }
+          this.showToast(ToastType.SUCCESS, '删除成功', 1000)
+          wx.navigateBack()
+        })
+        .catch(err => {})
+    }
+
     methods = {
       toggleSigninStatus() {
         
@@ -459,6 +481,17 @@
       },
       onSignIn() {
         this.signIn()
+      },
+      onClickRemove() {
+        wx.showModal({
+          title: '提示',
+          content: '确认删除此考勤？',
+          success: res => {
+            if (res.confirm) {
+              this.removeAttnd()
+            }
+          }
+        })
       },
     }
 

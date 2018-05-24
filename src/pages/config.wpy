@@ -95,7 +95,7 @@
       this.groupModel = { type: Type.TEXT_SELECT, label: '考勤名单', readonly: false, length: 50, value: '', hint: '例如：计科151', extra: '选择', options: [] }
       this.authorModel = { type: Type.TEXT, label: '发布者', readonly: false, length: 50, value: '', hint: '填写你的名字' }
       this.placeModel = { type: Type.TEXT_SELECT, label: '地点', readonly: false, length: 50, value: '', hint: '例如：理南404', extra: '选择', options: []}
-      this.lastModel.options = ['5','10','15','20','30','1440']
+      this.lastModel.options = ['5','10','15','20','30','60']
 
       this.dateModel.value = getCurTime('date')
       this.timeModel.value = getCurTime('time')

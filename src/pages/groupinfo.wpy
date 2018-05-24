@@ -4,7 +4,7 @@
 
   .groupinfo {
     box-sizing: border-box;
-    padding: 46rpx;
+    padding: 46rpx 46rpx 100rpx 46rpx;
     height: 100%;
     background: white;
 
@@ -123,28 +123,31 @@
 </style>
 
 <template>
-  <view class="groupinfo">
-    <view class="groupinfo__header">
-      <view class="groupinfo__title">{{groupInfo.name}}</view>
-      <view class="groupinfo__p">管理者：{{groupInfo.creator_name}}</view>
-      <view class="groupinfo__p">人数：{{count}}</view>
-      <image class="groupinfo__remove" src="{{Icon.remove}}" mode="scaleToFill"/>
-    </view>
-    <view class="groupinfo__list">
-      <view class="groupinfo__item" wx:for-items="{{userList}}" wx:for-item="stu" wx:key="id">
-        <view class="groupinfo__item--avator">{{stu.avator}}</view>
-        <view class="groupinfo__item--info">
-          <view class="groupinfo__item--name">{{stu.name}}</view>
-          <view class="groupinfo__item--id">ID: {{stu.stu_id}}</view>
-        </view>
+  <scrol-view style="height: 100vh"
+    scroll-y="true" lower-threshold="50" bindscrolltolower="onScrollToLower">
+    <view class="groupinfo" wx:if="{{isShow}}">
+      <view class="groupinfo__header">
+        <view class="groupinfo__title">{{groupInfo.name}}</view>
+        <view class="groupinfo__p">管理者：{{groupInfo.creator_name}}</view>
+        <view class="groupinfo__p">人数：{{count}}</view>
+        <image class="groupinfo__remove" src="{{Icon.remove}}" mode="scaleToFill" @tap="onClickRemove"/>
       </view>
-      <view class="groupinfo__baseline"></view>
+      <view class="groupinfo__list">
+        <view class="groupinfo__item" wx:for-items="{{userList}}" wx:for-item="stu" wx:key="id">
+          <view class="groupinfo__item--avator">{{stu.avator}}</view>
+          <view class="groupinfo__item--info">
+            <view class="groupinfo__item--name">{{stu.name}}</view>
+            <view class="groupinfo__item--id">ID: {{stu.stu_id}}</view>
+          </view>
+        </view>
+        <view class="groupinfo__baseline"></view>
+      </view>
+      <view class="groupinfo__plus" @tap="onClickAdd">
+        <image src="{{Icon.plus}}" mode="scaleToFill"/>
+      </view>
+      <toast />
     </view>
-    <view class="groupinfo__plus">
-      <image src="{{Icon.plus}}" mode="scaleToFill"/>
-    </view>
-    <toast />
-  </view>
+  </scrol-view>
 </template>
 
 <script>
@@ -154,12 +157,14 @@
   import Toast from 'wepy-com-toast'
   import { ToastType, URL, CODE } from '../share/consts'
   import zajax from '../utils/zajax'
+  import zlog from '../utils/zlog'
 
   export default class Groupinfo extends wepy.page {
 
     mixins = [AToast]
     data = {
       Icon: Icon,
+      isShow: false,
       groupId: 0,
       page: 1,
       pageSize: 10,
@@ -189,6 +194,8 @@
       await a
       await b
       wx.hideNavigationBarLoading()
+      this.isShow = true
+      this.$apply()
     }
 
     getGroupInfo() {
@@ -234,8 +241,73 @@
         .catch(err => {})
     }
 
-    methods = {
+    async removeGroup() {
+      let del = false
+      if (Number.isInteger(this.groupId)) {
+        zlog.log('groupid is invalid')
+        return
+      }
+      this.showToast(ToastType.LOADING, '加载中')
+      await zajax.postFD(URL.removeGroup, { group_id: this.groupId })
+        .then(res => {
+          this.hideToast()
+          let body = res.data
+          let code = body.code
+          if (code !== CODE.GLOBAL_SUCCESS) {
+            this.showToast(ToastType.FAIL, '删除失败', 1000)
+            return
+          }
+          del = true
+        })
+        .catch(err => {})
+      if (del)
+        wx.navigateBack()
+    }
 
+    async addUserToGroup() {
+      this.showToast(ToastType.LOADING, '加载中')
+      let cipher = ''
+      await zajax.postFD(URL.addUserToGroup, { group_id: this.groupId })
+        .then(res => {
+          this.hideToast()
+          let body = res.data
+          let code = body.code
+          if (code !== CODE.GLOBAL_SUCCESS) {
+            this.showToast(ToastType.HINT, `稍后再试`, 1000)
+            return
+          }
+          cipher = body.data
+        })
+        .catch(err => {})
+      if (!cipher) {
+        this.showToast(ToastType.HINT, `稍后再试`, 1000)
+        return
+      }
+      wx.showModal({
+        title: '提示',
+        content: `录入口令为：${cipher}`,
+        showCancel: false
+      })
+    }
+
+    methods = {
+      onClickRemove() {
+        wx.showModal({
+          title: '提示',
+          content: '确认删除此名单？',
+          success: res => {
+            if (res.confirm) {
+              this.removeGroup()
+            }
+          }
+        })
+      },
+      onClickAdd() {
+        this.addUserToGroup()
+      },
+      onScrollToLower() {
+        this.getUserList()
+      }
     }
 
   }

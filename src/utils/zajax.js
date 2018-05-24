@@ -1,5 +1,6 @@
 import zstore from './zstore'
 import zlog from './zlog'
+import { CODE } from '../share/consts'
 const zajax = {
   get: () => {},
   post: () => {},
@@ -21,6 +22,10 @@ function createWxRequest(opts) {
           reqData: opts.data,
           data: res.data
         })
+        if (res.data.code === CODE.GLOBAL_NOAUTH) {
+          wx.showModal({ title: '提示', content: '会话过期，请重启小程序' })
+          reject('session 过期')
+        }
         resolve(res)
       },
       fail: err => {
