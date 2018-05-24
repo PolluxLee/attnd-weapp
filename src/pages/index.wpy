@@ -155,6 +155,7 @@
       },
       onClickResp() {
         this.model.value = ''
+        // wx.navigateTo({ url: 'attnd?cipher=GMB3+' })
         if (!zmid.checkSelfinfo()) {
           this.showToast(ToastType.HINT, '完善信息', 1000)
           wx.navigateTo({ url: 'selfinfo' })

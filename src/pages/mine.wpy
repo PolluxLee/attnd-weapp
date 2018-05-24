@@ -321,11 +321,11 @@
     }
 
     onShow() {
-      this.initData()
+      this.resetData()
       this.getData()
     }
 
-    initData() {
+    resetData() {
       this.page = 1
       this.query = ''
     }
@@ -439,7 +439,7 @@
           case 2: this.attndType = 2; break
           default: this.attndType = 1; break
         }
-        this.initData()
+        this.resetData()
         this.getAttndList()
       },
       //搜索框确认搜索
@@ -450,7 +450,7 @@
         this.getAttndList()
       },
       onQueryClear() {
-        this.initData()
+        this.resetData()
         this.getAttndList()
       },
       onScrollToLower() {

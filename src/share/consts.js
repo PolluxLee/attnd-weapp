@@ -11,7 +11,7 @@ export const TypeInModal = { NOTITLE_TEXT: 0, TEXT: 1 }
 export const ToastType = { SUCCESS: 0, FAIL: 1, LOADING: 2, HINT: 3 }
 
 // 签到状态
-export const Signin = { ARRIVED: 0, NOT_ARRIVED: 1 }
+export const SigninType = { ARRIVED: 1, DISTANCE_OUT: 2, TIME_OUT: 3, NOT_ARRIVED: 4 }
 
 // API URL
 const HOST = 'http://liziyi.top'

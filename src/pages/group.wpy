@@ -157,7 +157,7 @@
     methods = {
       onClickItem(groupId) {
         if (!Number.isInteger(groupId)) return
-        wx.navigateTo({ url: `groupinfo?${groupId}` })
+        wx.navigateTo({ url: `groupinfo?groupid=${groupId}` })
       },
       onInput(event) {
         this.query = event.detail.value

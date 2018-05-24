@@ -92,6 +92,7 @@
         align-items: center;
         color: white;
         font-size: 40rpx;
+        overflow: hidden;
       }
       &--info {
         height: 100%;
@@ -102,12 +103,14 @@
       }
       &--name {
         white-space: nowrap;
+        overflow-x: auto;
         color: black;
         font-size: 30rpx;
         margin: 4rpx 0;
       }
       &--location {
         white-space: nowrap;
+        overflow-x: auto;
         color: $font;
         font-size: 24rpx;
         margin: 4rpx 0;
@@ -176,7 +179,7 @@
         <view class="attnd__title">{{baseInfo.attnd_name}}</view>
         <view class="attnd__p attnd__p--pwd">口令：{{baseInfo.cipher}}</view>
         <view class="attnd__p">时间：{{baseInfo.start_time}}</view>
-        <view class="attnd__p">持续：{{baseInfo.last}} mins</view>
+        <view class="attnd__p">持续：{{baseInfo.last}} 分钟</view>
         <view class="attnd__p">发布者：{{baseInfo.teacher_name}}</view>
         <view class="attnd__p">名单：{{baseInfo.group_name}}</view>
         <view class="attnd__p">地点：{{baseInfo.addr_name}}</view>
@@ -190,6 +193,23 @@
             <image class="attnd__filter--img" src="{{Icon.triangle}}" mode="scaleToFill"/>
           </view>
         </view>
+        <view class="attnd__item attnd__item--self" wx:if="{{self}}">
+          <view class="attnd__item--avator">{{self.avator}}</view>
+          <view class="attnd__item--info">
+            <view class="attnd__item--name">{{self.name}}{{self.id ? '（'+ self.stu_id +'）' : ''}}</view>
+            <view class="attnd__item--location">距离：{{self.distance}}m</view>
+          </view>
+          <view class="attnd__item--icon">
+            <image wx:if="{{self.attnd_status===SigninType.ARRIVED}}" src="{{Icon.attndArrived}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
+            <image wx:if="{{self.attnd_status===SigninType.DISTANCE_OUT}}" src="{{Icon.attndDistanceOut}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
+            <image wx:if="{{self.attnd_status===SigninType.TIME_OUT}}" src="{{Icon.attndTimeOut}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
+            <image wx:if="{{self.attnd_status===SigninType.NOT_ARRIVED}}" src="{{Icon.attndNotArrived}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
+            <view wx:if="{{self.attnd_status===SigninType.ARRIVED}}">已到</view>
+            <view wx:if="{{self.attnd_status===SigninType.DISTANCE_OUT}}">超距</view>
+            <view wx:if="{{self.attnd_status===SigninType.TIME_OUT}}">超时</view>
+            <view wx:if="{{self.attnd_status===SigninType.NOT_ARRIVED}}">未到</view>
+          </view>
+        </view>
         <view class="attnd__item" wx:for-items="{{attndList}}" wx:for-item="stu" wx:key="id">
           <view class="attnd__item--avator">{{stu.avator}}</view>
           <view class="attnd__item--info">
@@ -197,8 +217,14 @@
             <view class="attnd__item--location">距离：{{stu.distance}}m</view>
           </view>
           <view class="attnd__item--icon" @tap="toggleSigninStatus">
-            <icon type="{{stu.attnd_status===1 ?'success':'warn'}}" size="{{40 * rpxScale}}" color="{{stu.attnd_status===1?'#00897B':'#f44336'}}"/>
-            <view>{{stu.attnd_status===1 ?'已到':'未到'}}</view>
+            <image wx:if="{{stu.attnd_status===SigninType.ARRIVED}}" src="{{Icon.attndArrived}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
+            <image wx:if="{{stu.attnd_status===SigninType.DISTANCE_OUT}}" src="{{Icon.attndDistanceOut}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
+            <image wx:if="{{stu.attnd_status===SigninType.TIME_OUT}}" src="{{Icon.attndTimeOut}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
+            <image wx:if="{{stu.attnd_status===SigninType.NOT_ARRIVED}}" src="{{Icon.attndNotArrived}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
+            <view wx:if="{{stu.attnd_status===SigninType.ARRIVED}}">已到</view>
+            <view wx:if="{{stu.attnd_status===SigninType.DISTANCE_OUT}}">超距</view>
+            <view wx:if="{{stu.attnd_status===SigninType.TIME_OUT}}">超时</view>
+            <view wx:if="{{stu.attnd_status===SigninType.NOT_ARRIVED}}">未到</view>
           </view>
         </view>
         <view class="attnd__baseline" wx:if="{{count!==0 && count===attndList.length}}">
@@ -221,22 +247,27 @@
   import { Icon } from '../assets/icon/icon'
   import AToast from '../mixins/a-toast'
   import Toast from 'wepy-com-toast'
-  import { ToastType, URL, CODE } from '../share/consts'
+  import { ToastType, URL, CODE, SigninType } from '../share/consts'
   import { isNumber, getTimeFormat } from '../share/funcs'
   import zajax from '../utils/zajax'
   import zmap from '../utils/zmap'
 
   export default class Attnd extends wepy.page {
 
+    config = {
+      enablePullDownRefresh: true,
+      backgroundColor: '#ffffff'
+    }
+
     mixins = [AToast]
     data = {
       Icon: Icon,
-      winW: 0,    //屏幕可用宽度 px
-      rpxScale: 0.5,    //rpx 与 px 关系：1rpx = winW px / 750 = (winW/750)px = rpxScale px
+      SigninType: SigninType,
       isShow: false,
       cipher: '',
       baseInfo: {},
       attndList: [],
+      self: {},
       page: 1,
       pageSize: 10,
       count: 0,
@@ -244,34 +275,30 @@
       emptyLock: true,   //空列表提示锁
       baselineMsg: '没有更多了',
       emptyMsg: '无签到信息',
+      location: {
+        latitude: null,
+        longitude: null,
+        accuracy: null,
+      }
     }
 
     components = {
       toast: Toast
     }
 
-    getWinWidth() {
-      // 获取屏幕可用宽度
-      try {
-        var res = wx.getSystemInfoSync()
-        this.winW = res.windowWidth
-        this.rpxScale = this.winW / 750
-      } catch (e) {
-
-      }
-    }
-
     onLoad(option) {
       console.log(option)
       this.cipher = option.cipher ? option.cipher : ''
       wx.setNavigationBarTitle({ title: '考勤情况' })
-      this.getWinWidth()
+    }
+
+    onShow() {
+      this.resetData()
       this.getData()
     }
 
     resetData() {
       this.page = 1
-      this.failOnlyFilter = false
       this.emptyLock = true
       this.$apply()
     }
@@ -314,7 +341,7 @@
       this.emptyLock = true
       this.page++
       this.$apply()
-      zajax.get(URL.attndSituation, reqData)
+      return zajax.get(URL.attndSituation, reqData)
         .then(res => {
           let body = res.data
           let code = body.code
@@ -337,38 +364,56 @@
           this.$apply()
         })
         .catch(err => {})
+        wx.stopPullDownRefresh()
+    }
+
+    //检查位置
+    checkLocation() {
+      for (let key in this.location) {
+        if (!isNumber(this.location[key])) {
+          return false
+        }
+      }
+      return true
     }
 
     async signIn() {
-      this.showToast(ToastType.LOADING, '正在签到')
-      let latitude
-      let longitude
-      let accuracy
+      this.showToast(ToastType.LOADING, '获取位置')
       // 获取经纬度
       await zmap.getLocation()
         .then(res => {
-          latitude = res.latitude
-          longitude = res.longitude
-          accuracy = res.accuracy
+          this.location.latitude = res.latitude
+          this.location.longitude = res.longitude
+          this.location.accuracy = res.accuracy
+          this.$apply()
         })
         .catch(err => {})
-
-      if (latitude === undefined || longitude === undefined || accuracy === undefined) {
-        this.showToast(ToastType.FAIL, '未获取位置')
+      this.hideToast()
+      let checkLoc = this.checkLocation()
+      if (!checkLoc) {
+        wx.navigateTo({ url: 'auth' })
         return
       }
-
+      this.showToast(ToastType.LOADING, '正在签到')
       // 提交签到
       let reqData = {
         cipher: this.cipher,
-        location: { latitude, longitude, accuracy }
+        location: this.location
       }
       await zajax.post(URL.signIn, reqData)
         .then(res => {
           let body = res.data
           let code = body.code
           if (code !== CODE.GLOBAL_SUCCESS) {
-            this.showToast(ToastType.FAIL, '签到失败')
+            let msg = ''
+            switch (body.data) {
+              case SigninType.ARRIVED: msg = '签到成功'; break;
+              case SigninType.DISTANCE_OUT: msg = '距离太远'; break;
+              case SigninType.TIME_OUT: msg = '考勤已结束'; break;
+              case SigninType.NOT_ARRIVED: msg = '签到失败'; break;
+              default: msg = '签到失败'; break;
+            }
+            this.showToast(ToastType.FAIL, msg)
             return
           }
           this.showToast(ToastType.SUCCESS, '签到成功')
@@ -377,6 +422,11 @@
           this.showToast(ToastType.FAIL, '签到失败')
         })
 
+      this.resetData()
+      this.getResponserList()
+    }
+
+    onPullDownRefresh() {
       this.resetData()
       this.getResponserList()
     }
@@ -409,7 +459,7 @@
       },
       onSignIn() {
         this.signIn()
-      }
+      },
     }
 
   }

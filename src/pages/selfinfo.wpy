@@ -58,28 +58,29 @@
       this.initData()
     }
 
+    onShow() {
+      this.getData()
+    }
+
     initData() {
-      
+      wx.showNavigationBarLoading()
       this.nameModel = { type: Type.TEXT, label: '名字', readonly: false, length: 50, value: '', hint: '请填写真实姓名' }
       this.idModel = { type: Type.TEXT, label: 'ID', readonly: false, length: 50, value: '', hint: '可以填写学号或工号' }
       this.btnModel = [
         { name: '保存', emit: 'save-btn', color: '#00897B' },
       ]
-      // this.btnModel = [
-      //   { name: '进入授权页', emit: 'auth-btn', color: '#00897B' },
-      // ]
-      this.getData()
       this.isShow = true
     }
 
     // 获取用户信息
     async getData() {
-      wx.showNavigationBarLoading()
       await zmid.getSelfinfo().then(res => {
         this.nameModel.value = res.name ? res.name : ''
         this.idModel.value = res.stuid ? res.stuid : ''
       })
-      wx.hideNavigationBarLoading()
+      setTimeout(() => {
+        wx.hideNavigationBarLoading()
+      }, 1000);
     }
 
     //更新用户信息

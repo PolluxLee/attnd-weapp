@@ -94,12 +94,14 @@
       }
       &--name {
         white-space: nowrap;
+        overflow: auto;
         color: black;
         font-size: 30rpx;
         margin: 4rpx 0;
       }
       &--id {
         white-space: nowrap;
+        overflow: auto;
         color: $font;
         font-size: 24rpx;
         margin: 4rpx 0;
@@ -124,13 +126,13 @@
   <view class="groupinfo">
     <view class="groupinfo__header">
       <view class="groupinfo__title">{{groupInfo.name}}</view>
-      <view class="groupinfo__p">管理者：{{groupInfo.creator}}</view>
+      <view class="groupinfo__p">管理者：{{groupInfo.creator_name}}</view>
       <view class="groupinfo__p">人数：{{count}}</view>
       <image class="groupinfo__remove" src="{{Icon.remove}}" mode="scaleToFill"/>
     </view>
     <view class="groupinfo__list">
       <view class="groupinfo__item" wx:for-items="{{userList}}" wx:for-item="stu" wx:key="id">
-        <view class="groupinfo__item--avator">{{el.avator}}</view>
+        <view class="groupinfo__item--avator">{{stu.avator}}</view>
         <view class="groupinfo__item--info">
           <view class="groupinfo__item--name">{{stu.name}}</view>
           <view class="groupinfo__item--id">ID: {{stu.stu_id}}</view>
@@ -172,17 +174,25 @@
 
     onLoad(option) {
       wx.setNavigationBarTitle({ title: '录入' })
-      this.groupId = option.query
+      this.groupId = option.groupid
+    }
+
+    onShow() {
+      this.page = 1
+      this.getData()
     }
 
     async getData() {
       wx.showNavigationBarLoading()
-      await this.getUserList()
+      let a = this.getGroupInfo()
+      let b = this.getUserList()
+      await a
+      await b
       wx.hideNavigationBarLoading()
     }
 
     getGroupInfo() {
-      zajax.get(URL.group)
+      return zajax.get(URL.group, { group_id: this.groupId })
         .then(res => {
           let body = res.data
           let code = body.code
@@ -199,6 +209,9 @@
         page: this.page,
         page_size: this.pageSize
       }
+      this.page++
+      this.$apply()
+
       return zajax.get(URL.groupUserList, reqData)
         .then(res => {
           let body = res.data
@@ -206,11 +219,13 @@
           if (code !== CODE.GLOBAL_SUCCESS) return
           this.count = Number.isInteger(body.data.count) ? body.data.count : 0
           body.data.user_list = Array.isArray(body.data.user_list) ? body.data.user_list : []
+
           if (paging) this.userList = this.userList.concat(body.data.user_list)
           else this.userList = body.data.user_list
           this.userList = this.userList.map(el => {
             if (typeof el.name === 'string') {
               el.avator = el.name[0].toUpperCase()
+              console.log(el.avator)
             }
             return el
           })

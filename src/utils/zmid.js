@@ -25,9 +25,9 @@ zmid.getOpenid = () => zstore.get(zstore.openid)
 
 // 验证个人信息
 zmid.checkSelfinfo = () => {
-  zlog.log({ id,name }, 'zmid/checkSelfinfo')
   let id = zstore.get(zstore.id)
   let name = zstore.get(zstore.name)
+  zlog.log({ id, name }, 'zmid/checkSelfinfo')
   if (typeof name === 'string' && name && Number.isInteger(id)) {
     return true
   }

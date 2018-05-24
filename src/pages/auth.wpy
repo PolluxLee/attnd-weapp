@@ -81,13 +81,12 @@
     initData() {
       wx.showNavigationBarLoading()
       setTimeout(() => {
-        this.isShow = true
-        this.$apply()
         wx.hideNavigationBarLoading()
-      }, 1500);
+      }, 1000);
       this.authModel = [
         { name: '立即授权', color: '#00897B', openType: 'openSetting' },
       ]
+      this.isShow = true
     }
 
     methods = {
