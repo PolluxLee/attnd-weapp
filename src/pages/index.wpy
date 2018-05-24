@@ -111,6 +111,19 @@
           if (!cipher) return
           // 根据口令的第一个字母判断考勤类型，从而跳转到不同页面
           if (cipher[0] === 'S') {
+            this.showToast(ToastType.LOADING, '获取数据')
+            zajax.post(URL.signIn, { cipher, location: {latitude:0,longitude:0,accuracy:0} })
+              .then(res => {
+                let body = res.data
+                let code = body.code
+                if (code !== CODE.GLOBAL_SUCCESS) {
+                  this.showToast(ToastType.FAIL, '加入失败')
+                  return
+                }
+                this.showToast(ToastType.SUCCESS, '加入成功', 1000)
+                this.$invoke('attndModal','hideModal')
+              })
+              .catch(err => {})
 
           } else {
             this.showToast(ToastType.LOADING, '获取数据')
