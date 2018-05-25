@@ -176,24 +176,24 @@
     scroll-y="true" lower-threshold="50" bindscrolltolower="onScrollToLower">
     <view class="attnd" wx:if="{{isShow}}">
       <view class="attnd__header">
-        <view class="attnd__title">{{baseInfo.attnd_name}}</view>
+        <view class="attnd__title">{{baseInfo.attnd_name}}{{attndState}}</view>
         <view class="attnd__p attnd__p--pwd">口令：{{baseInfo.cipher}}</view>
         <view class="attnd__p">时间：{{baseInfo.start_time}}</view>
         <view class="attnd__p">持续：{{baseInfo.last}} 分钟</view>
         <view class="attnd__p">发布者：{{baseInfo.teacher_name}}</view>
         <view class="attnd__p">名单：{{baseInfo.group_name}}</view>
         <view class="attnd__p">地点：{{baseInfo.addr_name}}</view>
-        <image class="attnd__remove" src="{{Icon.remove}}" mode="scaleToFill" @tap="onClickRemove"/>
+        <image class="attnd__remove" wx:if="{{displayRemove}}" src="{{Icon.remove}}" mode="scaleToFill" @tap="onClickRemove"/>
       </view>
       <view class="attnd__list">
         <view class="attnd__oper">
-          <view class="attnd__count">人数：1 / 49</view>
-          <view class="attnd__filter" @tap="toggleFilter">
-            <view class="attnd__filter--text">{{failOnlyFilter ? '未到' : '全部'}}</view>
+          <view class="attnd__count">{{displayCount}}</view>
+          <view class="attnd__filter" @tap="attndListFilter">
+            <view class="attnd__filter--text">{{filterListStatus}}</view>
             <image class="attnd__filter--img" src="{{Icon.triangle}}" mode="scaleToFill"/>
           </view>
         </view>
-        <view class="attnd__item attnd__item--self" wx:if="{{self}}">
+        <view class="attnd__item attnd__item--self" wx:if="{{identity===Identity.STUDENT && isShowSelf}}">
           <view class="attnd__item--avator">{{self.avator}}</view>
           <view class="attnd__item--info">
             <view class="attnd__item--name">{{self.name}}{{self.id ? '（'+ self.stu_id +'）' : ''}}</view>
@@ -216,7 +216,7 @@
             <view class="attnd__item--name">{{stu.name}}{{stu.id ? '（'+ stu.stu_id +'）' : ''}}</view>
             <view class="attnd__item--location">距离：{{stu.distance}}m</view>
           </view>
-          <view class="attnd__item--icon" @tap="toggleSigninStatus">
+          <view class="attnd__item--icon" @tap="toggleSigninFilter({{stu.openid}})">
             <image wx:if="{{stu.attnd_status===SigninType.ARRIVED}}" src="{{Icon.attndArrived}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
             <image wx:if="{{stu.attnd_status===SigninType.DISTANCE_OUT}}" src="{{Icon.attndDistanceOut}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
             <image wx:if="{{stu.attnd_status===SigninType.TIME_OUT}}" src="{{Icon.attndTimeOut}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
@@ -236,7 +236,7 @@
           <view class="attnd__baseline--text">{{emptyMsg}}</view>
         </view>
       </view>
-      <view class="attnd__resp" @tap="onSignIn">签到</view>
+      <view class="attnd__resp" @tap="onSignIn" wx:if="{{displaySignin}}">签到</view>
       <toast />
     </view>
   </scroll-view>
@@ -247,10 +247,13 @@
   import { Icon } from '../assets/icon/icon'
   import AToast from '../mixins/a-toast'
   import Toast from 'wepy-com-toast'
-  import { ToastType, URL, CODE, SigninType } from '../share/consts'
+  import { ToastType, URL, CODE, SigninType, AttndStatus, Identity } from '../share/consts'
   import { isNumber, getTimeFormat } from '../share/funcs'
   import zajax from '../utils/zajax'
   import zmap from '../utils/zmap'
+  import zlog from '../utils/zlog'
+  import zmid from '../utils/zmid'
+  import zstore from '../utils/zstore'
 
   export default class Attnd extends wepy.page {
 
@@ -263,15 +266,23 @@
     data = {
       Icon: Icon,
       SigninType: SigninType,
-      isShow: false,
+      AttndStatus: AttndStatus,
+      Identity: Identity,
       cipher: '',
+      isShow: false,
+      
+      self: {}, 
       baseInfo: {},
       attndList: [],
-      self: {},
+      identity: Identity.VISITOR,   //身份
+      signInFilter: SigninType.SIGNIN_ALL,    //筛选
+      attndStatus: 0,    //考勤类型，负数为结束
+
       page: 1,
       pageSize: 10,
+      presentCnt: 0,
       count: 0,
-      failOnlyFilter: false,
+
       emptyLock: true,   //空列表提示锁
       baselineMsg: '没有更多了',
       emptyMsg: '无签到信息',
@@ -286,32 +297,69 @@
       toast: Toast
     }
 
+    computed = {
+      // 进行中和结束的状态
+      attndState () {
+        if (Number.isInteger(this.attndStatus) && this.attndStatus < 0) return '（已结束）'
+        if (Number.isInteger(this.attndStatus) && this.attndStatus > 0) return '（进行中）'
+        return ''
+      },
+      // 人数的显示
+      displayCount() {
+        // 有用户组的录入
+        if (this.attndStatus === AttndStatus.ATTND_NORMAL
+          && Number.isInteger(this.presentCnt)
+          && Number.isInteger(this.count)) {
+            return `人数：${this.presentCnt} / ${this.count}`
+        }
+        // 其他情况
+        if (Number.isInteger(this.count)) return `人数：${this.count}`
+        return ''
+      },
+      // 控制签到按钮的显示
+      displaySignin() {
+        if (this.identity === Identity.STUDENT) return true
+        return false
+      },
+      // 控制删除的显示
+      displayRemove() {
+        if (this.identity === Identity.TEACHER && this.attndStatus < 0) return true
+        return false
+      },
+      // 筛选后的列表状态
+      filterListStatus() {
+        switch (this.signInFilter) {
+          case SigninType.SIGNIN_ALL: return '全部'
+          case SigninType.DISTANCE_OUT: return '迟到'
+          case SigninType.TIME_OUT: return '超出距离'
+          case SigninType.NOT_ARRIVED: return '未到'
+        }
+      },
+      // 是否显示 self
+      isShowSelf() {
+        if (JSON.stringify(this.self) === '{}') return false
+        return true
+      }
+
+    }
+
     onLoad(option) {
-      console.log(option)
+      zlog.log(option)
       this.cipher = option.cipher ? option.cipher : ''
       wx.setNavigationBarTitle({ title: '考勤情况' })
     }
 
     onShow() {
-      this.resetData()
       this.getData()
-    }
-
-    resetData() {
-      this.page = 1
-      this.emptyLock = true
-      this.$apply()
     }
 
     // 获取考勤信息
     async getData() {
       wx.showNavigationBarLoading()
-      let a = this.getAttndInfo()
-      let b = this.getResponserList()
-      await a
+      await this.getAttndInfo()
       this.isShow = true
       this.$apply()
-      await b
+      await this.getResponserList() 
       wx.hideNavigationBarLoading()
     }
 
@@ -322,12 +370,27 @@
           let body = res.data
           let code = body.code
           if (code !== CODE.GLOBAL_SUCCESS) return
-          this.baseInfo = body.data
-          let date = new Date(this.baseInfo.start_time)
-          this.baseInfo.start_time = `${getTimeFormat(date, 'date', '/')} ${getTimeFormat(date, 'time', ':')}`
+          this.processAttndInfo(body.data)
           this.$apply()
         })
         .catch(err => {})
+    }
+
+    // 考勤基本信息数据处理
+    processAttndInfo(baseInfo) {
+      this.baseInfo = baseInfo
+      // 获取考勤状态，负数表示考勤结束
+      this.attndStatus = this.baseInfo.status
+      // 判别身份，做权限控制渲染和交互
+      let id = zstore.get(zstore.id)
+      if (id === this.baseInfo.teacher_id) {
+        this.identity = Identity.TEACHER
+      } else {
+        this.identity = Identity.STUDENT
+      }
+      // 数据加工
+      let date = new Date(this.baseInfo.start_time)
+      this.baseInfo.start_time = `${getTimeFormat(date, 'date', '/')} ${getTimeFormat(date, 'time', ':')}`
     }
 
     // 获取签到者列表
@@ -335,46 +398,53 @@
       let reqData = {
         page: this.page,
         page_size: this.pageSize,
-        fail_only: this.failOnlyFilter,
-        cipher: this.cipher ? this.cipher : ''
+        signin_status: this.signInFilter,
+        cipher: this.cipher ? this.cipher : '',
+        attnd_id: this.baseInfo.attnd_id
       }
       this.emptyLock = true
-      this.page++
       this.$apply()
       await zajax.get(URL.attndSituation, reqData)
         .then(res => {
           let body = res.data
           let code = body.code
           if (code !== CODE.GLOBAL_SUCCESS) return
-          this.count = Number.isInteger(body.data.count) ? body.data.count : 0
-          body.data.attnds = Array.isArray(body.data.attnds) ? body.data.attnds : []
-          if (paging) this.attndList = this.attndList.concat(body.data.attnds)
-          else this.attndList = body.data.attnds
-          this.attndList = this.attndList.map(el => {
-            if (typeof el.name === 'string') {
-              el.avator = el.name[0].toUpperCase()
-            }
-            if (isNumber(el.distance)) el.distance = Math.floor(el.distance)
-            else el.distance = -1
-            return el
-          })
-          this.$apply()
-          this.isShow = true
-          setTimeout(() => { this.emptyLock = false; this.$apply() }, 200);
+          this.processGetList(body.data)
           this.$apply()
         })
         .catch(err => {})
+      this.isShow = true
+      this.$apply()
+      setTimeout(() => { this.emptyLock = false; this.$apply() }, 200);
+      this.$apply()
       wx.stopPullDownRefresh()
     }
 
-    //检查位置
-    checkLocation() {
-      for (let key in this.location) {
-        if (!isNumber(this.location[key])) {
-          return false
-        }
+    // 签到列表数据处理
+    processGetList(attndInfo) {
+      // 获取人数
+      this.count = attndInfo.count
+      this.presentCnt = attndInfo.present_count
+      // 获取自己，将自己置顶
+      this.self = attndInfo.my_signin
+      if (Array.isArray(attndInfo.attnds)) {
+        if (paging) this.attndList = this.attndList.concat(attndInfo.attnds)
+        else this.attndList = attndInfo.attnds
       }
-      return true
+      // 加工数据
+      if (typeof this.self.name === 'string') {
+          this.self.avator = this.self.name[0].toUpperCase()
+      }
+      if (isNumber(this.self.distance)) this.self.distance = Math.floor(this.self.distance)
+      else el.distance = -1
+      this.attndList = this.attndList.map(el => {
+        if (typeof el.name === 'string') {
+          el.avator = el.name[0].toUpperCase()
+        }
+        if (isNumber(el.distance)) el.distance = Math.floor(el.distance)
+        else el.distance = -1
+        return el
+      })
     }
 
     async signIn() {
@@ -398,7 +468,8 @@
       // 提交签到
       let reqData = {
         cipher: this.cipher,
-        location: this.location
+        location: this.location,
+        attnd_id: this.baseInfo.attnd_id
       }
       await zajax.post(URL.signIn, reqData)
         .then(res => {
@@ -407,30 +478,89 @@
           if (code !== CODE.GLOBAL_SUCCESS) {
             let msg = ''
             switch (body.data) {
-              case SigninType.ARRIVED: msg = '签到成功'; break;
-              case SigninType.DISTANCE_OUT: msg = '距离太远'; break;
-              case SigninType.TIME_OUT: msg = '考勤已结束'; break;
-              case SigninType.NOT_ARRIVED: msg = '签到失败'; break;
-              default: msg = '签到失败'; break;
+              case SigninType.ARRIVED: msg = '签到成功'; break
+              case SigninType.DISTANCE_OUT: msg = '超出距离'; break
+              case SigninType.TIME_OUT: msg = '考勤已结束'; break
+              case SigninType.NOT_ARRIVED: msg = '签到失败'; break
+              default: msg = '签到失败'; break
             }
             this.showToast(ToastType.FAIL, msg)
             return
           }
           this.showToast(ToastType.SUCCESS, '签到成功')
         })
-        .catch(err => {
-          this.showToast(ToastType.FAIL, '签到失败')
+        .catch(err => { this.showToast(ToastType.FAIL, '签到失败') })
+      this.page = 1
+      this.$apply()
+      this.getResponserList()
+    }
+
+    //检查位置
+    checkLocation() {
+      for (let key in this.location) {
+        if (!isNumber(this.location[key])) {
+          return false
+        }
+      }
+      return true
+    }
+
+    methods = {
+      // 修改签到者状态
+      toggleSigninFilter(openid) {
+        if (identity !== Identity.TEACHER) return
+        if (!openid) return
+        wx.showActionSheet({
+          itemList: ['已到', '超出距离', '迟到', '未到'],
+          success: res => {
+            let tapIndex = res.tapIndex
+            this.updateSigninStatus(tapIndex, openid)
+          },
+          fail: res => console.log(res.errMsg)
         })
-
-      this.resetData()
-      this.getResponserList()
+      },
+      // 筛选不同状态的签到列表
+      attndListFilter() {
+        wx.showActionSheet({
+          itemList: ['全部', '超出距离', '迟到', '未到'],
+          success: res => {
+            this.signInFilter = res.tapIndex
+            this.page = 1
+            this.$apply()
+            this.getResponserList()
+          },
+          fail: res => console.log(res.errMsg)
+        })
+      },
+      onScrollToLower() {
+        this.page++
+        this.getResponserList(true)
+      },
+      onSignIn() {
+        this.signIn()
+      },
+      onClickRemove() {
+        if (identity !== Identity.TEACHER) return
+        wx.showModal({
+          title: '提示',
+          content: '确认删除此考勤？',
+          success: res => {
+            if (res.confirm) {
+              this.removeAttnd()
+            }
+          }
+        })
+      },
     }
 
+    
+    // 监听下拉
     onPullDownRefresh() {
-      this.resetData()
+      this.page = 1
       this.getResponserList()
     }
 
+    // 删除考勤
     removeAttnd() {
       let cipher = this.cipher
       if (!cipher) {
@@ -450,49 +580,30 @@
           this.showToast(ToastType.SUCCESS, '删除成功', 1000)
           wx.navigateBack()
         })
-        .catch(err => {})
+        .catch(err => { this.showToast(ToastType.FAIL, '删除失败', 1000) })
     }
 
-    methods = {
-      toggleSigninStatus() {
-        
-      },
-      toggleFilter() {
-        wx.showActionSheet({
-          itemList: ['全部', '未到'],
-          success: res => {
-            let tapIndex = res.tapIndex
-            if (tapIndex === 0) this.failOnlyFilter = false
-            else if (tapIndex === 1) this.failOnlyFilter = true
-            // 重置页码
-            this.page = 1
-            this.count = 0
-            this.emptyLock = true
-            this.$apply()
-            this.getResponserList()
-          },
-          fail: res => {
-            console.log(res.errMsg)
+    // 结束考勤后修改签到状态
+    updateSigninStatus(status, openid) {
+      this.showToast(ToastType.LOADING, '正在修改')
+      let reqData = {
+        cipher: this.cipher ? this.cipher : '',
+        openid,
+        attnd_status: status
+      }
+      zajax.postFD(URL.updateSignIn, reqData)
+        .then(res => {
+          this.hideToast()
+          let body = res.data
+          let code = body.code
+          if (code !== CODE.GLOBAL_SUCCESS) {
+            this.showToast(ToastType.FAIL, '修改失败', 1000)
+            return
           }
+          this.$apply()
+          this.getResponserList()
         })
-      },
-      onScrollToLower() {
-        this.getResponserList(true)
-      },
-      onSignIn() {
-        this.signIn()
-      },
-      onClickRemove() {
-        wx.showModal({
-          title: '提示',
-          content: '确认删除此考勤？',
-          success: res => {
-            if (res.confirm) {
-              this.removeAttnd()
-            }
-          }
-        })
-      },
+        .catch(err => {})
     }
 
   }

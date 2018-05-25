@@ -11,7 +11,20 @@ export const TypeInModal = { NOTITLE_TEXT: 0, TEXT: 1 }
 export const ToastType = { SUCCESS: 0, FAIL: 1, LOADING: 2, HINT: 3 }
 
 // 签到状态
-export const SigninType = { ARRIVED: 1, DISTANCE_OUT: 2, TIME_OUT: 3, NOT_ARRIVED: 4 }
+export const SigninType = { SIGNIN_ALL: 0, ARRIVED: 1, DISTANCE_OUT: 2, TIME_OUT: 3, NOT_ARRIVED: 4 }
+
+// 口令类型
+// G: 发布时候填写新的组，考勤签到顺便录入该组成员
+// A: 发布时选择曾经使用过的用户组
+// N: 发布不填写用户组
+// S: 用于单独录入的口令
+export const CipherType = { GROUP: 'A', NEW_GROUP: 'G', NO_GROUP: 'N', ENTRY: 'S' }
+
+// 身份：两个字段分别代表发布者和签到者
+export const Identity = { TEACHER: 0, STUDENT: 1, VISITOR: 3 }
+
+// 考勤状态
+export const AttndStatus = { ATTND_NORMAL: 1, ATTND_ENTRY: 2, ATTND_NOGROUP: 3, ATTND_DEL: 4 }
 
 // API URL
 const HOST = 'http://liziyi.top'
@@ -34,6 +47,7 @@ export const URL = {
   historyPlaceNames: `${PREFIX}/api/attnd/hisaddr`,
   attndSituation: `${PREFIX}/api/attnd/situation`,
   signIn: `${PREFIX}/api/attnd/signin`,
+  updateSignIn: `${PREFIX}/api/signin/status/upd`,
 
 }
 
