@@ -193,7 +193,7 @@
             <image class="attnd__filter--img" src="{{Icon.triangle}}" mode="scaleToFill"/>
           </view>
         </view>
-        <view class="attnd__item attnd__item--self" wx:if="{{identity===Identity.STUDENT && isShowSelf}}">
+        <view class="attnd__item attnd__item--self" wx:if="{{isShowSelf}}">
           <view class="attnd__item--avator">{{self.avator}}</view>
           <view class="attnd__item--info">
             <view class="attnd__item--name">{{self.name}}{{self.id ? '（'+ self.stu_id +'）' : ''}}</view>
@@ -330,15 +330,17 @@
       filterListStatus() {
         switch (this.signInFilter) {
           case SigninType.SIGNIN_ALL: return '全部'
-          case SigninType.DISTANCE_OUT: return '迟到'
-          case SigninType.TIME_OUT: return '超出距离'
+          case SigninType.DISTANCE_OUT: return '超出距离'
+          case SigninType.TIME_OUT: return '迟到'
           case SigninType.NOT_ARRIVED: return '未到'
         }
       },
-      // 是否显示 self
+      // 控制个人签到置顶的显示
       isShowSelf() {
-        if (JSON.stringify(this.self) === '{}') return false
-        return true
+        if (!JSON.stringify(this.self) === '{}' 
+          && identity===Identity.STUDENT 
+          && (this.signInFilter === SigninType.SIGNIN_ALL || this.signInFilter === this.self.attnd_status) ) return true
+        return false
       }
 
     }
@@ -370,7 +372,19 @@
           let body = res.data
           let code = body.code
           if (code !== CODE.GLOBAL_SUCCESS) return
-          this.processAttndInfo(body.data)
+          this.baseInfo = body.data
+          // 获取考勤状态，负数表示考勤结束
+          this.attndStatus = this.baseInfo.status
+          // 判别身份，做权限控制渲染和交互
+          let id = zstore.get(zstore.id)
+          if (id === this.baseInfo.teacher_id) {
+            this.identity = Identity.TEACHER
+          } else {
+            this.identity = Identity.STUDENT
+          }
+          // 数据加工
+          let date = new Date(this.baseInfo.start_time)
+          this.baseInfo.start_time = `${getTimeFormat(date, 'date', '/')} ${getTimeFormat(date, 'time', ':')}`
           this.$apply()
         })
         .catch(err => {})
@@ -378,19 +392,7 @@
 
     // 考勤基本信息数据处理
     processAttndInfo(baseInfo) {
-      this.baseInfo = baseInfo
-      // 获取考勤状态，负数表示考勤结束
-      this.attndStatus = this.baseInfo.status
-      // 判别身份，做权限控制渲染和交互
-      let id = zstore.get(zstore.id)
-      if (id === this.baseInfo.teacher_id) {
-        this.identity = Identity.TEACHER
-      } else {
-        this.identity = Identity.STUDENT
-      }
-      // 数据加工
-      let date = new Date(this.baseInfo.start_time)
-      this.baseInfo.start_time = `${getTimeFormat(date, 'date', '/')} ${getTimeFormat(date, 'time', ':')}`
+
     }
 
     // 获取签到者列表
@@ -409,7 +411,30 @@
           let body = res.data
           let code = body.code
           if (code !== CODE.GLOBAL_SUCCESS) return
-          this.processGetList(body.data)
+          // 获取人数
+          let attndInfo = body.data
+          this.count = attndInfo.count
+          this.presentCnt = attndInfo.present_count
+          // 获取自己，将自己置顶
+          this.self = attndInfo.my_signin
+          if (Array.isArray(attndInfo.attnds)) {
+            if (paging) this.attndList = this.attndList.concat(attndInfo.attnds)
+            else this.attndList = attndInfo.attnds
+          }
+          // 加工数据
+          if (typeof this.self.name === 'string') {
+              this.self.avator = this.self.name[0].toUpperCase()
+          }
+          if (isNumber(this.self.distance)) this.self.distance = Math.floor(this.self.distance)
+          else el.distance = -1
+          this.attndList = this.attndList.map(el => {
+            if (typeof el.name === 'string') {
+              el.avator = el.name[0].toUpperCase()
+            }
+            if (isNumber(el.distance)) el.distance = Math.floor(el.distance)
+            else el.distance = -1
+            return el
+          })
           this.$apply()
         })
         .catch(err => {})
@@ -418,33 +443,6 @@
       setTimeout(() => { this.emptyLock = false; this.$apply() }, 200);
       this.$apply()
       wx.stopPullDownRefresh()
-    }
-
-    // 签到列表数据处理
-    processGetList(attndInfo) {
-      // 获取人数
-      this.count = attndInfo.count
-      this.presentCnt = attndInfo.present_count
-      // 获取自己，将自己置顶
-      this.self = attndInfo.my_signin
-      if (Array.isArray(attndInfo.attnds)) {
-        if (paging) this.attndList = this.attndList.concat(attndInfo.attnds)
-        else this.attndList = attndInfo.attnds
-      }
-      // 加工数据
-      if (typeof this.self.name === 'string') {
-          this.self.avator = this.self.name[0].toUpperCase()
-      }
-      if (isNumber(this.self.distance)) this.self.distance = Math.floor(this.self.distance)
-      else el.distance = -1
-      this.attndList = this.attndList.map(el => {
-        if (typeof el.name === 'string') {
-          el.avator = el.name[0].toUpperCase()
-        }
-        if (isNumber(el.distance)) el.distance = Math.floor(el.distance)
-        else el.distance = -1
-        return el
-      })
     }
 
     async signIn() {
@@ -475,21 +473,27 @@
         .then(res => {
           let body = res.data
           let code = body.code
-          if (code !== CODE.GLOBAL_SUCCESS) {
-            let msg = ''
-            switch (body.data) {
-              case SigninType.ARRIVED: msg = '签到成功'; break
-              case SigninType.DISTANCE_OUT: msg = '超出距离'; break
-              case SigninType.TIME_OUT: msg = '考勤已结束'; break
-              case SigninType.NOT_ARRIVED: msg = '签到失败'; break
-              default: msg = '签到失败'; break
-            }
-            this.showToast(ToastType.FAIL, msg)
-            return
+          let msg = ''
+          switch (code) {
+            case CODE.GLOBAL_SUCCESS: 
+              switch (body.data) {
+                case SigninType.ARRIVED: msg = '签到成功'; break
+                case SigninType.DISTANCE_OUT: msg = '超出距离'; break
+                case SigninType.TIME_OUT: msg = '考勤已结束'; break
+                case SigninType.NOT_ARRIVED: msg = '签到失败'; break
+                default: msg = '签到失败'; break
+              }
+            case ATTND_NOT_EXIST: msg = '考勤不存在'; break
+            case ATTND_CIPHER_NOT_CORRESPOND: msg = '签到失败'; break
+            case ATTND_HAS_SIGNIN: msg = '已签到'; break
+            case ATTND_EXPIRED: msg = '考勤已结束'; break
+            case ATTND_NOT_BELONG: msg = '你不在名单内'; break
+            case ATTND_CREATOR: msg = '无需签到'; break
+            default: msg = '签到失败'; break
           }
-          this.showToast(ToastType.SUCCESS, '签到成功')
+          this.showToast(ToastType.SUCCESS, msg, 2000)
         })
-        .catch(err => { this.showToast(ToastType.FAIL, '签到失败') })
+        .catch(err => { this.showToast(ToastType.FAIL, '签到失败', 2000) })
       this.page = 1
       this.$apply()
       this.getResponserList()
@@ -508,13 +512,19 @@
     methods = {
       // 修改签到者状态
       toggleSigninFilter(openid) {
-        if (identity !== Identity.TEACHER) return
+        if (this.identity !== Identity.TEACHER) return
         if (!openid) return
         wx.showActionSheet({
           itemList: ['已到', '超出距离', '迟到', '未到'],
           success: res => {
-            let tapIndex = res.tapIndex
-            this.updateSigninStatus(tapIndex, openid)
+            let status
+            switch (res.tapIndex) {
+              case 0: status = SigninType.ARRIVED; break
+              case 1: status = SigninType.DISTANCE_OUT; break
+              case 2: status = SigninType.TIME_OUT; break
+              case 3: status = SigninType.NOT_ARRIVED; break
+            }
+            this.updateSigninStatus(status, openid)
           },
           fail: res => console.log(res.errMsg)
         })
@@ -524,7 +534,12 @@
         wx.showActionSheet({
           itemList: ['全部', '超出距离', '迟到', '未到'],
           success: res => {
-            this.signInFilter = res.tapIndex
+            switch (res.tapIndex) {
+              case 0: this.signInFilter = SigninType.SIGNIN_ALL; break
+              case 1: this.signInFilter = SigninType.DISTANCE_OUT; break
+              case 2: this.signInFilter = SigninType.TIME_OUT; break
+              case 3: this.signInFilter = SigninType.NOT_ARRIVED; break
+            }
             this.page = 1
             this.$apply()
             this.getResponserList()

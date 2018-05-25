@@ -91,7 +91,7 @@
       this.nameModel = { type: Type.TEXT_SELECT, label: '考勤名称', readonly: false, length: 50, value: '', hint: '例如：计网', extra: '选择', options: [] }
       this.dateModel = { type: Type.DATE, label: '日期', readonly: false, options: [], value: '' }
       this.timeModel = { type: Type.TIME, label: '时间', readonly: false, options: [], value: '' }
-      this.lastModel = { type: Type.SELECT, label: '持续', readonly: false, options: [], suffix: '分钟', value: '5', }
+      this.lastModel = { type: Type.SELECT, label: '持续', readonly: false, options: [], suffix: '分钟', value: '10', }
       this.groupModel = { type: Type.TEXT_SELECT, label: '考勤名单', readonly: false, length: 50, value: '', hint: '例如：计科151', extra: '选择', options: [] }
       this.authorModel = { type: Type.TEXT, label: '发布者', readonly: false, length: 50, value: '', hint: '填写你的名字' }
       this.placeModel = { type: Type.TEXT_SELECT, label: '地点', readonly: false, length: 50, value: '', hint: '例如：理南404', extra: '选择', options: []}
