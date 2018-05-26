@@ -15,9 +15,6 @@
     <nameInput :model.sync="nameModel"></nameInput>  
     <datePicker :model.sync="dateModel"></datePicker>
     <timePicker :model.sync="timeModel"></timePicker>
-    <lastInput :model.sync="lastModel"></lastInput>
-    <groupInput :model.sync="groupModel"></groupInput>
-    <attndTitle><view slot="title">* 输入考勤名单名称可新建考勤名单，新建的考勤名单里的成员由当次考勤确定；若已有历史名单，可点击选择选取</view></attndTitle>
     <attndTitle><view slot="title">个人信息</view></attndTitle>
     <authorInput :model.sync="authorModel"></authorInput>
     <placeInput :model.sync="placeModel"></placeInput>
@@ -50,8 +47,6 @@
       nameModel: {},
       dateModel: {},
       timeModel: {},
-      lastModel: {},
-      groupModel: {},
       authorModel: {},
       placeModel: {},
       btnModel: [],
@@ -70,8 +65,6 @@
       nameInput: AttndInput,
       datePicker: AttndInput,
       timePicker: AttndInput,
-      groupInput: AttndInput,
-      lastInput: AttndInput,
       authorInput: AttndInput,
       placeInput: AttndInput,
       toast: Toast
@@ -88,14 +81,11 @@
 
     initData() {
       wx.showNavigationBarLoading()
-      this.nameModel = { type: Type.TEXT_SELECT, label: '考勤名称', readonly: false, length: 50, value: '', hint: '例如：计网', extra: '选择', options: [] }
+      this.nameModel = { type: Type.TEXT_SELECT, label: '考勤名称', readonly: false, length: 50, value: '', hint: '例如：计网-计科151', extra: '选择', options: [] }
       this.dateModel = { type: Type.DATE, label: '日期', readonly: false, options: [], value: '' }
       this.timeModel = { type: Type.TIME, label: '时间', readonly: false, options: [], value: '' }
-      this.lastModel = { type: Type.SELECT, label: '持续', readonly: false, options: [], suffix: '分钟', value: '10', }
-      this.groupModel = { type: Type.TEXT_SELECT, label: '考勤名单', readonly: false, length: 50, value: '', hint: '例如：计科151', extra: '选择', options: [] }
       this.authorModel = { type: Type.TEXT, label: '发布者', readonly: false, length: 50, value: '', hint: '填写你的名字' }
       this.placeModel = { type: Type.TEXT_SELECT, label: '地点', readonly: false, length: 50, value: '', hint: '例如：理南404', extra: '选择', options: []}
-      this.lastModel.options = ['5','10','15','20','30','60']
 
       this.dateModel.value = getCurTime('date')
       this.timeModel.value = getCurTime('time')
@@ -109,11 +99,9 @@
     async getData() {
       let c = this.getAuthorName()
       let a = this.getHistoryAttndNames()
-      let b = this.getHistoryGroupNames()
       let d = this.getHistoryPlaceNames()
       let e = this.getLocation()
       await a
-      await b
       await c
       await d
       await e
@@ -130,19 +118,6 @@
           if (code !== CODE.GLOBAL_SUCCESS) return
           let options = body.data
           if (Array.isArray(options)) this.nameModel.options = options
-        })
-        .catch(err => {})
-    }
-
-    // 获取考勤名单名字列表
-    getHistoryGroupNames() {
-      return zajax.get(URL.historyGroupNames)
-        .then(res => {
-          let body = res.data
-          let code = body.code
-          if (code !== CODE.GLOBAL_SUCCESS) return
-          let options = body.data
-          if (Array.isArray(options)) this.groupModel.options = options
         })
         .catch(err => {})
     }
@@ -177,10 +152,6 @@
           this.$apply()
         })
         .catch(err => {})
-    }
-
-    methods = {
-
     }
 
     events = {

@@ -109,38 +109,20 @@
         confirmCallback: res => {
           let cipher = res
           if (!cipher) return
-          // 根据口令的第一个字母判断考勤类型，从而跳转到不同页面
-          if (cipher[0] === 'S') {
-            this.showToast(ToastType.LOADING, '获取数据')
-            zajax.post(URL.signIn, { cipher, location: {latitude:0,longitude:0,accuracy:0} })
-              .then(res => {
-                let body = res.data
-                let code = body.code
-                if (code !== CODE.GLOBAL_SUCCESS) {
-                  this.showToast(ToastType.FAIL, '加入失败')
-                  return
-                }
-                this.showToast(ToastType.SUCCESS, '加入成功', 1000)
-                this.$invoke('attndModal','hideModal')
-              })
-              .catch(err => {})
-
-          } else {
-            this.showToast(ToastType.LOADING, '获取数据')
-            zajax.get(URL.attnd, { cipher })
-              .then(res => {
-                this.showToast(ToastType.LOADING, '加载数据', 1000)
-                let body = res.data
-                let code = body.code
-                if (code !== CODE.GLOBAL_SUCCESS) {
-                  this.showToast(ToastType.FAIL, '口令不正确', 1000)
-                  return
-                }
-                this.$invoke('attndModal','hideModal')
-                wx.navigateTo({ url: `attnd?cipher=${cipher}` })
-              })
-              .catch(err => {})
-          }
+          this.showToast(ToastType.LOADING, '获取数据')
+          zajax.get(URL.attnd, { cipher })
+            .then(res => {
+              this.showToast(ToastType.LOADING, '加载数据', 1000)
+              let body = res.data
+              let code = body.code
+              if (code !== CODE.GLOBAL_SUCCESS) {
+                this.showToast(ToastType.FAIL, '口令不正确', 1000)
+                return
+              }
+              this.$invoke('attndModal','hideModal')
+              wx.navigateTo({ url: `attnd?cipher=${cipher}` })
+            })
+            .catch(err => {})
         },
         cancelCallback: () => {}
       }
@@ -168,7 +150,6 @@
       },
       onClickResp() {
         this.model.value = ''
-        // wx.navigateTo({ url: 'attnd?cipher=GMB3+' })
         if (!zmid.checkSelfinfo()) {
           this.showToast(ToastType.HINT, '完善信息', 1000)
           wx.navigateTo({ url: 'selfinfo' })
@@ -177,8 +158,6 @@
         this.$invoke('attndModal','showModal')
       }
     }
-
-    // 获取考勤信息
 
   }
 </script>

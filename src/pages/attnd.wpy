@@ -142,9 +142,17 @@
       align-items: center;
       color: white;
       font-size: 36rpx;
-      background: $theme;
-      &:active {
-        background: $theme-dark;
+      &--signin {
+        background: $theme;
+        &:active {
+          background: $theme-dark;
+        }
+      }
+      &--finish {
+        background: $alert;
+        &:active {
+          background: $alert-dark;
+        }
       }
     }
 
@@ -179,9 +187,7 @@
         <view class="attnd__title">{{baseInfo.attnd_name}}{{attndState}}</view>
         <view class="attnd__p attnd__p--pwd">口令：{{baseInfo.cipher}}</view>
         <view class="attnd__p">时间：{{baseInfo.start_time}}</view>
-        <view class="attnd__p">持续：{{baseInfo.last}} 分钟</view>
         <view class="attnd__p">发布者：{{baseInfo.teacher_name}}</view>
-        <view class="attnd__p">名单：{{baseInfo.group_name}}</view>
         <view class="attnd__p">地点：{{baseInfo.addr_name}}</view>
         <image class="attnd__remove" wx:if="{{displayRemove}}" src="{{Icon.remove}}" mode="scaleToFill" @tap="onClickRemove"/>
       </view>
@@ -203,11 +209,9 @@
             <image wx:if="{{self.attnd_status===SigninType.ARRIVED}}" src="{{Icon.attndArrived}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
             <image wx:if="{{self.attnd_status===SigninType.DISTANCE_OUT}}" src="{{Icon.attndDistanceOut}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
             <image wx:if="{{self.attnd_status===SigninType.TIME_OUT}}" src="{{Icon.attndTimeOut}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
-            <image wx:if="{{self.attnd_status===SigninType.NOT_ARRIVED}}" src="{{Icon.attndNotArrived}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
             <view wx:if="{{self.attnd_status===SigninType.ARRIVED}}">已到</view>
             <view wx:if="{{self.attnd_status===SigninType.DISTANCE_OUT}}">超距</view>
             <view wx:if="{{self.attnd_status===SigninType.TIME_OUT}}">超时</view>
-            <view wx:if="{{self.attnd_status===SigninType.NOT_ARRIVED}}">未到</view>
           </view>
         </view>
         <view class="attnd__item" wx:for-items="{{attndList}}" wx:for-item="stu" wx:key="id">
@@ -220,11 +224,9 @@
             <image wx:if="{{stu.attnd_status===SigninType.ARRIVED}}" src="{{Icon.attndArrived}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
             <image wx:if="{{stu.attnd_status===SigninType.DISTANCE_OUT}}" src="{{Icon.attndDistanceOut}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
             <image wx:if="{{stu.attnd_status===SigninType.TIME_OUT}}" src="{{Icon.attndTimeOut}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
-            <image wx:if="{{stu.attnd_status===SigninType.NOT_ARRIVED}}" src="{{Icon.attndNotArrived}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
             <view wx:if="{{stu.attnd_status===SigninType.ARRIVED}}">已到</view>
             <view wx:if="{{stu.attnd_status===SigninType.DISTANCE_OUT}}">超距</view>
             <view wx:if="{{stu.attnd_status===SigninType.TIME_OUT}}">超时</view>
-            <view wx:if="{{stu.attnd_status===SigninType.NOT_ARRIVED}}">未到</view>
           </view>
         </view>
         <view class="attnd__baseline" wx:if="{{count!==0 && count===attndList.length}}">
@@ -236,7 +238,8 @@
           <view class="attnd__baseline--text">{{emptyMsg}}</view>
         </view>
       </view>
-      <view class="attnd__resp" @tap="onSignIn" wx:if="{{displaySignin}}">签到</view>
+      <view class="attnd__resp attnd__resp--signin" @tap="onSignIn" wx:if="{{displaySignin}}">签到</view>
+      <view class="attnd__resp attnd__resp--finish" @tap="onFinishAttnd" wx:if="{{displayFinish}}">结束考勤</view>
       <toast />
     </view>
   </scroll-view>
@@ -321,6 +324,11 @@
         if (this.identity === Identity.STUDENT) return true
         return false
       },
+      // 控制结束按钮的显示
+      displayFinish() {
+        if (this.identity === Identity.TEACHER && this.attndStatus > 0) return true
+        return false
+      },
       // 控制删除的显示
       displayRemove() {
         if (this.identity === Identity.TEACHER && this.attndStatus < 0) return true
@@ -332,7 +340,6 @@
           case SigninType.SIGNIN_ALL: return '全部'
           case SigninType.DISTANCE_OUT: return '超出距离'
           case SigninType.TIME_OUT: return '迟到'
-          case SigninType.NOT_ARRIVED: return '未到'
         }
       },
       // 控制个人签到置顶的显示
@@ -510,14 +517,13 @@
         if (this.identity !== Identity.TEACHER) return
         if (!openid) return
         wx.showActionSheet({
-          itemList: ['已到', '超出距离', '迟到', '未到'],
+          itemList: ['已到', '超出距离', '迟到'],
           success: res => {
             let status
             switch (res.tapIndex) {
               case 0: status = SigninType.ARRIVED; break
               case 1: status = SigninType.DISTANCE_OUT; break
               case 2: status = SigninType.TIME_OUT; break
-              case 3: status = SigninType.NOT_ARRIVED; break
             }
             this.updateSigninStatus(status, openid)
           },
@@ -527,13 +533,12 @@
       // 筛选不同状态的签到列表
       attndListFilter() {
         wx.showActionSheet({
-          itemList: ['全部', '超出距离', '迟到', '未到'],
+          itemList: ['全部', '超出距离', '迟到'],
           success: res => {
             switch (res.tapIndex) {
               case 0: this.signInFilter = SigninType.SIGNIN_ALL; break
               case 1: this.signInFilter = SigninType.DISTANCE_OUT; break
               case 2: this.signInFilter = SigninType.TIME_OUT; break
-              case 3: this.signInFilter = SigninType.NOT_ARRIVED; break
             }
             this.page = 1
             this.$apply()
@@ -550,7 +555,7 @@
         this.signIn()
       },
       onClickRemove() {
-        if (identity !== Identity.TEACHER) return
+        if (this.identity !== Identity.TEACHER) return
         wx.showModal({
           title: '提示',
           content: '确认删除此考勤？',
@@ -561,12 +566,28 @@
           }
         })
       },
+      onFinishAttnd() {
+        wx.showModal({
+          title: '提示',
+          content: '在考勤结束后签到的人，会被视为迟到，确定结束考勤？',
+          success: res => {
+            if (res.confirm) {
+              
+            }
+          }
+        })
+      }
     }
 
     // 监听下拉
     onPullDownRefresh() {
       this.page = 1
       this.getResponserList()
+    }
+
+    // 结束考勤
+    finishAttnd() {
+
     }
 
     // 删除考勤

@@ -24,8 +24,6 @@
         'pages/attnd',
         'pages/config',
         'pages/selfinfo',
-        'pages/group',
-        'pages/groupinfo',
         'pages/auth'
       ],
       window: {

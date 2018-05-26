@@ -127,7 +127,7 @@
 
   &__search {
     box-sizing: border-box;
-    width: 330rpx;
+    width: 430rpx;
     height: 70rpx;
     background: white;
     @extend %box-edge;
@@ -250,13 +250,13 @@
           <view class="mine__tab--resp {{attndType===2 ? 'mine__tab--resp-active' : ''}}"
             @tap="onTagToggle({{2}})">签到</view>
         </view>
-        <view class="mine__group" @tap="onClickGroup">名单</view>
       </view>
-      <view class="mine__list">
+      <view class="mine__list" wx:if="{{isShow}}">
         <view class="mine__item" wx:for-items="{{attndList}}" wx:for-item="attnd" wx:key="id"
           @tap="onClickAttnd({{attnd.cipher}})">
           <view class="mine__item--title">{{attnd.attnd_name}}{{attnd.group_name ? '（'+attnd.group_name+'）' : ''}}</view>
           <view class="mine__item--p mine__item--p-pwd">口令：{{attnd.cipher}}</view>
+          <view class="mine__item--p" wx:if="{{attndType===2}}">发布者：{{attnd.teacher_name}}</view>
           <view class="mine__item--p">时间：{{attnd.start_time}}</view>
           <view class="mine__item--p">地点：{{attnd.addr_name}}</view>
         </view>
@@ -300,13 +300,13 @@
       addrName: '...',
       avator: '',
       attndList: [],
-
       attndType: 1,  //考勤类别，1代表我的考勤，2代表我的签到
       query: '',    //搜索参数
       page: 1,    //第几页
       pageSize: 10,   //每页数量
       count: 0,   //列表项总数
       emptyLock: true,   //空列表提示锁
+      isShow: false, 
       baselineMsg: '没有更多了',
       emptyYellMsg: '无点名信息',
       emptyRespMsg: '无签到信息',
@@ -328,6 +328,7 @@
     resetData() {
       this.page = 1
       this.query = ''
+      this.isShow = false
     }
 
     // Promise 并行开始，串行结束
@@ -388,10 +389,8 @@
           let body = res.data
           let code = body.code
           if (code !== CODE.GLOBAL_SUCCESS) return
-
           this.count = Number.isInteger(body.data.count) ? body.data.count : 0
           body.data.attnds = Array.isArray(body.data.attnds) ? body.data.attnds : []
-
           if (paging) this.attndList = this.attndList.concat(body.data.attnds)
           else this.attndList = body.data.attnds
           this.attndList.map(el => {
@@ -403,6 +402,7 @@
         .catch(err => {})
       wx.hideNavigationBarLoading()
       setTimeout(() => { this.emptyLock = false; this.$apply() }, 200)
+      this.isShow = true
       this.$apply()
     }
 
@@ -425,9 +425,6 @@
             zlog.log(res.errMsg)
           }
         })
-      },
-      onClickGroup() {
-        wx.navigateTo({ url: 'group' })
       },
       onQueryInput(event) {
         this.query = event.detail.value
