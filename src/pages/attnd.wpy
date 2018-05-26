@@ -390,11 +390,6 @@
         .catch(err => {})
     }
 
-    // 考勤基本信息数据处理
-    processAttndInfo(baseInfo) {
-
-    }
-
     // 获取签到者列表
     async getResponserList(paging) {
       let reqData = {
@@ -416,17 +411,10 @@
           this.count = attndInfo.count
           this.presentCnt = attndInfo.present_count
           // 获取自己，将自己置顶
-          this.self = attndInfo.my_signin
           if (Array.isArray(attndInfo.attnds)) {
             if (paging) this.attndList = this.attndList.concat(attndInfo.attnds)
             else this.attndList = attndInfo.attnds
           }
-          // 加工数据
-          if (typeof this.self.name === 'string') {
-              this.self.avator = this.self.name[0].toUpperCase()
-          }
-          if (isNumber(this.self.distance)) this.self.distance = Math.floor(this.self.distance)
-          else el.distance = -1
           this.attndList = this.attndList.map(el => {
             if (typeof el.name === 'string') {
               el.avator = el.name[0].toUpperCase()
@@ -435,6 +423,13 @@
             else el.distance = -1
             return el
           })
+          this.$apply()
+          this.self = attndInfo.my_signin
+          if (typeof this.self.name === 'string') {
+              this.self.avator = this.self.name[0].toUpperCase()
+          }
+          if (isNumber(this.self.distance)) this.self.distance = Math.floor(this.self.distance)
+          else el.distance = -1
           this.$apply()
         })
         .catch(err => {})
@@ -568,7 +563,6 @@
       },
     }
 
-    
     // 监听下拉
     onPullDownRefresh() {
       this.page = 1

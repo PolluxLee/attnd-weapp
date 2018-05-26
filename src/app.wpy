@@ -52,6 +52,7 @@
 
     constructor () {
       super()
+      this.use('promisify')
     }
 
     onLaunch() {
