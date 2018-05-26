@@ -22,6 +22,8 @@
 
     &__title {
       white-space: nowrap;
+      overflow-x: auto;
+      width: 600rpx;
       font-size: 48rpx;
       color: black;
       margin-bottom: 20rpx;
@@ -29,6 +31,7 @@
 
     &__p {
       white-space: nowrap;
+      overflow-x: auto;
       font-size: 30rpx;
       color: $font;
       margin-top: 4rpx;

@@ -164,6 +164,27 @@
     box-sizing: border-box;
   }
 
+  &__tag {
+    position: absolute;
+    right: 30rpx;
+    top: 30rpx;
+    width: 110rpx;
+    height: 42rpx;
+    font-size: 28rpx;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10rpx;
+    &--ongoing {
+      color: $theme;
+      border: 1rpx solid $theme;
+    }
+    &--over {
+      color: $font;
+      border: 1rpx solid $font;
+    }
+  }
+
   &__item {
     margin-bottom: 30rpx;
     box-sizing: border-box;
@@ -176,10 +197,11 @@
     animation: fade-out 0.5s;
     &--title {
       white-space: nowrap;
+      overflow-x: auto;
+      width: 500rpx;
       font-size: 40rpx;
       color: black;
       margin-bottom: 20rpx;
-      overflow-x: auto;
     }
     &--p {
       white-space: nowrap;
@@ -189,7 +211,7 @@
       margin-top: 4rpx;
       margin-bottom: 4rpx;
       &-pwd {
-        color: $red;
+        color: $theme;
       }
     }
   }
@@ -254,7 +276,8 @@
       <view class="mine__list" wx:if="{{isShow}}">
         <view class="mine__item" wx:for-items="{{attndList}}" wx:for-item="attnd" wx:key="id"
           @tap="onClickAttnd({{attnd.cipher}})">
-          <view class="mine__item--title">{{attnd.attnd_name}}{{attnd.group_name ? '（'+attnd.group_name+'）' : ''}}</view>
+          <view class="mine__tag mine__tag--over">已结束</view>
+          <view class="mine__item--title">{{attnd.attnd_name}}</view>
           <view class="mine__item--p mine__item--p-pwd">口令：{{attnd.cipher}}</view>
           <view class="mine__item--p" wx:if="{{attndType===2}}">发布者：{{attnd.teacher_name}}</view>
           <view class="mine__item--p">时间：{{attnd.start_time}}</view>
