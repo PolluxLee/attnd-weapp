@@ -2,150 +2,617 @@
   @import '../assets/style/_variables.scss';
   @import '../assets/style/_common.scss';
 
-.attnd {
-  width: 100%;
-  padding: 46rpx;
-  box-sizing: border-box;
-
-  &__header {
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    padding-bottom: 30rpx;
-    margin-bottom: 30rpx;
-    border-bottom: 1rpx dashed $edge;
-  }
-
-  &__title {
-    white-space: nowrap;
-    font-size: 48rpx;
-    color: black;
-    margin-bottom: 20rpx;
-  }
-
-  &__p {
-    white-space: nowrap;
-    font-size: 30rpx;
-    color: $font;
-    margin-top: 4rpx;
-    margin-bottom: 4rpx;
-    &--pwd {
-      color: $red;
-    }
-  }
-
-  &__remove {
-    width: 40rpx;
-    height: 40rpx;
-    position: absolute;
-    right: 15rpx;
-    top: 15rpx;
-  }
-
-  &__item {
-    display: flex;
+  .attnd {
     width: 100%;
-    height: 100rpx;
-    margin-bottom: 30rpx;
+    padding: 46rpx 46rpx 100rpx 46rpx;
+    box-sizing: border-box;
+    background: white;
+    height: 100%;
+    position: relative;
 
-    &--avator {
-      width: 100rpx;
+    &__header {
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      padding-bottom: 30rpx;
+      margin-bottom: 30rpx;
+      border-bottom: 1rpx dashed $edge;
+    }
+
+    &__title {
+      white-space: nowrap;
+      font-size: 48rpx;
+      color: black;
+      margin-bottom: 20rpx;
+    }
+
+    &__p {
+      white-space: nowrap;
+      font-size: 30rpx;
+      color: $font;
+      margin-top: 4rpx;
+      margin-bottom: 4rpx;
+      &--pwd {
+        color: $red;
+      }
+    }
+
+    &__remove {
+      width: 40rpx;
+      height: 40rpx;
+      position: absolute;
+      right: 15rpx;
+      top: 15rpx;
+    }
+
+    &__oper {
+      color: $font;
+      box-sizing: border-box;
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      font-size: 30rpx;
+    }
+
+    &__count {
+      margin-right: 100rpx;
+      padding-bottom: 30rpx;
+    }
+
+    &__filter {
+      padding-bottom: 30rpx;
+      &--text {
+        display: inline-block;
+        vertical-align: center;
+        margin-right: 6rpx;
+      }
+      &--img {
+        width: 30rpx;
+        height: 30rpx;
+        display: inline-block;
+        vertical-align: center;
+      }
+    }
+
+    &__item {
+      display: flex;
+      width: 100%;
       height: 100rpx;
-      margin-right: 30rpx;
-      border-radius: 50%;
-      background: $theme;
+      margin-bottom: 30rpx;
+      animation: fade-out 0.5s;
+      &--avator {
+        width: 100rpx;
+        height: 100rpx;
+        margin-right: 30rpx;
+        border-radius: 50%;
+        background: $theme;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-size: 40rpx;
+        overflow: hidden;
+      }
+      &--info {
+        height: 100%;
+        width: 400rpx;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      &--name {
+        white-space: nowrap;
+        overflow-x: auto;
+        color: black;
+        font-size: 30rpx;
+        margin: 4rpx 0;
+      }
+      &--location {
+        white-space: nowrap;
+        overflow-x: auto;
+        color: $font;
+        font-size: 24rpx;
+        margin: 4rpx 0;
+      }
+      &--icon {
+        height: 100rpx;
+        width: 120rpx;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        font-size: 24rpx;
+      }
+    }
+
+    &__list {
+      margin-bottom: 150rpx;
+      animation: fade-out 0.5s;
+    }
+
+    &__resp {
+      position: fixed;
+      box-sizing: border-box;
+      width: 100%;
+      height: 100rpx;
+      bottom: 0;
+      left: 0;
       display: flex;
       justify-content: center;
       align-items: center;
       color: white;
-      font-size: 40rpx;
+      font-size: 36rpx;
+      background: $theme;
+      &:active {
+        background: $theme-dark;
+      }
     }
-    &--info {
-      height: 100%;
-      width: 400rpx;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-    &--name {
-      white-space: nowrap;
-      color: black;
-      font-size: 30rpx;
-      margin: 4rpx 0;
-    }
-    &--location {
-      white-space: nowrap;
-      color: $font;
-      font-size: 24rpx;
-      margin: 4rpx 0;
-    }
-    &--checkbox {
-      width: 128rpx;
-      height: 100%;
+
+    &__baseline {
+      animation: fade-out 0.5s;
+      box-sizing: border-box;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 26rpx;
-      color: $font;
-      checkbox {
-        transform: scale(0.8,0.8);
+      &--line {
+        height: 1rpx;
+        width: 50rpx;
+        background: $hint;
+      }
+      &--text {
+        color: $hint;
+        font-size: 30rpx;
+        box-sizing: border-box;
+        padding-left: 10rpx;
+        padding-right: 10rpx;
+        text-align: center;
       }
     }
   }
-
-}
 </style>
 
 <template>
-  <view class="attnd">
-    <view class="attnd__header">
-      <view class="attnd__title">嵌入式</view>
-      <view class="attnd__p attnd__p--pwd">口令：DR125SDR5</view>
-      <view class="attnd__p">时间：2018/05/07 13:50</view>
-      <view class="attnd__p">持续：10 mins</view>
-      <view class="attnd__p">发布者：老金</view>
-      <view class="attnd__p">位置：南亭猫咪主题餐厅</view>
-      <image class="attnd__remove" src="{{remove}}" mode="scaleToFill"/>
-    </view>
-    <view class="attnd__list">
-      <view class="attnd__item">
-        <view class="attnd__item--avator">机</view>
-        <view class="attnd__item--info">
-          <view class="attnd__item--name">机长</view>
-          <view class="attnd__item--location">位置：南亭猫咪主题餐厅</view>
-        </view>
-        <checkbox-group class="attnd__item--checkbox">
-          <label class="checkbox">
-            <checkbox checked="false"/>到了
-          </label>
-        </checkbox-group>
+  <scroll-view style="height: 100vh"
+    scroll-y="true" lower-threshold="50" bindscrolltolower="onScrollToLower">
+    <view class="attnd" wx:if="{{isShow}}">
+      <view class="attnd__header">
+        <view class="attnd__title">{{baseInfo.attnd_name}}{{attndState}}</view>
+        <view class="attnd__p attnd__p--pwd">口令：{{baseInfo.cipher}}</view>
+        <view class="attnd__p">时间：{{baseInfo.start_time}}</view>
+        <view class="attnd__p">持续：{{baseInfo.last}} 分钟</view>
+        <view class="attnd__p">发布者：{{baseInfo.teacher_name}}</view>
+        <view class="attnd__p">名单：{{baseInfo.group_name}}</view>
+        <view class="attnd__p">地点：{{baseInfo.addr_name}}</view>
+        <image class="attnd__remove" wx:if="{{displayRemove}}" src="{{Icon.remove}}" mode="scaleToFill" @tap="onClickRemove"/>
       </view>
+      <view class="attnd__list">
+        <view class="attnd__oper">
+          <view class="attnd__count">{{displayCount}}</view>
+          <view class="attnd__filter" @tap="attndListFilter">
+            <view class="attnd__filter--text">{{filterListStatus}}</view>
+            <image class="attnd__filter--img" src="{{Icon.triangle}}" mode="scaleToFill"/>
+          </view>
+        </view>
+        <view class="attnd__item attnd__item--self" wx:if="{{isShowSelf}}">
+          <view class="attnd__item--avator">{{self.avator}}</view>
+          <view class="attnd__item--info">
+            <view class="attnd__item--name">{{self.name}}{{self.id ? '（'+ self.stu_id +'）' : ''}}</view>
+            <view class="attnd__item--location">距离：{{self.distance}}m</view>
+          </view>
+          <view class="attnd__item--icon">
+            <image wx:if="{{self.attnd_status===SigninType.ARRIVED}}" src="{{Icon.attndArrived}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
+            <image wx:if="{{self.attnd_status===SigninType.DISTANCE_OUT}}" src="{{Icon.attndDistanceOut}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
+            <image wx:if="{{self.attnd_status===SigninType.TIME_OUT}}" src="{{Icon.attndTimeOut}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
+            <image wx:if="{{self.attnd_status===SigninType.NOT_ARRIVED}}" src="{{Icon.attndNotArrived}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
+            <view wx:if="{{self.attnd_status===SigninType.ARRIVED}}">已到</view>
+            <view wx:if="{{self.attnd_status===SigninType.DISTANCE_OUT}}">超距</view>
+            <view wx:if="{{self.attnd_status===SigninType.TIME_OUT}}">超时</view>
+            <view wx:if="{{self.attnd_status===SigninType.NOT_ARRIVED}}">未到</view>
+          </view>
+        </view>
+        <view class="attnd__item" wx:for-items="{{attndList}}" wx:for-item="stu" wx:key="id">
+          <view class="attnd__item--avator">{{stu.avator}}</view>
+          <view class="attnd__item--info">
+            <view class="attnd__item--name">{{stu.name}}{{stu.id ? '（'+ stu.stu_id +'）' : ''}}</view>
+            <view class="attnd__item--location">距离：{{stu.distance}}m</view>
+          </view>
+          <view class="attnd__item--icon" @tap="toggleSigninFilter({{stu.openid}})">
+            <image wx:if="{{stu.attnd_status===SigninType.ARRIVED}}" src="{{Icon.attndArrived}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
+            <image wx:if="{{stu.attnd_status===SigninType.DISTANCE_OUT}}" src="{{Icon.attndDistanceOut}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
+            <image wx:if="{{stu.attnd_status===SigninType.TIME_OUT}}" src="{{Icon.attndTimeOut}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
+            <image wx:if="{{stu.attnd_status===SigninType.NOT_ARRIVED}}" src="{{Icon.attndNotArrived}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
+            <view wx:if="{{stu.attnd_status===SigninType.ARRIVED}}">已到</view>
+            <view wx:if="{{stu.attnd_status===SigninType.DISTANCE_OUT}}">超距</view>
+            <view wx:if="{{stu.attnd_status===SigninType.TIME_OUT}}">超时</view>
+            <view wx:if="{{stu.attnd_status===SigninType.NOT_ARRIVED}}">未到</view>
+          </view>
+        </view>
+        <view class="attnd__baseline" wx:if="{{count!==0 && count===attndList.length}}">
+          <view class="attnd__baseline--line"></view>
+          <view class="attnd__baseline--text">{{baselineMsg}}</view>
+          <view class="attnd__baseline--line"></view>
+        </view>
+        <view class="attnd__baseline" wx:if="{{!emptyLock && attndList.length===0}}">
+          <view class="attnd__baseline--text">{{emptyMsg}}</view>
+        </view>
+      </view>
+      <view class="attnd__resp" @tap="onSignIn" wx:if="{{displaySignin}}">签到</view>
+      <toast />
     </view>
-    <view class="attnd__resp"></view>
-  </view>
+  </scroll-view>
 </template>
 
 <script>
   import wepy from 'wepy'
-  import ALog from '../mixins/a-log'
-  import Icon from '../assets/icon/icon'
+  import { Icon } from '../assets/icon/icon'
+  import AToast from '../mixins/a-toast'
+  import Toast from 'wepy-com-toast'
+  import { ToastType, URL, CODE, SigninType, AttndStatus, Identity } from '../share/consts'
+  import { isNumber, getTimeFormat } from '../share/funcs'
+  import zajax from '../utils/zajax'
+  import zmap from '../utils/zmap'
+  import zlog from '../utils/zlog'
+  import zmid from '../utils/zmid'
+  import zstore from '../utils/zstore'
 
   export default class Attnd extends wepy.page {
 
-    mixins = [ALog, Icon]
+    config = {
+      enablePullDownRefresh: true,
+      backgroundColor: '#ffffff'
+    }
+
+    mixins = [AToast]
     data = {
+      Icon: Icon,
+      SigninType: SigninType,
+      AttndStatus: AttndStatus,
+      Identity: Identity,
+      cipher: '',
+      isShow: false,
+      
+      self: {}, 
+      baseInfo: {},
+      attndList: [],
+      identity: Identity.VISITOR,   //身份
+      signInFilter: SigninType.SIGNIN_ALL,    //筛选
+      attndStatus: 0,    //考勤类型，负数为结束
+
+      page: 1,
+      pageSize: 10,
+      presentCnt: 0,
+      count: 0,
+
+      emptyLock: true,   //空列表提示锁
+      baselineMsg: '没有更多了',
+      emptyMsg: '无签到信息',
+      location: {
+        latitude: null,
+        longitude: null,
+        accuracy: null,
+      }
+    }
+
+    components = {
+      toast: Toast
+    }
+
+    computed = {
+      // 进行中和结束的状态
+      attndState () {
+        if (Number.isInteger(this.attndStatus) && this.attndStatus < 0) return '（已结束）'
+        if (Number.isInteger(this.attndStatus) && this.attndStatus > 0) return '（进行中）'
+        return ''
+      },
+      // 人数的显示
+      displayCount() {
+        // 有用户组的录入
+        if (this.attndStatus === AttndStatus.ATTND_NORMAL
+          && Number.isInteger(this.presentCnt)
+          && Number.isInteger(this.count)) {
+            return `人数：${this.presentCnt} / ${this.count}`
+        }
+        // 其他情况
+        if (Number.isInteger(this.count)) return `人数：${this.count}`
+        return ''
+      },
+      // 控制签到按钮的显示
+      displaySignin() {
+        if (this.identity === Identity.STUDENT) return true
+        return false
+      },
+      // 控制删除的显示
+      displayRemove() {
+        if (this.identity === Identity.TEACHER && this.attndStatus < 0) return true
+        return false
+      },
+      // 筛选后的列表状态
+      filterListStatus() {
+        switch (this.signInFilter) {
+          case SigninType.SIGNIN_ALL: return '全部'
+          case SigninType.DISTANCE_OUT: return '超出距离'
+          case SigninType.TIME_OUT: return '迟到'
+          case SigninType.NOT_ARRIVED: return '未到'
+        }
+      },
+      // 控制个人签到置顶的显示
+      isShowSelf() {
+        if (!JSON.stringify(this.self) === '{}' 
+          && identity===Identity.STUDENT 
+          && (this.signInFilter === SigninType.SIGNIN_ALL || this.signInFilter === this.self.attnd_status) ) return true
+        return false
+      }
 
     }
 
-    onLoad() {
+    onLoad(option) {
+      zlog.log(option)
+      this.cipher = option.cipher ? option.cipher : ''
+      wx.setNavigationBarTitle({ title: '考勤情况' })
+    }
 
+    onShow() {
+      this.getData()
+    }
+
+    // 获取考勤信息
+    async getData() {
+      wx.showNavigationBarLoading()
+      await this.getAttndInfo()
+      this.isShow = true
+      this.$apply()
+      await this.getResponserList() 
+      wx.hideNavigationBarLoading()
+    }
+
+    // 获取考勤基本信息
+    getAttndInfo() {
+      return zajax.get(URL.attnd, { cipher: this.cipher })
+        .then(res =>{
+          let body = res.data
+          let code = body.code
+          if (code !== CODE.GLOBAL_SUCCESS) return
+          this.baseInfo = body.data
+          // 获取考勤状态，负数表示考勤结束
+          this.attndStatus = this.baseInfo.status
+          // 判别身份，做权限控制渲染和交互
+          let id = zstore.get(zstore.id)
+          if (id === this.baseInfo.teacher_id) {
+            this.identity = Identity.TEACHER
+          } else {
+            this.identity = Identity.STUDENT
+          }
+          // 数据加工
+          let date = new Date(this.baseInfo.start_time)
+          this.baseInfo.start_time = `${getTimeFormat(date, 'date', '/')} ${getTimeFormat(date, 'time', ':')}`
+          this.$apply()
+        })
+        .catch(err => {})
+    }
+
+    // 获取签到者列表
+    async getResponserList(paging) {
+      let reqData = {
+        page: this.page,
+        page_size: this.pageSize,
+        signin_status: this.signInFilter,
+        cipher: this.cipher ? this.cipher : '',
+        attnd_id: this.baseInfo.attnd_id
+      }
+      this.emptyLock = true
+      this.$apply()
+      await zajax.get(URL.attndSituation, reqData)
+        .then(res => {
+          let body = res.data
+          let code = body.code
+          if (code !== CODE.GLOBAL_SUCCESS) return
+          // 获取人数
+          let attndInfo = body.data
+          this.count = attndInfo.count
+          this.presentCnt = attndInfo.present_count
+          // 获取自己，将自己置顶
+          if (Array.isArray(attndInfo.attnds)) {
+            if (paging) this.attndList = this.attndList.concat(attndInfo.attnds)
+            else this.attndList = attndInfo.attnds
+          }
+          this.attndList = this.attndList.map(el => {
+            if (typeof el.name === 'string') {
+              el.avator = el.name[0].toUpperCase()
+            }
+            if (isNumber(el.distance)) el.distance = Math.floor(el.distance)
+            else el.distance = -1
+            return el
+          })
+          this.$apply()
+          this.self = attndInfo.my_signin
+          if (typeof this.self.name === 'string') {
+              this.self.avator = this.self.name[0].toUpperCase()
+          }
+          if (isNumber(this.self.distance)) this.self.distance = Math.floor(this.self.distance)
+          else el.distance = -1
+          this.$apply()
+        })
+        .catch(err => {})
+      this.isShow = true
+      this.$apply()
+      setTimeout(() => { this.emptyLock = false; this.$apply() }, 200);
+      this.$apply()
+      wx.stopPullDownRefresh()
+    }
+
+    async signIn() {
+      this.showToast(ToastType.LOADING, '获取位置')
+      // 获取经纬度
+      await zmap.getLocation()
+        .then(res => {
+          this.location.latitude = res.latitude
+          this.location.longitude = res.longitude
+          this.location.accuracy = res.accuracy
+          this.$apply()
+        })
+        .catch(err => {})
+      this.hideToast()
+      let checkLoc = this.checkLocation()
+      if (!checkLoc) {
+        wx.navigateTo({ url: 'auth' })
+        return
+      }
+      this.showToast(ToastType.LOADING, '正在签到')
+      // 提交签到
+      let reqData = {
+        cipher: this.cipher,
+        location: this.location,
+        attnd_id: this.baseInfo.attnd_id
+      }
+      await zajax.post(URL.signIn, reqData)
+        .then(res => {
+          let body = res.data
+          let code = body.code
+          let msg = ''
+          switch (code) {
+            case CODE.GLOBAL_SUCCESS: 
+              switch (body.data) {
+                case SigninType.ARRIVED: msg = '签到成功'; break
+                case SigninType.DISTANCE_OUT: msg = '超出距离'; break
+                case SigninType.TIME_OUT: msg = '考勤已结束'; break
+                case SigninType.NOT_ARRIVED: msg = '签到失败'; break
+                default: msg = '签到失败'; break
+              }
+            case ATTND_NOT_EXIST: msg = '考勤不存在'; break
+            case ATTND_CIPHER_NOT_CORRESPOND: msg = '签到失败'; break
+            case ATTND_HAS_SIGNIN: msg = '已签到'; break
+            case ATTND_EXPIRED: msg = '考勤已结束'; break
+            case ATTND_NOT_BELONG: msg = '你不在名单内'; break
+            case ATTND_CREATOR: msg = '无需签到'; break
+            default: msg = '签到失败'; break
+          }
+          this.showToast(ToastType.SUCCESS, msg, 2000)
+        })
+        .catch(err => { this.showToast(ToastType.FAIL, '签到失败', 2000) })
+      this.page = 1
+      this.$apply()
+      this.getResponserList()
+    }
+
+    //检查位置
+    checkLocation() {
+      for (let key in this.location) {
+        if (!isNumber(this.location[key])) {
+          return false
+        }
+      }
+      return true
     }
 
     methods = {
-      // onPullDownRefresh: () => {
-      //   wx.stopPullDownRefresh()
-      // }
+      // 修改签到者状态
+      toggleSigninFilter(openid) {
+        if (this.identity !== Identity.TEACHER) return
+        if (!openid) return
+        wx.showActionSheet({
+          itemList: ['已到', '超出距离', '迟到', '未到'],
+          success: res => {
+            let status
+            switch (res.tapIndex) {
+              case 0: status = SigninType.ARRIVED; break
+              case 1: status = SigninType.DISTANCE_OUT; break
+              case 2: status = SigninType.TIME_OUT; break
+              case 3: status = SigninType.NOT_ARRIVED; break
+            }
+            this.updateSigninStatus(status, openid)
+          },
+          fail: res => console.log(res.errMsg)
+        })
+      },
+      // 筛选不同状态的签到列表
+      attndListFilter() {
+        wx.showActionSheet({
+          itemList: ['全部', '超出距离', '迟到', '未到'],
+          success: res => {
+            switch (res.tapIndex) {
+              case 0: this.signInFilter = SigninType.SIGNIN_ALL; break
+              case 1: this.signInFilter = SigninType.DISTANCE_OUT; break
+              case 2: this.signInFilter = SigninType.TIME_OUT; break
+              case 3: this.signInFilter = SigninType.NOT_ARRIVED; break
+            }
+            this.page = 1
+            this.$apply()
+            this.getResponserList()
+          },
+          fail: res => console.log(res.errMsg)
+        })
+      },
+      onScrollToLower() {
+        this.page++
+        this.getResponserList(true)
+      },
+      onSignIn() {
+        this.signIn()
+      },
+      onClickRemove() {
+        if (identity !== Identity.TEACHER) return
+        wx.showModal({
+          title: '提示',
+          content: '确认删除此考勤？',
+          success: res => {
+            if (res.confirm) {
+              this.removeAttnd()
+            }
+          }
+        })
+      },
+    }
+
+    // 监听下拉
+    onPullDownRefresh() {
+      this.page = 1
+      this.getResponserList()
+    }
+
+    // 删除考勤
+    removeAttnd() {
+      let cipher = this.cipher
+      if (!cipher) {
+        this.showToast(ToastType.FAIL, '删除失败', 1000)
+        return
+      }
+      this.showToast(ToastType.LOADING, '加载中')
+      zajax.postFD(URL.removeAttnd, { cipher })
+        .then(res => {
+          this.hideToast()
+          let body = res.data
+          let code = body.code
+          if (code !== CODE.GLOBAL_SUCCESS) {
+            this.showToast(ToastType.FAIL, '删除失败', 1000)
+            return
+          }
+          this.showToast(ToastType.SUCCESS, '删除成功', 1000)
+          wx.navigateBack()
+        })
+        .catch(err => { this.showToast(ToastType.FAIL, '删除失败', 1000) })
+    }
+
+    // 结束考勤后修改签到状态
+    updateSigninStatus(status, openid) {
+      this.showToast(ToastType.LOADING, '正在修改')
+      let reqData = {
+        cipher: this.cipher ? this.cipher : '',
+        openid,
+        attnd_status: status
+      }
+      zajax.postFD(URL.updateSignIn, reqData)
+        .then(res => {
+          this.hideToast()
+          let body = res.data
+          let code = body.code
+          if (code !== CODE.GLOBAL_SUCCESS) {
+            this.showToast(ToastType.FAIL, '修改失败', 1000)
+            return
+          }
+          this.$apply()
+          this.getResponserList()
+        })
+        .catch(err => {})
     }
 
   }

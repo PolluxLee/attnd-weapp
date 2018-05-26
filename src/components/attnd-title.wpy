@@ -1,0 +1,42 @@
+<style lang="scss">
+  @import '../assets/style/_variables.scss';
+  @import '../assets/style/_common.scss';
+
+  .attitle {
+    &__title {
+      width: 100%;
+      box-sizing: border-box;
+      color: $font;
+      font-size: 28rpx;
+      padding: 20rpx 20rpx;
+    }
+  }
+</style>
+
+<template>
+  <view class="attitle">
+    <view class="attitle__title">
+      <slot name="title">Title</slot>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class AttndTitle extends wepy.component {
+
+    data = {
+
+    }
+
+    onLoad() {
+
+    }
+
+    methods = {
+
+    }
+
+  }
+</script>

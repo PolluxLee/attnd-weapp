@@ -1,0 +1,101 @@
+<style lang="scss">
+  @import '../assets/style/_variables.scss';
+  @import '../assets/style/_common.scss';
+
+  .auth {
+    box-sizing: border-box;
+    background: white;
+    height: 100%;
+    padding-top: 100rpx;
+
+    &__explain {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 100rpx;
+    }
+
+    &__img {
+      width: 200rpx;
+      height: 200rpx;
+      margin-bottom: 60rpx;
+    }
+
+    &__text {
+      color: black;
+      font-size: 36rpx;
+      text-align: center;
+    }
+  }
+</style>
+
+<template>
+  <view class="auth" wx:if="{{isShow}}">
+    <view class="auth__explain">
+      <image class="auth__img" src="{{Icon.location}}" mode="scaleToFill"/>
+      <view class="auth__text">小程序需要获取你的地理位置</view>
+    </view>
+    <authBtn :btns.sync="authModel"></authBtn>
+    <toast />
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import AttndTitle from '../components/attnd-title'
+  import AttndInput from '../components/attnd-input'
+  import AttndBtn from '../components/attnd-btn'
+  import { Type, BtnType, URL, CODE } from '../share/consts'
+  import { getTimeFormat, getCurTime, getTimeMsFromTimeS, getTimeSFromTimeMs } from '../share/funcs'
+  import mock from '../utils/mock'
+  import zajax from '../utils/zajax'
+  import AToast from '../mixins/a-toast'
+  import Toast from 'wepy-com-toast'
+  import { ToastType } from '../share/consts'
+  import zstore from '../utils/zstore'
+  import zmid from '../utils/zmid'
+  import zlog from '../utils/zlog'
+  import { Icon } from '../assets/icon/icon'
+
+  export default class Auth extends wepy.page {
+
+    mixins = [AToast]
+    data = {
+      isShow: false,
+      authModel: [],
+      Icon: Icon
+    }
+
+    components = {
+      authBtn: AttndBtn,
+      authTitle: AttndTitle,
+      toast: Toast
+    }
+
+    onLoad() {
+      wx.setNavigationBarTitle({ title: '授权管理' })
+      this.initData()
+    }
+
+    initData() {
+      wx.showNavigationBarLoading()
+      setTimeout(() => {
+        wx.hideNavigationBarLoading()
+      }, 1000);
+      this.authModel = [
+        { name: '立即授权', color: '#00897B', openType: 'openSetting' },
+      ]
+      this.isShow = true
+    }
+
+    methods = {
+
+    }
+
+    events = {
+
+    }
+
+  }
+</script>

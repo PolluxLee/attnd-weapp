@@ -2,107 +2,183 @@
   @import '../assets/style/_variables.scss';
   @import '../assets/style/_common.scss';
 
-.home {
-  box-sizing: border-box;
-  width: 100%;
-
-  &__yell, &__resp {
-    box-sizing: border-box;
-    height: 50%;
-    width: 100%;
-  }
-  &__yell { padding: 50rpx; }
-  &__resp { padding-left: 50rpx; padding-right: 50rpx; padding-bottom: 100rpx; }
-
-  &__btn {
+  .home {
     box-sizing: border-box;
     width: 100%;
-    height: 100%;
-    background: white;
-    @extend %box-edge;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
+    padding: 50rpx;
 
-  &__circle {
-    height: 124rpx;
-    width: 124rpx;
-    font-size: 48rpx;
-    margin: 16rpx auto;
-    border-radius: 50%;
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    &--yell {
-      background: $theme;
+    &__yell, &__resp {
+      box-sizing: border-box;
+      height: 450rpx;
+      width: 100%;
     }
 
-    &--resp {
-      background: $theme-aid;
+    &__yell { margin-bottom: 50rpx; }
+
+    &__btn {
+      box-sizing: border-box;
+      width: 100%;
+      height: 100%;
+      background: white;
+      @extend %box-edge;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
-  }
 
-  &__text {
-    text-align: center;
-    font-size: 32rpx;
-    padding-top: 10rpx;
-    color: black;
-  }
+    &__circle {
+      height: 124rpx;
+      width: 124rpx;
+      font-size: 48rpx;
+      margin: 16rpx auto;
+      border-radius: 50%;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
 
-}
+      &--yell {
+        background: $theme;
+      }
+
+      &--resp {
+        background: $theme-aid;
+      }
+    }
+
+    &__text {
+      text-align: center;
+      font-size: 32rpx;
+      padding-top: 10rpx;
+      color: black;
+    }
+
+  }
 </style>
 
 <template>
-  <view class="home" style="height: {{winH}}px">
+  <view class="home">
     <view class="home__yell">
-      <view class="home__btn">
+      <view class="home__btn" @tap="onClickYell">
         <view class="home__circle home__circle--yell">点</view>
-        <view class="home__text">我要点名</view>
+        <view class="home__text">点名 / 发布考勤</view>
       </view>
     </view>
     <view class="home__resp">
       <view class="home__btn" @tap="onClickResp">
         <view class="home__circle home__circle--resp">签</view>
-        <view class="home__text">我要签到</view>
+        <view class="home__text">签到 / 输入口令</view>
       </view>
     </view>
+    <button open-type="openSetting"></button>
+    <attndModal :model.sync="model"></attndModal>
+    <toast />
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
-  import ALog from '../mixins/a-log'
+  import AttndModal from '../components/attnd-modal'
+  import AToast from '../mixins/a-toast'
+  import Toast from 'wepy-com-toast'
+  import { ToastType } from '../share/consts'
+  import { URL, CODE } from '../share/consts'
+  import zajax from '../utils/zajax'
+  import zstore from '../utils/zstore'
+  import zmid from '../utils/zmid'
+  import zlog from '../utils/zlog'
 
   export default class Index extends wepy.page {
 
-    mixins = [ALog]
+    mixins = [AToast]
     data = {
-      winH: 0
+      model: {}
     }
 
     onLoad() {
-      this.getWinHeight()
+      this.initData()
+    }
+
+    initData() {
+      this.model = {
+        title: '口令',
+        hint: '', 
+        value: '', 
+        length: 50, 
+        readonly: false,
+        confirmCallback: res => {
+          let cipher = res
+          if (!cipher) return
+          // 根据口令的第一个字母判断考勤类型，从而跳转到不同页面
+          if (cipher[0] === 'S') {
+            this.showToast(ToastType.LOADING, '获取数据')
+            zajax.post(URL.signIn, { cipher, location: {latitude:0,longitude:0,accuracy:0} })
+              .then(res => {
+                let body = res.data
+                let code = body.code
+                if (code !== CODE.GLOBAL_SUCCESS) {
+                  this.showToast(ToastType.FAIL, '加入失败')
+                  return
+                }
+                this.showToast(ToastType.SUCCESS, '加入成功', 1000)
+                this.$invoke('attndModal','hideModal')
+              })
+              .catch(err => {})
+
+          } else {
+            this.showToast(ToastType.LOADING, '获取数据')
+            zajax.get(URL.attnd, { cipher })
+              .then(res => {
+                this.showToast(ToastType.LOADING, '加载数据', 1000)
+                let body = res.data
+                let code = body.code
+                if (code !== CODE.GLOBAL_SUCCESS) {
+                  this.showToast(ToastType.FAIL, '口令不正确', 1000)
+                  return
+                }
+                this.$invoke('attndModal','hideModal')
+                wx.navigateTo({ url: `attnd?cipher=${cipher}` })
+              })
+              .catch(err => {})
+          }
+        },
+        cancelCallback: () => {}
+      }
+    }
+
+    onHide() {
+      this.$invoke('attndModal','hideModal')
+    }
+
+    isNameEmpty() {
+      let name = zstore.get(zstore.userName)
+      let id = zstore.get(zstore.id)
+      if (!name || !id) return true
+      return false
+    }
+
+    components = {
+      attndModal: AttndModal,
+      toast: Toast
     }
 
     methods = {
+      onClickYell() {
+        wx.navigateTo({ url: 'config' })
+      },
       onClickResp() {
-        wx.navigateTo({
-          url: 'attnd'
-        })
+        this.model.value = ''
+        // wx.navigateTo({ url: 'attnd?cipher=GMB3+' })
+        if (!zmid.checkSelfinfo()) {
+          this.showToast(ToastType.HINT, '完善信息', 1000)
+          wx.navigateTo({ url: 'selfinfo' })
+          return
+        }
+        this.$invoke('attndModal','showModal')
       }
     }
 
-    getWinHeight() {
-      // 获取屏幕可用高度
-      try {
-        var res = wx.getSystemInfoSync()
-        this.winH = res.windowHeight
-      } catch (e) {
-        this.print(e)
-      }
-    }
+    // 获取考勤信息
+
   }
 </script>

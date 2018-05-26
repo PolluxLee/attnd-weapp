@@ -1,14 +1,24 @@
 $teal: #00897B;
+$teal-dark: #006D62;
 $acid: #CCBF0E;
-$light-grey: #fafafa;
+$light-grey0: #fafafa;
+$light-grey: #f2f2f2;
+$light-grey2: #f5f5f5;
+$light-grey3: #a5a5a5;
 $grey: #ebebeb;
 $edge-grey: #bbbbbb;
 $dark-grey: #757575;
-$red: #f44336;
+$red: #E6433E;
+$dark-red: #D1382E;
+$sweet-red: #B73A31;
+$sweet-red2: rgb(155, 39, 31);
 
 $theme: $teal;
+$theme-dark: $teal-dark;
 $theme-aid: $acid;
-$bg: $light-grey;
+$bg: $grey;
+$bg-dark: $light-grey2;
 $shadow: $edge-grey;
 $font: $dark-grey;
 $edge: $edge-grey;
+$hint: $light-grey3;

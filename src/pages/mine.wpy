@@ -4,8 +4,8 @@
 
 .mine {
   box-sizing: border-box;
-  padding: 30rpx;
-
+  padding: 30rpx 30rpx 100rpx 30rpx;
+  
   &__info {
     box-sizing: border-box;
     background: white;
@@ -22,6 +22,12 @@
     height: 140rpx;
     border-radius: 5rpx;
     margin-right: 30rpx;
+    background: $theme;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 80rpx;
   }
 
   &__selfinfo {
@@ -35,14 +41,14 @@
       color: black;
       white-space: nowrap;
       overflow-x: auto;
-      margin-top: 6rpx;
+      line-height: 60rpx;
     }
     &--location {
       font-size: 28rpx;
       color: $font;
       white-space: nowrap;
       overflow-x: auto;
-      margin-top: 6rpx;
+      line-height: 66rpx;
     }
   }
 
@@ -56,66 +62,105 @@
   }
 
   &__config {
-    width: 40rpx;
-    height: 40rpx;
+    width: 100rpx;
+    height: 100rpx;
     position: absolute;
-    right: 30rpx;
-    top: 30rpx;
+    right: 0;
+    top: 0;
+    image {
+      width: 40rpx;
+      height: 40rpx;
+      right: 30rpx;
+      top: 30rpx;
+      position: absolute;
+    }
   }
 
   &__status {
     box-sizing: border-box;
-    height: 75rpx;
+    height: 70rpx;
     margin-bottom: 30rpx;
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
   }
 
   &__tab {
     box-sizing: border-box;
     color: $font;
-    font-size: 32rpx;
-    height: 100%;
+    font-size: 28rpx;
+    height: 70rpx;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
+    background: white;
+    border-radius: 10rpx;
     &--yell, &--resp {
-      display: inline-block;
-      vertical-align: center;
-      border-bottom: 6rpx solid $font;
-      margin-right: 20rpx;
+      box-sizing: border-box;
+      padding-left: 30rpx;
+      padding-right: 30rpx;
+      line-height: 70rpx;
     }
+    &--yell {
+      border-top-left-radius: 10rpx;
+      border-bottom-left-radius: 10rpx;
+    }
+    &--resp {
+      border-top-right-radius: 10rpx;
+      border-bottom-right-radius: 10rpx;
+    }
+    &--yell-active, &--resp-active {
+      background: $theme;
+      color: white
+    }
+  }
+
+  &__group {
+    box-sizing: border-box;
+    color: $font;
+    font-size: 28rpx;
+    height: 70rpx;
+    line-height: 70rpx;
+    padding-left: 20rpx;
+    padding-right: 20rpx;
+    background: white;
+    border-radius: 10rpx;
   }
 
   &__search {
     box-sizing: border-box;
-    width: 350rpx;
-    height: 64rpx;
+    width: 330rpx;
+    height: 70rpx;
     background: white;
     @extend %box-edge;
     display: flex;
     align-items: center;
-    image {
+    &--icon {
       width: 40rpx;
       height: 40rpx;
-      display: inline-block;
-      vertical-align: center;
       box-sizing: border-box;
       padding: 2rpx;
       margin: 0 10rpx;
     }
     input {
-      display: inline-block;
-      vertical-align: center;
       font-size: 28rpx;
-      color: $font;
-      width: 280rpx;
+      color: black;
+      width: 230rpx;
       height: 48rpx;
+    }
+    view {
+      width: 40rpx;
+      height: 70rpx;
+      padding: 2rpx;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    &--clear {
+      width: 30rpx;
+      height: 30rpx;
     }
   }
 
   &__list {
-    margin-bottom: 30rpx;
     box-sizing: border-box;
   }
 
@@ -128,14 +173,17 @@
     display: flex;
     flex-direction: column;
     position: relative;
+    animation: fade-out 0.5s;
     &--title {
       white-space: nowrap;
       font-size: 40rpx;
       color: black;
       margin-bottom: 20rpx;
+      overflow-x: auto;
     }
     &--p {
       white-space: nowrap;
+      overflow-x: auto;
       font-size: 26rpx;
       color: $font;
       margin-top: 4rpx;
@@ -145,67 +193,269 @@
       }
     }
   }
+
+  &__baseline {
+    animation: fade-out 0.5s;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    &--line {
+      height: 1rpx;
+      width: 50rpx;
+      background: $hint;
+    }
+    &--text {
+      color: $hint;
+      font-size: 30rpx;
+      box-sizing: border-box;
+      padding-left: 10rpx;
+      padding-right: 10rpx;
+      text-align: center;
+    }
+    &--img {
+      width: 260rpx;
+      height: 260rpx;
+    }
+  }
 }
 </style>
 
 <template>
-  <view class="mine">
-    <view class="mine__info">
-      <image class="mine__avator" src="http://os5w1n6kc.bkt.clouddn.com/mini-05.jpg" mode="scaleToFill"></image>
-      <view class="mine__selfinfo">
-        <view class="mine__selfinfo--name">巴西拳王</view>
-        <view class="mine__selfinfo--location">我的位置：南亭猫咪主题餐厅一楼二楼三楼四楼五楼好长的地址</view>
+  <scroll-view style="height: 100vh"
+    scroll-y="true" lower-threshold="50" bindscrolltolower="onScrollToLower">
+    <view class="mine">
+      <view class="mine__info" @tap="onClickSelfinfo">
+        <view class="mine__avator">{{avator}}</view>
+        <view class="mine__selfinfo">
+          <view class="mine__selfinfo--name">{{name}}</view>
+          <view class="mine__selfinfo--location">{{addrName}}</view>
+        </view>
+        <image class="mine__arrow" src="{{Icon.arrow}}" mode="scaleToFill"/>
       </view>
-      <image class="mine__arrow" src="{{arrow}}" mode="scaleToFill"/>
+      <view class="mine__status">
+        <view class="mine__search">
+          <image class="mine__search--icon" src="{{Icon.search}}" mode="scaleToFill"/>
+          <input placeholder="按考勤名字搜索" confirm-type="search" value="{{query}}" 
+            placeholder-style="color: #a5a5a5"
+            @input="onQueryInput" @confirm="onSearchConfirm"/>
+          <view>
+            <image class="mine__search--clear" wx:if="{{query}}"
+              src="{{Icon.clear}}" mode="scaleToFill" @tap="onQueryClear"/>
+          </view>
+        </view>
+        <view class="mine__tab">
+          <view class="mine__tab--yell {{attndType===1 ? 'mine__tab--yell-active' : ''}}"
+            @tap="onTagToggle({{1}})">点名</view>
+          <view class="mine__tab--resp {{attndType===2 ? 'mine__tab--resp-active' : ''}}"
+            @tap="onTagToggle({{2}})">签到</view>
+        </view>
+        <view class="mine__group" @tap="onClickGroup">名单</view>
+      </view>
+      <view class="mine__list">
+        <view class="mine__item" wx:for-items="{{attndList}}" wx:for-item="attnd" wx:key="id"
+          @tap="onClickAttnd({{attnd.cipher}})">
+          <view class="mine__item--title">{{attnd.attnd_name}}{{attnd.group_name ? '（'+attnd.group_name+'）' : ''}}</view>
+          <view class="mine__item--p mine__item--p-pwd">口令：{{attnd.cipher}}</view>
+          <view class="mine__item--p">时间：{{attnd.start_time}}</view>
+          <view class="mine__item--p">地点：{{attnd.addr_name}}</view>
+        </view>
+        <view class="mine__baseline" wx:if="{{count!==0 && count===attndList.length}}">
+          <view class="mine__baseline--line"></view>
+          <view class="mine__baseline--text">{{baselineMsg}}</view>
+          <view class="mine__baseline--line"></view>
+        </view>
+        <view class="mine__baseline" wx:if="{{!emptyLock && attndList.length===0}}" 
+          style="flex-direction: column">
+          <image class="mine__baseline--img" src="{{Icon.empty}}" mode="scaleToFill"/>
+          <view class="mine__baseline--text">{{attndType===1 ? emptyYellMsg : emptyRespMsg}}</view>
+        </view>
+      </view>
+      <toast />
     </view>
-    <view class="mine__status">
-      <view class="mine__search">
-        <image src="{{search}}" mode="scaleToFill"/>
-        <input placeholder="按考勤名字搜索" confirm-type="search"></input>
-      </view>
-      <view class="mine__tab">
-        <view class="mine__tab--yell">点名</view>
-        <view class="mine__tab--resp">签到</view>
-      </view>
-    </view>
-    <view class="mine__list">
-      <view class="mine__item">
-        <view class="mine__item--title">嵌入式</view>
-        <view class="mine__item--p mine__item--p-pwd">口令：DR125SDR5</view>
-        <view class="mine__item--p">时间：2018/05/07 13:50</view>
-        <view class="mine__item--p">持续：10 mins</view>
-        <view class="mine__item--p">发布者：老金</view>
-        <view class="mine__item--p">位置：南亭猫咪主题餐厅</view>
-        <image class="mine__arrow" src="{{arrow}}" mode="scaleToFill"/>
-        <image class="mine__config" src="{{config}}" mode="scaleToFill"/>
-      </view>
-    </view>
-  </view>
+  </scroll-view>
+  
 </template>
 
 <script>
   import wepy from 'wepy'
-  import Icon from '../assets/icon/icon'
-  import ALog from '../mixins/a-log'
+  import { Icon } from '../assets/icon/icon'
+  import mock from '../utils/mock'
+  import zmap from '../utils/zmap'
+  import { Type, BtnType, URL, CODE } from '../share/consts'
+  import { getTimeFormat, getCurTime, getTimeMsFromTimeS, getTimeSFromTimeMs } from '../share/funcs'
+  import AToast from '../mixins/a-toast'
+  import Toast from 'wepy-com-toast'
+  import { ToastType } from '../share/consts'
+  import zstore from '../utils/zstore'
+  import zajax from '../utils/zajax'
+  import zmid from '../utils/zmid'
+  import zlog from '../utils/zlog'
 
   export default class Mine extends wepy.page {
-    mixins = [ALog, Icon]
+    mixins = [AToast]
     data = {
-      winH: 0
+      Icon: Icon,
+      name: '...',
+      addrName: '...',
+      avator: '',
+      attndList: [],
+
+      attndType: 1,  //考勤类别，1代表我的考勤，2代表我的签到
+      query: '',    //搜索参数
+      page: 1,    //第几页
+      pageSize: 10,   //每页数量
+      count: 0,   //列表项总数
+      emptyLock: true,   //空列表提示锁
+      baselineMsg: '没有更多了',
+      emptyYellMsg: '无点名信息',
+      emptyRespMsg: '无签到信息',
+    }
+
+    components = {
+      toast: Toast
     }
 
     onLoad() {
-      this.getWinHeight()
+      wx.setNavigationBarTitle({ title: '我的' })
     }
 
-    getWinHeight() {
-      // 获取屏幕可用高度
-      try {
-        var res = wx.getSystemInfoSync()
-        this.winH = res.windowHeight
-      } catch (e) {
-        this.print(e)
+    onShow() {
+      this.resetData()
+      this.getData()
+    }
+
+    resetData() {
+      this.page = 1
+      this.query = ''
+    }
+
+    // Promise 并行开始，串行结束
+    async getData() {
+      wx.showNavigationBarLoading()
+      let a = this.getSelfInfo()
+      let b = this.getAddrName()
+      let c = this.getAttndList()
+      await a
+      await b
+      await c
+      wx.hideNavigationBarLoading()
+    }
+
+    // 获取个人信息
+    async getSelfInfo() {
+      let name = (await zmid.getSelfinfo()).name
+      if (name) {
+        this.name = name
+        this.avator = name[0].toUpperCase()
+        this.$apply()
       }
+    }
+
+    // 获取位置
+    async getAddrName() {
+      let latitude
+      let longitude
+      await zmap.getLocation()
+        .then(res => { latitude = res.latitude; longitude = res.longitude })
+        .catch(err => {})
+      await zmap.getAddrName(latitude, longitude)
+        .then(res => {
+          if (res) {
+            this.addrName = res ? res : ''
+            this.$apply() 
+          }
+        })
+        .catch(err => {})
+      return
+    }
+
+    // 获取考勤列表
+    async getAttndList(paging) {
+      this.emptyLock = true
+      this.$apply()
+      wx.showNavigationBarLoading()
+      let reqData = {
+        list_type: this.attndType,
+        page: this.page,
+        page_size: this.pageSize,
+        query: this.query ? this.query : ''
+      }
+      this.page ++
+      this.$apply()
+      await zajax.get(URL.attndList, reqData)
+        .then(res => {
+          let body = res.data
+          let code = body.code
+          if (code !== CODE.GLOBAL_SUCCESS) return
+
+          this.count = Number.isInteger(body.data.count) ? body.data.count : 0
+          body.data.attnds = Array.isArray(body.data.attnds) ? body.data.attnds : []
+
+          if (paging) this.attndList = this.attndList.concat(body.data.attnds)
+          else this.attndList = body.data.attnds
+          this.attndList.map(el => {
+            let date = new Date(el.start_time)
+            el.start_time = `${getTimeFormat(date, 'date', '/')} ${getTimeFormat(date, 'time', ':')}`
+            return el
+          })
+        })
+        .catch(err => {})
+      wx.hideNavigationBarLoading()
+      setTimeout(() => { this.emptyLock = false; this.$apply() }, 200)
+      this.$apply()
+    }
+
+    methods = {
+      onClickAttnd(cipher) {
+        if (cipher) {
+          wx.navigateTo({ url: `attnd?cipher=${cipher}` })
+        }
+      },
+      onClickSelfinfo() {
+        // wx.navigateTo({ url: 'selfinfo' })
+        wx.showActionSheet({
+          itemList: ['个人信息', '授权管理'],
+          success: res => {
+            let tapIndex = res.tapIndex
+            if (tapIndex === 0) wx.navigateTo({ url: 'selfinfo' })
+            else if (tapIndex === 1) wx.navigateTo({ url: 'auth' })
+          },
+          fail: res => {
+            zlog.log(res.errMsg)
+          }
+        })
+      },
+      onClickGroup() {
+        wx.navigateTo({ url: 'group' })
+      },
+      onQueryInput(event) {
+        this.query = event.detail.value
+      },
+      //[考勤] [签到] 标签切换
+      onTagToggle(index) {
+        switch (index) {
+          case 1: this.attndType = 1; break
+          case 2: this.attndType = 2; break
+          default: this.attndType = 1; break
+        }
+        this.resetData()
+        this.getAttndList()
+      },
+      //搜索框确认搜索
+      onSearchConfirm(event) {
+        let value = event.detail.value
+        if (!value) { this.query = ''; return }
+        this.page = 1
+        this.getAttndList()
+      },
+      onQueryClear() {
+        this.resetData()
+        this.getAttndList()
+      },
+      onScrollToLower() {
+        this.getAttndList(true)
+      },
     }
   }
 </script>

@@ -1,0 +1,258 @@
+<style lang="scss">
+  @import '../assets/style/_variables.scss';
+  @import '../assets/style/_common.scss';
+
+  .config {
+    box-sizing: border-box;
+    width: 750rpx;
+    overflow-x: hidden;
+  }
+</style>
+
+<template>
+  <view class="config" wx:if="{{isShow}}">
+    <attndTitle><view slot="title">考勤信息</view></attndTitle>
+    <nameInput :model.sync="nameModel"></nameInput>  
+    <datePicker :model.sync="dateModel"></datePicker>
+    <timePicker :model.sync="timeModel"></timePicker>
+    <lastInput :model.sync="lastModel"></lastInput>
+    <groupInput :model.sync="groupModel"></groupInput>
+    <attndTitle><view slot="title">* 输入考勤名单名称可新建考勤名单，新建的考勤名单里的成员由当次考勤确定；若已有历史名单，可点击选择选取</view></attndTitle>
+    <attndTitle><view slot="title">个人信息</view></attndTitle>
+    <authorInput :model.sync="authorModel"></authorInput>
+    <placeInput :model.sync="placeModel"></placeInput>
+    <attndTitle><view slot="title">* 签到有效范围为 200 米，上限 1000 人</view></attndTitle>
+    <attndBtn :btns.sync="btnModel"></attndBtn>
+    <toast />
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import AttndTitle from '../components/attnd-title'
+  import AttndInput from '../components/attnd-input'
+  import AttndBtn from '../components/attnd-btn'
+  import { Type, BtnType, URL, CODE } from '../share/consts'
+  import { getTimeFormat, getCurTime, getTimeMsFromTimeS, getTimeSFromTimeMs, dateToTimeMs, isNumber} from '../share/funcs'
+  import zmap from '../utils/zmap'
+  import mock from '../utils/mock'
+  import zajax from '../utils/zajax'
+  import AToast from '../mixins/a-toast'
+  import Toast from 'wepy-com-toast'
+  import { ToastType } from '../share/consts'
+  import zstore from '../utils/zstore'
+  import zmid from '../utils/zmid'
+
+  export default class Config extends wepy.page {
+
+    mixins = [AToast]
+    data = {
+      nameModel: {},
+      dateModel: {},
+      timeModel: {},
+      lastModel: {},
+      groupModel: {},
+      authorModel: {},
+      placeModel: {},
+      btnModel: [],
+      isShow: false,
+      
+      location: {
+        latitude: null,
+        longitude: null,
+        accuracy: null,
+      }
+    }
+
+    components = {
+      attndTitle: AttndTitle,
+      attndBtn: AttndBtn,
+      nameInput: AttndInput,
+      datePicker: AttndInput,
+      timePicker: AttndInput,
+      groupInput: AttndInput,
+      lastInput: AttndInput,
+      authorInput: AttndInput,
+      placeInput: AttndInput,
+      toast: Toast
+    }
+
+    onLoad(option) {
+      wx.setNavigationBarTitle({ title: '发布考勤' })
+      this.initData()
+    }
+
+    onShow() {
+      this.getData()
+    }
+
+    initData() {
+      wx.showNavigationBarLoading()
+      this.nameModel = { type: Type.TEXT_SELECT, label: '考勤名称', readonly: false, length: 50, value: '', hint: '例如：计网', extra: '选择', options: [] }
+      this.dateModel = { type: Type.DATE, label: '日期', readonly: false, options: [], value: '' }
+      this.timeModel = { type: Type.TIME, label: '时间', readonly: false, options: [], value: '' }
+      this.lastModel = { type: Type.SELECT, label: '持续', readonly: false, options: [], suffix: '分钟', value: '10', }
+      this.groupModel = { type: Type.TEXT_SELECT, label: '考勤名单', readonly: false, length: 50, value: '', hint: '例如：计科151', extra: '选择', options: [] }
+      this.authorModel = { type: Type.TEXT, label: '发布者', readonly: false, length: 50, value: '', hint: '填写你的名字' }
+      this.placeModel = { type: Type.TEXT_SELECT, label: '地点', readonly: false, length: 50, value: '', hint: '例如：理南404', extra: '选择', options: []}
+      this.lastModel.options = ['5','10','15','20','30','60']
+
+      this.dateModel.value = getCurTime('date')
+      this.timeModel.value = getCurTime('time')
+      this.btnModel = [
+        { name: '发布', emit: 'release-btn', color: '#00897B' }
+      ]
+      this.isShow = true
+    }
+
+    // Promise 并行开始，串行结束
+    async getData() {
+      let c = this.getAuthorName()
+      let a = this.getHistoryAttndNames()
+      let b = this.getHistoryGroupNames()
+      let d = this.getHistoryPlaceNames()
+      let e = this.getLocation()
+      await a
+      await b
+      await c
+      await d
+      await e
+      wx.hideNavigationBarLoading()
+      return
+    }
+
+    // 获取历史考勤名字列表
+    getHistoryAttndNames() {
+      return zajax.get(URL.historyAttndNames)
+        .then(res => {
+          let body = res.data
+          let code = body.code
+          if (code !== CODE.GLOBAL_SUCCESS) return
+          let options = body.data
+          if (Array.isArray(options)) this.nameModel.options = options
+        })
+        .catch(err => {})
+    }
+
+    // 获取考勤名单名字列表
+    getHistoryGroupNames() {
+      return zajax.get(URL.historyGroupNames)
+        .then(res => {
+          let body = res.data
+          let code = body.code
+          if (code !== CODE.GLOBAL_SUCCESS) return
+          let options = body.data
+          if (Array.isArray(options)) this.groupModel.options = options
+        })
+        .catch(err => {})
+    }
+
+    // 获取历史常用地点列表
+    getHistoryPlaceNames() {
+      return zajax.get(URL.historyPlaceNames)
+        .then(res => {
+          let body = res.data
+          let code = body.code
+          if (code !== CODE.GLOBAL_SUCCESS) return
+          let options = body.data
+          if (Array.isArray(options)) this.placeModel.options = options
+        })
+        .catch(err => {})
+    }
+
+    // 获取我的名字
+    async getAuthorName() {
+      let name = (await zmid.getSelfinfo()).name
+      this.authorModel.value = name ? name : ''
+      this.$apply()
+    }
+
+    // 获取位置
+    getLocation() {
+      return zmap.getLocation()
+        .then(res => { 
+          this.location.latitude = res.latitude
+          this.location.longitude = res.longitude
+          this.location.accuracy = res.accuracy
+          this.$apply()
+        })
+        .catch(err => {})
+    }
+
+    methods = {
+
+    }
+
+    events = {
+      'release-btn': event => {
+        this.releaseAttnd()
+      }
+    }
+
+    // 发布考勤
+    releaseAttnd() {
+      let checkLoc = this.checkLocation()
+      if (!checkLoc) {
+        wx.navigateTo({ url: 'auth' })
+        return
+      }
+      let checkRes = this.checkData()
+      if (!checkRes.status) {
+        wx.showModal({ title: '提示', content: checkRes.msg || '表单未填写完整' })
+        return
+      }
+      let reqData = {
+        "attnd_name": this.nameModel.value,
+        "start_time": dateToTimeMs(`${this.dateModel.value} ${this.timeModel.value}`),
+        "last": +this.lastModel.value,
+        "location": {
+            "latitude": this.location.latitude,
+            "longitude": this.location.longitude,
+            "accuracy": this.location.accuracy
+        },
+        "addr_name": this.placeModel.value,
+        "group_name": this.groupModel.value,
+        "teacher_name": this.authorModel.value
+      }
+      this.showToast(ToastType.LOADING, '正在发布')
+      zajax.post(URL.attnd, JSON.stringify(reqData))
+        .then(res => {
+          this.hideToast()
+          let body = res.data
+          let code = body.code
+          if (code !== CODE.GLOBAL_SUCCESS) {   
+            this.showToast(ToastType.FAIL, '失败', 2000)
+            return
+          }
+          this.showToast(ToastType.SUCCESS, '成功', 2000)
+          if (body.data.cipher) wx.redirectTo({ url: `attnd?cipher=${body.data.cipher}` })
+          zmid.getSelfinfo()
+        })
+        .catch(err => {
+          this.showToast(ToastType.FAIL, '失败', 2000)
+        })
+    }
+
+    //检查位置
+    checkLocation() {
+      for (let key in this.location) {
+        if (!isNumber(this.location[key])) {
+          return false
+        }
+      }
+      return true
+    }
+
+    // 检查表单
+    checkData() {
+      let models = [this.nameModel, this.dateModel, this.timeModel, this.lastModel, this.groupModel, this.authorModel, this.placeModel]
+      for (let el of models) {
+        if (!el.value) {
+          return { status: false, msg: `[${el.label}] 未正确填写` }
+        }
+      }
+      return { status: true }
+    }
+
+  }
+</script>

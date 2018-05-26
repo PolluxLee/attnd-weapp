@@ -1,75 +1,104 @@
 <style lang="scss">
+  @import './assets/style/_variables.scss';
+
+  page {
+    height: 100%;
+    background: $bg;
+  }
 </style>
 
 <script>
-import wepy from 'wepy'
-import 'wepy-async-function'
+  import wepy from 'wepy'
+  import 'wepy-async-function'
+  import zajax from './utils/zajax'
+  import { URL } from './share/consts'
+  import zstore from './utils/zstore'
+  import zmid from './utils/zmid'
+  import zlog from './utils/zlog'
 
-export default class extends wepy.app {
-  config = {
-    pages: [
-      'pages/index',
-      'pages/mine',
-      'pages/attnd'
-    ],
-    window: {
-      backgroundTextStyle: 'light',
-      navigationBarBackgroundColor: '#00897B',
-      navigationBarTitleText: '小小考勤',
-      navigationBarTextStyle: 'white',
-      backgroundTextStyle: 'dark',
-      enablePullDownRefresh: true,
-      onReachBottomDistance: 50
-    },
-    tabBar: {
-      color: '#757575',
-      selectedColor: '#00897B',
-      borderStyle: 'black',
-      position: 'bottom',
-      list: [
-        { pagePath: 'pages/index', text: '考勤' },
-        { pagePath: 'pages/mine', text: '我的' },
-      ]
-    }
-  }
-
-  globalData = {
-    userInfo: null
-  }
-
-  constructor () {
-    super()
-    this.use('requestfix')
-  }
-
-  onLaunch() {
-    // this.testAsync()
-  }
-
-  sleep (s) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve('promise resolved')
-      }, s * 1000)
-    })
-  }
-
-  async testAsync () {
-    const data = await this.sleep(3)
-    console.log(data)
-  }
-
-  getUserInfo(cb) {
-    const that = this
-    if (this.globalData.userInfo) {
-      return this.globalData.userInfo
-    }
-    wepy.getUserInfo({
-      success (res) {
-        that.globalData.userInfo = res.userInfo
-        cb && cb(res.userInfo)
+  export default class extends wepy.app {
+    config = {
+      pages: [
+        'pages/index',
+        'pages/mine',
+        'pages/attnd',
+        'pages/config',
+        'pages/selfinfo',
+        'pages/group',
+        'pages/groupinfo',
+        'pages/auth'
+      ],
+      window: {
+        backgroundTextStyle: 'light',
+        backgroundColor: '#ebebeb',
+        navigationBarBackgroundColor: '#00897B',
+        navigationBarTitleText: '小小考勤',
+        navigationBarTextStyle: 'white',
+        backgroundTextStyle: 'dark'
+      },
+      tabBar: {
+        color: '#757575',
+        selectedColor: '#00897B',
+        borderStyle: 'black',
+        position: 'bottom',
+        list: [
+          { pagePath: 'pages/index', text: '考勤' },
+          { pagePath: 'pages/mine', text: '我的' },
+        ]
       }
-    })
+    }
+
+    globalData = {}
+
+    constructor () {
+      super()
+      this.use('promisify')
+    }
+
+    onLaunch() {
+      this.login()
+      this.auth()
+    }
+
+    auth() {
+      wx.getSetting({
+        success(res) {
+          zlog.log(res)
+          if (!res.authSetting['scope.userLocation']) {
+            wx.authorize({
+              scope: 'scope.userLocation',
+              success: () => {
+                zlog.log(res.authSetting, 'app/authorize')
+              }
+            })
+          }
+        }
+      })
+    }
+
+    login() {
+      wx.login({
+        success: res => {
+          zlog.log(res, 'wx.login')
+          if (res.code) {
+            zmid.setSelfinfo({ openid: res.code })
+            zajax.postFD(URL.login, { code: res.code })
+              .then(res => {
+                if(res.header['Set-Cookie']) zstore.set(zstore.cookie, res.header['Set-Cookie'])
+                let userInfo = res.data.data
+                let name = userInfo.name
+                let stuid = userInfo.stu_id
+                let id = userInfo.id
+                let openid = userInfo.openid
+                zmid.setSelfinfo({ name, stuid, id, openid })
+              })
+              .catch(err => {})
+          } else {
+            zlog.log(res, 'wx.login')
+          }
+        }
+      });
+    }
+
   }
-}
 </script>

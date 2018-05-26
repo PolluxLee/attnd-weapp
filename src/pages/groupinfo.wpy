@@ -1,0 +1,314 @@
+<style lang="scss">
+  @import '../assets/style/_variables.scss';
+  @import '../assets/style/_common.scss';
+
+  .groupinfo {
+    box-sizing: border-box;
+    padding: 46rpx 46rpx 100rpx 46rpx;
+    height: 100%;
+    background: white;
+
+    &__header {
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      padding-bottom: 30rpx;
+      margin-bottom: 30rpx;
+      border-bottom: 1rpx dashed $edge;
+    }
+
+    &__title {
+      white-space: nowrap;
+      font-size: 48rpx;
+      color: black;
+      margin-bottom: 20rpx;
+    }
+
+    &__p {
+      white-space: nowrap;
+      font-size: 30rpx;
+      color: $font;
+      margin-top: 4rpx;
+      margin-bottom: 4rpx;
+      &--pwd {
+        color: $red;
+      }
+    }
+
+    &__remove {
+      width: 40rpx;
+      height: 40rpx;
+      position: absolute;
+      right: 15rpx;
+      top: 15rpx;
+    }
+
+    &__count {
+      margin-bottom: 30rpx;
+      font-size: 30rpx;
+      color: $font;
+    }
+
+    &__plus {
+      position: fixed;
+      width: 100rpx;
+      height: 100rpx;
+      box-sizing: border-box;
+      border-radius: 50%;
+      background: $theme;
+      right: 48rpx;
+      bottom: 48rpx;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      image {
+        width: 48rpx;
+        height: 48rpx;
+      }
+    }
+
+    &__item {
+      display: flex;
+      width: 100%;
+      height: 100rpx;
+      margin-bottom: 30rpx;
+      &--avator {
+        width: 100rpx;
+        height: 100rpx;
+        margin-right: 30rpx;
+        border-radius: 50%;
+        background: $theme;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-size: 40rpx;
+      }
+      &--info {
+        height: 100%;
+        width: 480rpx;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      &--name {
+        white-space: nowrap;
+        overflow: auto;
+        color: black;
+        font-size: 30rpx;
+        margin: 4rpx 0;
+      }
+      &--id {
+        white-space: nowrap;
+        overflow: auto;
+        color: $font;
+        font-size: 24rpx;
+        margin: 4rpx 0;
+      }
+      &--icon {
+        height: 100rpx;
+        width: 60rpx;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 24rpx;
+        image {
+          width: 46rpx;
+          height: 46rpx;
+        }
+      }
+    }
+  }
+</style>
+
+<template>
+  <scrol-view style="height: 100vh"
+    scroll-y="true" lower-threshold="50" bindscrolltolower="onScrollToLower">
+    <view class="groupinfo" wx:if="{{isShow}}">
+      <view class="groupinfo__header">
+        <view class="groupinfo__title">{{groupInfo.name}}</view>
+        <view class="groupinfo__p">管理者：{{groupInfo.creator_name}}</view>
+        <view class="groupinfo__p">人数：{{count}}</view>
+        <image class="groupinfo__remove" src="{{Icon.remove}}" mode="scaleToFill" @tap="onClickRemove"/>
+      </view>
+      <view class="groupinfo__list">
+        <view class="groupinfo__item" wx:for-items="{{userList}}" wx:for-item="stu" wx:key="id">
+          <view class="groupinfo__item--avator">{{stu.avator}}</view>
+          <view class="groupinfo__item--info">
+            <view class="groupinfo__item--name">{{stu.name}}</view>
+            <view class="groupinfo__item--id">ID: {{stu.stu_id}}</view>
+          </view>
+        </view>
+        <view class="groupinfo__baseline"></view>
+      </view>
+      <view class="groupinfo__plus" @tap="onClickAdd">
+        <image src="{{Icon.plus}}" mode="scaleToFill"/>
+      </view>
+      <toast />
+    </view>
+  </scrol-view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import { Icon } from '../assets/icon/icon'
+  import AToast from '../mixins/a-toast'
+  import Toast from 'wepy-com-toast'
+  import { ToastType, URL, CODE } from '../share/consts'
+  import zajax from '../utils/zajax'
+  import zlog from '../utils/zlog'
+
+  export default class Groupinfo extends wepy.page {
+
+    mixins = [AToast]
+    data = {
+      Icon: Icon,
+      isShow: false,
+      groupId: 0,
+      page: 1,
+      pageSize: 10,
+      count: 0,
+      groupInfo: {},
+      userList: [],
+    }
+
+    components = {
+      toast: Toast
+    }
+
+    onLoad(option) {
+      wx.setNavigationBarTitle({ title: '录入' })
+      this.groupId = option.groupid
+    }
+
+    onShow() {
+      this.page = 1
+      this.getData()
+    }
+
+    async getData() {
+      wx.showNavigationBarLoading()
+      let a = this.getGroupInfo()
+      let b = this.getUserList()
+      await a
+      await b
+      wx.hideNavigationBarLoading()
+      this.isShow = true
+      this.$apply()
+    }
+
+    getGroupInfo() {
+      return zajax.get(URL.group, { group_id: this.groupId })
+        .then(res => {
+          let body = res.data
+          let code = body.code
+          if (code !== CODE.GLOBAL_SUCCESS) return
+          this.groupInfo = body.data
+          this.$apply()
+        })
+        .catch(err => {})
+    }
+
+    getUserList(paging) {
+      let reqData = {
+        group_id: this.groupId,
+        page: this.page,
+        page_size: this.pageSize
+      }
+      this.page++
+      this.$apply()
+
+      return zajax.get(URL.groupUserList, reqData)
+        .then(res => {
+          let body = res.data
+          let code = body.code
+          if (code !== CODE.GLOBAL_SUCCESS) return
+          this.count = Number.isInteger(body.data.count) ? body.data.count : 0
+          body.data.user_list = Array.isArray(body.data.user_list) ? body.data.user_list : []
+
+          if (paging) this.userList = this.userList.concat(body.data.user_list)
+          else this.userList = body.data.user_list
+          this.userList = this.userList.map(el => {
+            if (typeof el.name === 'string') {
+              el.avator = el.name[0].toUpperCase()
+              console.log(el.avator)
+            }
+            return el
+          })
+          this.$apply()
+        })
+        .catch(err => {})
+    }
+
+    async removeGroup() {
+      let del = false
+      if (Number.isInteger(this.groupId)) {
+        zlog.log('groupid is invalid')
+        return
+      }
+      this.showToast(ToastType.LOADING, '加载中')
+      await zajax.postFD(URL.removeGroup, { group_id: this.groupId })
+        .then(res => {
+          this.hideToast()
+          let body = res.data
+          let code = body.code
+          if (code !== CODE.GLOBAL_SUCCESS) {
+            this.showToast(ToastType.FAIL, '删除失败', 1000)
+            return
+          }
+          del = true
+        })
+        .catch(err => {})
+      if (del)
+        wx.navigateBack()
+    }
+
+    async addUserToGroup() {
+      this.showToast(ToastType.LOADING, '加载中')
+      let cipher = ''
+      await zajax.postFD(URL.addUserToGroup, { group_id: this.groupId })
+        .then(res => {
+          this.hideToast()
+          let body = res.data
+          let code = body.code
+          if (code !== CODE.GLOBAL_SUCCESS) {
+            this.showToast(ToastType.HINT, `稍后再试`, 1000)
+            return
+          }
+          cipher = body.data
+        })
+        .catch(err => {})
+      if (!cipher) {
+        this.showToast(ToastType.HINT, `稍后再试`, 1000)
+        return
+      }
+      wx.showModal({
+        title: '提示',
+        content: `录入口令为：${cipher}`,
+        showCancel: false
+      })
+    }
+
+    methods = {
+      onClickRemove() {
+        wx.showModal({
+          title: '提示',
+          content: '确认删除此名单？',
+          success: res => {
+            if (res.confirm) {
+              this.removeGroup()
+            }
+          }
+        })
+      },
+      onClickAdd() {
+        this.addUserToGroup()
+      },
+      onScrollToLower() {
+        this.getUserList()
+      }
+    }
+
+  }
+</script>

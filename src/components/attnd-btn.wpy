@@ -1,0 +1,60 @@
+<style lang="scss">
+  @import '../assets/style/_variables.scss';
+  @import '../assets/style/_common.scss';
+
+  .atbtn {
+    &__group {
+      box-sizing: border-box;
+      width: 100%;
+      margin-top: 30rpx;
+      margin-bottom: 30rpx;
+    }
+
+    &__btn {
+      color: white;
+      margin-left: 10rpx;
+      margin-right: 10rpx;
+      margin-bottom: 22rpx;
+      border-width: 0;
+      font-size: 36rpx;
+    }
+  }
+</style>
+
+<template>
+  <view class="atbtn__group">
+    <button wx:for-items="{{btns}}" wx:for-item="model" wx:key="id"
+      class="atbtn__btn" style="background: {{model.color}}"
+      open-type="{{model.openType}}"
+      @tap="onClick({{model}})">{{model.name}}</button>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import { Type, BtnType, URL } from '../share/consts'
+
+  export default class AttndBtn extends wepy.component {
+
+    data = {
+      Type: Type
+    }
+
+    props = {
+      btns: {
+        type: Array,
+        default: []
+      }
+    }
+
+    onLoad() {}
+
+    methods = {
+      onClick(model) {
+        if (!model.emit) return
+        this.$emit(model.emit)
+      }
+    }
+
+  }
+</script>
