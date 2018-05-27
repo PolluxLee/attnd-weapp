@@ -258,7 +258,7 @@
       <view class="mine__status">
         <view class="mine__search">
           <image class="mine__search--icon" src="{{Icon.search}}" mode="scaleToFill"/>
-          <input placeholder="按考勤名字搜索" confirm-type="search" value="{{query}}" 
+          <input placeholder="按考勤名称搜索" confirm-type="search" value="{{query}}" 
             placeholder-style="color: #a5a5a5"
             @input="onQueryInput" @confirm="onSearchConfirm"/>
           <view>
@@ -276,7 +276,8 @@
       <view class="mine__list" wx:if="{{isShow}}">
         <view class="mine__item" wx:for-items="{{attndList}}" wx:for-item="attnd" wx:key="id"
           @tap="onClickAttnd({{attnd.cipher}})">
-          <view class="mine__tag mine__tag--over">已结束</view>
+          <view class="mine__tag mine__tag--over" wx:if="{{attnd.status === AttndStatus.ATTND_FINISH}}">已结束</view>
+          <view class="mine__tag mine__tag--ongoing" wx:if="{{attnd.status === AttndStatus.ATTND_NORMAL}}">进行中</view>
           <view class="mine__item--title">{{attnd.attnd_name}}</view>
           <view class="mine__item--p mine__item--p-pwd">口令：{{attnd.cipher}}</view>
           <view class="mine__item--p" wx:if="{{attndType===2}}">发布者：{{attnd.teacher_name}}</view>
@@ -305,7 +306,7 @@
   import { Icon } from '../assets/icon/icon'
   import mock from '../utils/mock'
   import zmap from '../utils/zmap'
-  import { Type, BtnType, URL, CODE } from '../share/consts'
+  import { Type, BtnType, URL, CODE, AttndStatus } from '../share/consts'
   import { getTimeFormat, getCurTime, getTimeMsFromTimeS, getTimeSFromTimeMs } from '../share/funcs'
   import AToast from '../mixins/a-toast'
   import Toast from 'wepy-com-toast'
@@ -325,6 +326,7 @@
     mixins = [AToast]
     data = {
       Icon: Icon,
+      AttndStatus: AttndStatus,
       name: '...',
       addrName: '...',
       avator: '',
@@ -343,6 +345,10 @@
 
     components = {
       toast: Toast
+    }
+
+    computed = {
+
     }
 
     onLoad() {

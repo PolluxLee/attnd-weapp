@@ -93,6 +93,7 @@
               .catch(err => {})
           } else {
             zlog.log(res, 'wx.login')
+            wx.showModal({ title: '提示', showCancel: false, content: '非常抱歉，小程序登录失败，请稍后再试' })
           }
         }
       });

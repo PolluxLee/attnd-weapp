@@ -23,7 +23,7 @@
     &__title {
       white-space: nowrap;
       overflow-x: auto;
-      width: 600rpx;
+      width: 500rpx;
       font-size: 48rpx;
       color: black;
       margin-bottom: 20rpx;
@@ -46,7 +46,7 @@
       height: 40rpx;
       position: absolute;
       right: 15rpx;
-      top: 15rpx;
+      top: 80rpx;
     }
 
     &__oper {
@@ -96,6 +96,7 @@
         color: white;
         font-size: 40rpx;
         overflow: hidden;
+        &-me { background: $acid; }
       }
       &--info {
         height: 100%;
@@ -159,6 +160,27 @@
       }
     }
 
+    &__tag {
+      position: absolute;
+      right: 0rpx;
+      top: 10rpx;
+      width: 110rpx;
+      height: 42rpx;
+      font-size: 28rpx;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 10rpx;
+      &--ongoing {
+        color: $theme;
+        border: 1rpx solid $theme;
+      }
+      &--over {
+        color: $font;
+        border: 1rpx solid $font;
+      }
+    }
+
     &__baseline {
       animation: fade-out 0.5s;
       box-sizing: border-box;
@@ -187,7 +209,9 @@
     scroll-y="true" lower-threshold="50" bindscrolltolower="onScrollToLower">
     <view class="attnd" wx:if="{{isShow}}">
       <view class="attnd__header">
-        <view class="attnd__title">{{baseInfo.attnd_name}}{{attndState}}</view>
+        <view class="attnd__tag attnd__tag--over" wx:if="{{isAttndFinish}}">已结束</view>
+        <view class="attnd__tag attnd__tag--ongoing" wx:if="{{!isAttndFinish}}">进行中</view>
+        <view class="attnd__title">{{baseInfo.attnd_name}}</view>
         <view class="attnd__p attnd__p--pwd">口令：{{baseInfo.cipher}}</view>
         <view class="attnd__p">时间：{{baseInfo.start_time}}</view>
         <view class="attnd__p">发布者：{{baseInfo.teacher_name}}</view>
@@ -202,10 +226,10 @@
             <image class="attnd__filter--img" src="{{Icon.triangle}}" mode="scaleToFill"/>
           </view>
         </view>
-        <view class="attnd__item attnd__item--self" wx:if="{{isShowSelf}}">
-          <view class="attnd__item--avator">我</view>
+        <view class="attnd__item attnd__item--self" wx:if="{{isSignin}}">
+          <view class="attnd__item--avator attnd__item--avator-me">我</view>
           <view class="attnd__item--info">
-            <view class="attnd__item--name">我{{self.id ? '（'+ self.stu_id +'）' : ''}}</view>
+            <view class="attnd__item--name">{{self.name}}{{self.id ? '（'+ self.stu_id +'）' : ''}}</view>
             <view class="attnd__item--location">距离：{{self.distance}}m</view>
           </view>
           <view class="attnd__item--icon">
@@ -229,7 +253,7 @@
             <image wx:if="{{stu.attnd_status===SigninType.TIME_OUT}}" src="{{Icon.attndTimeOut}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
             <view wx:if="{{stu.attnd_status===SigninType.ARRIVED}}">已到</view>
             <view wx:if="{{stu.attnd_status===SigninType.DISTANCE_OUT}}">超距</view>
-            <view wx:if="{{stu.attnd_status===SigninType.TIME_OUT}}">超时</view>
+            <view wx:if="{{stu.attnd_status===SigninType.TIME_OUT}}">迟到</view>
           </view>
         </view>
         <view class="attnd__baseline" wx:if="{{count!==0 && count===attndList.length}}">
@@ -241,8 +265,16 @@
           <view class="attnd__baseline--text">{{emptyMsg}}</view>
         </view>
       </view>
-      <view class="attnd__resp attnd__resp--signin" @tap="onSignIn" wx:if="{{displaySignin}}">签到</view>
-      <view class="attnd__resp attnd__resp--finish" @tap="onFinishAttnd" wx:if="{{displayFinish}}">结束考勤</view>
+      <view class="attnd__resp attnd__resp--signin" 
+        style="background: {{isSignin ? 'grey' : ''}}" 
+        @tap="onSignIn" wx:if="{{displaySignin}}">
+        {{signinBtnText}}
+      </view>
+      <view class="attnd__resp attnd__resp--finish" 
+        style="background: {{isAttndFinish ? 'grey' : ''}}" 
+        @tap="onFinishAttnd" wx:if="{{displayFinish}}">
+        {{finishBtnText}}
+      </view>
       <toast />
     </view>
   </scroll-view>
@@ -282,7 +314,7 @@
       attndList: [],
       identity: Identity.VISITOR,   //身份
       signInFilter: SigninType.SIGNIN_ALL,    //筛选
-      attndStatus: 0,    //考勤类型，负数为结束
+      attndStatus: AttndStatus.ATTND_NORMAL,    //考勤状态
 
       page: 1,
       pageSize: 10,
@@ -304,17 +336,9 @@
     }
 
     computed = {
-      // 进行中和结束的状态
-      attndState () {
-        if (Number.isInteger(this.attndStatus) && this.attndStatus < 0) return '（已结束）'
-        if (Number.isInteger(this.attndStatus) && this.attndStatus > 0) return '（进行中）'
-        return ''
-      },
       // 人数的显示
       displayCount() {
-        // 有用户组的录入
-        if (this.attndStatus === AttndStatus.ATTND_NORMAL
-          && Number.isInteger(this.presentCnt)
+        if (Number.isInteger(this.presentCnt)
           && Number.isInteger(this.count)) {
             return `人数：${this.presentCnt} / ${this.count}`
         }
@@ -327,14 +351,14 @@
         if (this.identity === Identity.STUDENT) return true
         return false
       },
-      // 控制结束按钮的显示
+      // 控制结束考勤按钮的显示
       displayFinish() {
-        if (this.identity === Identity.TEACHER && this.attndStatus > 0) return true
+        if (this.identity === Identity.TEACHER) return true
         return false
       },
       // 控制删除的显示
       displayRemove() {
-        if (this.identity === Identity.TEACHER && this.attndStatus < 0) return true
+        if (this.identity === Identity.TEACHER && this.isAttndFinish) return true
         return false
       },
       // 筛选后的列表状态
@@ -345,13 +369,25 @@
           case SigninType.TIME_OUT: return '迟到'
         }
       },
-      // 控制个人签到置顶的显示
-      isShowSelf() {
+      // 返回 true 表示已签到或 self 结构体不为空
+      isSignin() {
         if (JSON.stringify(this.self) !== '{}' 
           && (this.identity===Identity.STUDENT)
           && (this.signInFilter === SigninType.SIGNIN_ALL || this.signInFilter === this.self.attnd_status) ) return true
         return false
       },
+      // 返回 true 表示考勤已结束
+      isAttndFinish() {
+        return this.baseInfo.status === AttndStatus.ATTND_FINISH
+      },
+      signinBtnText() {
+        if (this.isSignin) return '已签到'
+        return '签到'
+      },
+      finishBtnText() {
+        if (this.isAttndFinish) return '已结束'
+        return '结束考勤'
+      }
     }
 
     onLoad(option) {
@@ -487,6 +523,7 @@
                 case SigninType.NOT_ARRIVED: msg = '签到失败'; break
                 default: msg = '签到失败'; break
               }
+              break
             case ATTND_NOT_EXIST: msg = '考勤不存在'; break
             case ATTND_CIPHER_NOT_CORRESPOND: msg = '签到失败'; break
             case ATTND_HAS_SIGNIN: msg = '已签到'; break
@@ -554,6 +591,7 @@
         this.getResponserList(true)
       },
       onSignIn() {
+        if (this.isSignin) return
         this.signIn()
       },
       onClickRemove() {
@@ -569,12 +607,13 @@
         })
       },
       onFinishAttnd() {
+        if (this.baseInfo.status < 0) return
         wx.showModal({
           title: '提示',
           content: '在考勤结束后签到的人，会被视为迟到，确定结束考勤？',
           success: res => {
             if (res.confirm) {
-              
+              this.finishAttnd()
             }
           }
         })
@@ -582,14 +621,31 @@
     }
 
     // 监听下拉
-    onPullDownRefresh() {
+    async onPullDownRefresh() {
       this.page = 1
-      this.getResponserList()
+      this.$apply()
+      await this.getAttndInfo()
+      await this.getResponserList()
     }
 
     // 结束考勤
-    finishAttnd() {
-
+    async finishAttnd() {
+      if (!this.cipher) { this.showToast(ToastType.FAIL, '结束失败', 1000); return }
+      this.showToast(ToastType.LOADING, '正在结束')
+      await zajax.postFD(URL.endAttnd, { cipher: this.cipher })
+        .then(res => {
+          this.hideToast()
+          let body = res.data
+          let code = body.code
+          if (code === CODE.GLOBAL_SUCCESS) {
+            
+          }
+        })
+        .catch(err => {})
+      this.page = 1
+      this.$apply()
+      await this.getAttndInfo()
+      await this.getResponserList()
     }
 
     // 删除考勤

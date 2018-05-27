@@ -86,7 +86,6 @@
       this.timeModel = { type: Type.TIME, label: '时间', readonly: false, options: [], value: '' }
       this.authorModel = { type: Type.TEXT, label: '发布者', readonly: false, length: 50, value: '', hint: '填写你的名字' }
       this.placeModel = { type: Type.TEXT_SELECT, label: '地点', readonly: false, length: 50, value: '', hint: '例如：理南404', extra: '选择', options: []}
-
       this.dateModel.value = getCurTime('date')
       this.timeModel.value = getCurTime('time')
       this.btnModel = [
@@ -118,6 +117,7 @@
           if (code !== CODE.GLOBAL_SUCCESS) return
           let options = body.data
           if (Array.isArray(options)) this.nameModel.options = options
+          this.$apply()
         })
         .catch(err => {})
     }
@@ -131,6 +131,7 @@
           if (code !== CODE.GLOBAL_SUCCESS) return
           let options = body.data
           if (Array.isArray(options)) this.placeModel.options = options
+          this.$apply()
         })
         .catch(err => {})
     }
@@ -175,14 +176,12 @@
       let reqData = {
         "attnd_name": this.nameModel.value,
         "start_time": dateToTimeMs(`${this.dateModel.value} ${this.timeModel.value}`),
-        "last": +this.lastModel.value,
         "location": {
             "latitude": this.location.latitude,
             "longitude": this.location.longitude,
             "accuracy": this.location.accuracy
         },
         "addr_name": this.placeModel.value,
-        "group_name": this.groupModel.value,
         "teacher_name": this.authorModel.value
       }
       this.showToast(ToastType.LOADING, '正在发布')
@@ -216,7 +215,7 @@
 
     // 检查表单
     checkData() {
-      let models = [this.nameModel, this.dateModel, this.timeModel, this.lastModel, this.groupModel, this.authorModel, this.placeModel]
+      let models = [this.nameModel, this.dateModel, this.timeModel, this.authorModel, this.placeModel]
       for (let el of models) {
         if (!el.value) {
           return { status: false, msg: `[${el.label}] 未正确填写` }

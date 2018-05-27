@@ -24,7 +24,7 @@ export const CipherType = { GROUP: 'A', NEW_GROUP: 'G', NO_GROUP: 'N', ENTRY: 'S
 export const Identity = { TEACHER: 0, STUDENT: 1, VISITOR: 3 }
 
 // 考勤状态
-export const AttndStatus = { ATTND_NORMAL: 1, ATTND_ENTRY: 2, ATTND_NOGROUP: 3, ATTND_DEL: 4 }
+export const AttndStatus = { ATTND_NORMAL: 1, ATTND_ENTRY: 2, ATTND_NOGROUP: 3, ATTND_DEL: 4, ATTND_FINISH: 5 }
 
 // API URL
 const HOST = 'http://liziyi.top'
@@ -35,6 +35,7 @@ export const URL = {
   login: `${PREFIX}/api/login`,
   userInfo: `${PREFIX}/api/user/info`,
   attnd: `${PREFIX}/api/attnd`,
+  endAttnd: `${PREFIX}/api/attnd/end`,
   historyAttndNames: `${PREFIX}/api/attnd/hisname`,
   historyGroupNames: `${PREFIX}/api/group/name`,
   attndList: `${PREFIX}/api/attndlist`,
@@ -48,7 +49,6 @@ export const URL = {
   attndSituation: `${PREFIX}/api/attnd/situation`,
   signIn: `${PREFIX}/api/attnd/signin`,
   updateSignIn: `${PREFIX}/api/signin/status/upd`,
-
 }
 
 // Status Code
