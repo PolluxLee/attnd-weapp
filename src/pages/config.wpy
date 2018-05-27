@@ -191,15 +191,21 @@
           let body = res.data
           let code = body.code
           if (code !== CODE.GLOBAL_SUCCESS) {   
-            this.showToast(ToastType.FAIL, '失败', 2000)
+            this.showToast(ToastType.HINT, '服务出了点问题', 2000)
             return
           }
           this.showToast(ToastType.SUCCESS, '成功', 2000)
+          // 更新个人信息
+          let userInfo = body.data.userinfo
+          let id = userInfo.id
+          let name = userInfo.name
+          let openid = userInfo.openid
+          zmid.setSelfinfo({ id, name, openid })
           if (body.data.cipher) wx.redirectTo({ url: `attnd?cipher=${body.data.cipher}` })
-          zmid.getSelfinfo()
         })
         .catch(err => {
-          this.showToast(ToastType.FAIL, '失败', 2000)
+          this.showToast(ToastType.HINT, '服务出了点问题', 2000)
+          zlog.log(err, 'config/attnd')
         })
     }
 

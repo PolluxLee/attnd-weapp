@@ -229,7 +229,7 @@
         <view class="attnd__item attnd__item--self" wx:if="{{isSignin}}">
           <view class="attnd__item--avator attnd__item--avator-me">我</view>
           <view class="attnd__item--info">
-            <view class="attnd__item--name">{{self.name}}{{self.id ? '（'+ self.stu_id +'）' : ''}}</view>
+            <view class="attnd__item--name">{{self.name}}{{self.stu_id ? '（'+ self.stu_id +'）' : ''}}</view>
             <view class="attnd__item--location">距离：{{self.distance}}m</view>
           </view>
           <view class="attnd__item--icon">
@@ -244,7 +244,7 @@
         <view class="attnd__item" wx:for-items="{{attndList}}" wx:for-item="stu" wx:key="id">
           <view class="attnd__item--avator">{{stu.avator}}</view>
           <view class="attnd__item--info">
-            <view class="attnd__item--name">{{stu.name}}{{stu.id ? '（'+ stu.stu_id +'）' : ''}}</view>
+            <view class="attnd__item--name">{{stu.name}}{{stu.stu_id  ? '（'+ stu.stu_id +'）' : ''}}</view>
             <view class="attnd__item--location">距离：{{stu.distance}}m</view>
           </view>
           <view class="attnd__item--icon" @tap="toggleSigninStatus({{stu.openid}})">
@@ -267,12 +267,12 @@
       </view>
       <view class="attnd__resp attnd__resp--signin" 
         style="background: {{isSignin ? 'grey' : ''}}" 
-        @tap="onSignIn" wx:if="{{displaySignin}}">
+        @tap="onSignIn" wx:if="{{isStudent}}">
         {{signinBtnText}}
       </view>
       <view class="attnd__resp attnd__resp--finish" 
         style="background: {{isAttndFinish ? 'grey' : ''}}" 
-        @tap="onFinishAttnd" wx:if="{{displayFinish}}">
+        @tap="onFinishAttnd" wx:if="{{isTeacher}}">
         {{finishBtnText}}
       </view>
       <toast />
@@ -347,12 +347,12 @@
         return ''
       },
       // 控制签到按钮的显示
-      displaySignin() {
+      isStudent() {
         if (this.identity === Identity.STUDENT) return true
         return false
       },
       // 控制结束考勤按钮的显示
-      displayFinish() {
+      isTeacher() {
         if (this.identity === Identity.TEACHER) return true
         return false
       },
@@ -408,6 +408,22 @@
       this.$apply()
       await this.getResponserList() 
       wx.hideNavigationBarLoading()
+      // setInterval(()=>{ this.refreshData() }, 6500)
+    }
+
+    // 刷新数据
+    async refreshData(page) {
+      wx.showNavigationBarLoading()
+      if (Number.isInteger(page)) this.page = page
+      this.$apply()
+      await this.getAttndInfo()
+      await this.getResponserList()
+      wx.hideNavigationBarLoading()
+    }
+
+    // 监听下拉
+    onPullDownRefresh() {
+      this.refreshData(1)
     }
 
     // 获取考勤基本信息
@@ -532,12 +548,10 @@
             case ATTND_CREATOR: msg = '无需签到'; break
             default: msg = '签到失败'; break
           }
-          this.showToast(ToastType.SUCCESS, msg, 2000)
+          this.showToast(ToastType.HINT, msg, 2000)
         })
         .catch(err => { this.showToast(ToastType.FAIL, '签到失败', 2000) })
-      this.page = 1
-      this.$apply()
-      this.getResponserList()
+      this.refreshData()
     }
 
     //检查位置
@@ -553,7 +567,7 @@
     methods = {
       // 修改签到者状态
       toggleSigninStatus(openid) {
-        if (this.identity !== Identity.TEACHER) return
+        if (this.isStudent || !this.isAttndFinish) return
         if (!openid) return
         wx.showActionSheet({
           itemList: ['已到', '超出距离', '迟到'],
@@ -579,9 +593,7 @@
               case 1: this.signInFilter = SigninType.DISTANCE_OUT; break
               case 2: this.signInFilter = SigninType.TIME_OUT; break
             }
-            this.page = 1
-            this.$apply()
-            this.getResponserList()
+            this.refreshData(1)
           },
           fail: res => console.log(res.errMsg)
         })
@@ -595,7 +607,7 @@
         this.signIn()
       },
       onClickRemove() {
-        if (this.identity !== Identity.TEACHER) return
+        if (!this.isAttndFinish || this.isStudent) return
         wx.showModal({
           title: '提示',
           content: '确认删除此考勤？',
@@ -607,7 +619,7 @@
         })
       },
       onFinishAttnd() {
-        if (this.baseInfo.status < 0) return
+        if (this.isAttndFinish || this.isStudent) return
         wx.showModal({
           title: '提示',
           content: '在考勤结束后签到的人，会被视为迟到，确定结束考勤？',
@@ -620,17 +632,9 @@
       }
     }
 
-    // 监听下拉
-    async onPullDownRefresh() {
-      this.page = 1
-      this.$apply()
-      await this.getAttndInfo()
-      await this.getResponserList()
-    }
-
     // 结束考勤
     async finishAttnd() {
-      if (!this.cipher) { this.showToast(ToastType.FAIL, '结束失败', 1000); return }
+      if (!this.cipher) { this.showToast(ToastType.FAIL, '操作失败', 1000); return }
       this.showToast(ToastType.LOADING, '正在结束')
       await zajax.postFD(URL.endAttnd, { cipher: this.cipher })
         .then(res => {
@@ -642,17 +646,14 @@
           }
         })
         .catch(err => {})
-      this.page = 1
-      this.$apply()
-      await this.getAttndInfo()
-      await this.getResponserList()
+      this.refreshData()
     }
 
     // 删除考勤
     removeAttnd() {
       let cipher = this.cipher
       if (!cipher) {
-        this.showToast(ToastType.FAIL, '删除失败', 1000)
+        this.showToast(ToastType.FAIL, '操作失败', 1000)
         return
       }
       this.showToast(ToastType.LOADING, '加载中')
@@ -662,13 +663,13 @@
           let body = res.data
           let code = body.code
           if (code !== CODE.GLOBAL_SUCCESS) {
-            this.showToast(ToastType.FAIL, '删除失败', 1000)
+            this.showToast(ToastType.FAIL, '操作失败', 1000)
             return
           }
           this.showToast(ToastType.SUCCESS, '删除成功', 1000)
           wx.navigateBack()
         })
-        .catch(err => { this.showToast(ToastType.FAIL, '删除失败', 1000) })
+        .catch(err => { this.showToast(ToastType.FAIL, '操作失败', 1000) })
     }
 
     // 结束考勤后修改签到状态
@@ -685,11 +686,11 @@
           let body = res.data
           let code = body.code
           if (code !== CODE.GLOBAL_SUCCESS) {
-            this.showToast(ToastType.FAIL, '修改失败', 1000)
+            this.showToast(ToastType.FAIL, '操作失败', 1000)
             return
           }
           this.$apply()
-          this.getResponserList()
+          this.refreshData()
         })
         .catch(err => {})
     }

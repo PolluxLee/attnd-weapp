@@ -100,14 +100,15 @@
         let body = res.data
         let code = body.code
         if (code !== CODE.GLOBAL_SUCCESS) {
-          this.showToast(ToastType.FAIL, '保存失败', 2000)
+          this.showToast(ToastType.HINT, '服务出了点问题', 2000)
           return
         }
         let name = body.data.name
         let stuid = body.data.stu_id
         let id = body.data.id
         zmid.setSelfinfo({ id, stuid, name })
-        this.showToast(ToastType.SUCCESS, '保存成功', 2000)
+        this.showToast(ToastType.SUCCESS, '保存成功', 1000)
+        setTimeout(() => { wx.navigateBack() }, 1000);
       })
       .catch(err => {})
     }
@@ -121,9 +122,6 @@
       // 更新个人信息
       'save-btn': event => {
         this.updateUserInfo()
-      },
-      'auth-btn': event => {
-        
       }
     }
 
