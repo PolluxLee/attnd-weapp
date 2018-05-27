@@ -37,7 +37,7 @@
       margin-top: 4rpx;
       margin-bottom: 4rpx;
       &--pwd {
-        color: $red;
+        color: $theme;
       }
     }
 
@@ -108,14 +108,14 @@
         white-space: nowrap;
         overflow-x: auto;
         color: black;
-        font-size: 30rpx;
+        font-size: 32rpx;
         margin: 4rpx 0;
       }
       &--location {
         white-space: nowrap;
         overflow-x: auto;
         color: $font;
-        font-size: 24rpx;
+        font-size: 26rpx;
         margin: 4rpx 0;
       }
       &--icon {
@@ -203,9 +203,9 @@
           </view>
         </view>
         <view class="attnd__item attnd__item--self" wx:if="{{isShowSelf}}">
-          <view class="attnd__item--avator">{{self.avator}}</view>
+          <view class="attnd__item--avator">我</view>
           <view class="attnd__item--info">
-            <view class="attnd__item--name">{{self.name}}{{self.id ? '（'+ self.stu_id +'）' : ''}}</view>
+            <view class="attnd__item--name">我{{self.id ? '（'+ self.stu_id +'）' : ''}}</view>
             <view class="attnd__item--location">距离：{{self.distance}}m</view>
           </view>
           <view class="attnd__item--icon">
@@ -223,7 +223,7 @@
             <view class="attnd__item--name">{{stu.name}}{{stu.id ? '（'+ stu.stu_id +'）' : ''}}</view>
             <view class="attnd__item--location">距离：{{stu.distance}}m</view>
           </view>
-          <view class="attnd__item--icon" @tap="toggleSigninFilter({{stu.openid}})">
+          <view class="attnd__item--icon" @tap="toggleSigninStatus({{stu.openid}})">
             <image wx:if="{{stu.attnd_status===SigninType.ARRIVED}}" src="{{Icon.attndArrived}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
             <image wx:if="{{stu.attnd_status===SigninType.DISTANCE_OUT}}" src="{{Icon.attndDistanceOut}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
             <image wx:if="{{stu.attnd_status===SigninType.TIME_OUT}}" src="{{Icon.attndTimeOut}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
@@ -347,12 +347,11 @@
       },
       // 控制个人签到置顶的显示
       isShowSelf() {
-        if (!JSON.stringify(this.self) === '{}' 
-          && identity===Identity.STUDENT 
+        if (JSON.stringify(this.self) !== '{}' 
+          && (this.identity===Identity.STUDENT)
           && (this.signInFilter === SigninType.SIGNIN_ALL || this.signInFilter === this.self.attnd_status) ) return true
         return false
-      }
-
+      },
     }
 
     onLoad(option) {
@@ -516,7 +515,7 @@
 
     methods = {
       // 修改签到者状态
-      toggleSigninFilter(openid) {
+      toggleSigninStatus(openid) {
         if (this.identity !== Identity.TEACHER) return
         if (!openid) return
         wx.showActionSheet({
