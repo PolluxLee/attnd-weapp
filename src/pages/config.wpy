@@ -207,9 +207,9 @@
     //检查位置
     checkLocation() {
       for (let key in this.location) {
-        if (!isNumber(this.location[key])) {
-          return false
-        }
+        if (!isNumber(this.location[key])) return false
+        if (key === 'latitude' && !(this.location[key] >= -90 && this.location[key] <= 90)) return false
+        if (key === 'longitude' && !(this.location[key] >= -180 && this.location[key] <= 180)) return false
       }
       return true
     }

@@ -143,7 +143,7 @@
     input {
       font-size: 28rpx;
       color: black;
-      width: 230rpx;
+      width: 330rpx;
       height: 48rpx;
     }
     view {
@@ -419,14 +419,13 @@
           if (code !== CODE.GLOBAL_SUCCESS) return
           this.count = Number.isInteger(body.data.count) ? body.data.count : 0
           body.data.attnds = Array.isArray(body.data.attnds) ? body.data.attnds : []
-          this.attndList = []
-          // if (paging) this.attndList = this.attndList.concat(body.data.attnds)
-          // else this.attndList = body.data.attnds
-          // this.attndList.map(el => {
-          //   let date = new Date(el.start_time)
-          //   el.start_time = `${getTimeFormat(date, 'date', '/')} ${getTimeFormat(date, 'time', ':')}`
-          //   return el
-          // })
+          if (paging) this.attndList = this.attndList.concat(body.data.attnds)
+          else this.attndList = body.data.attnds
+          this.attndList.map(el => {
+            let date = new Date(el.start_time)
+            el.start_time = `${getTimeFormat(date, 'date', '/')} ${getTimeFormat(date, 'time', ':')}`
+            return el
+          })
         })
         .catch(err => {})
       wx.hideNavigationBarLoading()
