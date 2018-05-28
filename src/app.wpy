@@ -30,7 +30,7 @@
         backgroundTextStyle: 'light',
         backgroundColor: '#ebebeb',
         navigationBarBackgroundColor: '#00897B',
-        navigationBarTitleText: '小小考勤',
+        navigationBarTitleText: 'Simple考勤',
         navigationBarTextStyle: 'white',
         backgroundTextStyle: 'dark'
       },
