@@ -346,11 +346,7 @@
     components = {
       toast: Toast
     }
-
-    computed = {
-
-    }
-
+    
     onLoad() {
       wx.setNavigationBarTitle({ title: '我的' })
     }

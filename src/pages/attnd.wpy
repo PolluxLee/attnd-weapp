@@ -502,6 +502,11 @@
     }
 
     async signIn() {
+      if (!zmid.checkSelfinfo()) {
+        this.showToast(ToastType.HINT, '完善信息', 1000)
+        setTimeout(() => { wx.navigateTo({ url: 'selfinfo' }) }, 1000)
+        return
+      }
       this.showToast(ToastType.LOADING, '获取位置')
       // 获取经纬度
       await zmap.getLocation()
@@ -694,6 +699,17 @@
         })
         .catch(err => {})
     }
+
+    // onShareAppMessage(res) {
+    //   if (res.from === 'button') {
+    //     // 来自页面内转发按钮
+    //     console.log(res.target)
+    //   }
+    //   return {
+    //     title: '一起来签到',
+    //     path: `/pages/attnd?cipher=${this.cipher}`
+    //   }
+    // }
 
   }
 </script>

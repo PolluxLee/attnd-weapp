@@ -113,11 +113,6 @@
       .catch(err => {})
     }
 
-
-    methods = {
-
-    }
-
     events = {
       // 更新个人信息
       'save-btn': event => {
