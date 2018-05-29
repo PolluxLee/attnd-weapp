@@ -150,7 +150,7 @@
       },
       onClickResp() {
         this.model.value = ''
-        if (!zmid.checkSelfinfo()) {
+        if (JSON.stringify(zmid.checkSelfinfo()) === '{}') {
           this.showToast(ToastType.HINT, '完善信息', 1000)
           setTimeout(() => { wx.navigateTo({ url: 'selfinfo' }) }, 1000)
           return

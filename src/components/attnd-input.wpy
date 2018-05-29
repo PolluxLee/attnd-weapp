@@ -91,6 +91,7 @@
           maxlength="{{model.length}}"
           placeholder="{{model.hint}}"
           placeholder-style="color: #a5a5a5"
+          style="color: {{model.readonly ? '#a5a5a5' : '#000000'}}"
           @input="onInputChange"/>
         <picker wx:if="{{model.type===Type.TIME}}" 
           @change="onPickerChange" 

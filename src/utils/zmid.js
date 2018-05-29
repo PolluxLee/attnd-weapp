@@ -34,17 +34,11 @@ zmid.checkSelfinfo = () => {
   return false
 }
 
-// 获取个人信息
-zmid.getSelfinfo = async function() {
-  // 先从 storage 中获取
-  let name = zstore.get(zstore.name)
-  let stuid = zstore.get(zstore.stuid)
-  let id = zstore.get(zstore.id)
-  if (name && Number.isInteger(id)) {
-    zlog.log({ name, stuid, id }, 'zmid/getSelfinfo/zstore')
-    return { name, stuid, id }
-  }
-  // 若 storage 没有，再从后端获取
+// 从后端获取个人信息
+zmid.getFreshSelfinfo = async function() {
+  let name
+  let stuid
+  let id
   let openid = this.getOpenid()
   await zajax.get(URL.userInfo, { openid })
   .then(res => {
@@ -61,8 +55,19 @@ zmid.getSelfinfo = async function() {
   .catch(err => {
     zlog.error(err, 'zmid/getSelfinfo')
   })
-
   if (name && Number.isInteger(id)) {
+    return { name, stuid, id }
+  }
+  return {}
+}
+
+// 获取个人信息
+zmid.getSelfinfo = function() {
+  let name = zstore.get(zstore.name)
+  let stuid = zstore.get(zstore.stuid)
+  let id = zstore.get(zstore.id)
+  if (name && Number.isInteger(id)) {
+    zlog.log({ name, stuid, id }, 'zmid/getSelfinfo/zstore')
     return { name, stuid, id }
   }
   return {}

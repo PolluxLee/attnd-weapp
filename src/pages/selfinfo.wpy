@@ -69,18 +69,18 @@
       this.btnModel = [
         { name: '保存', emit: 'save-btn', color: '#00897B' },
       ]
-      this.isShow = true
     }
 
     // 获取用户信息
     async getData() {
-      await zmid.getSelfinfo().then(res => {
+      await zmid.getFreshSelfinfo().then(res => {
         this.nameModel.value = res.name ? res.name : ''
         this.idModel.value = res.stuid ? res.stuid : ''
+        this.$apply()
       })
-      setTimeout(() => {
-        wx.hideNavigationBarLoading()
-      }, 1000);
+      wx.hideNavigationBarLoading()
+      this.isShow = true
+      this.$apply()
     }
 
     //更新用户信息
@@ -96,7 +96,6 @@
       this.showToast(ToastType.LOADING, '正在保存')
       zajax.post(URL.userInfo, data)
       .then(res => {
-        this.hideToast()
         let body = res.data
         let code = body.code
         if (code !== CODE.GLOBAL_SUCCESS) {
@@ -107,8 +106,7 @@
         let stuid = body.data.stu_id
         let id = body.data.id
         zmid.setSelfinfo({ id, stuid, name })
-        this.showToast(ToastType.SUCCESS, '保存成功', 1000)
-        setTimeout(() => { wx.navigateBack() }, 1000);
+        setTimeout(() => { this.hideToast(); wx.navigateBack() }, 500);
       })
       .catch(err => {})
     }

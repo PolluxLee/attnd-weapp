@@ -376,7 +376,7 @@
 
     // 获取个人信息
     async getSelfInfo() {
-      let name = (await zmid.getSelfinfo()).name
+      let name = (await zmid.getFreshSelfinfo()).name
       if (name) {
         this.name = name
         this.avator = name[0].toUpperCase()
