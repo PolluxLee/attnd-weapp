@@ -89,6 +89,7 @@
                 let id = userInfo.id
                 let openid = userInfo.openid
                 zmid.setSelfinfo({ name, stuid, id, openid })
+                zstore.set(zstore.logTime, Date.now())
               })
               .catch(err => {})
           } else {
