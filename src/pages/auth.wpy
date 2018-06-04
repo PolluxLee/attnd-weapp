@@ -55,7 +55,7 @@
   import { ToastType } from '../share/consts'
   import zstore from '../utils/zstore'
   import zmid from '../utils/zmid'
-  import zlog from '../utils/zlog'
+  import zlog, { LogLevel } from '../utils/zlog'
   import { Icon } from '../assets/icon/icon'
 
   export default class Auth extends wepy.page {

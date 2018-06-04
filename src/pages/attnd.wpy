@@ -289,7 +289,7 @@
   import { isNumber, getTimeFormat } from '../share/funcs'
   import zajax from '../utils/zajax'
   import zmap from '../utils/zmap'
-  import zlog from '../utils/zlog'
+  import zlog, { LogLevel } from '../utils/zlog'
   import zmid from '../utils/zmid'
   import zstore from '../utils/zstore'
 
@@ -404,6 +404,10 @@
       wx.setNavigationBarTitle({ title: '考勤情况' })
     }
 
+    onUnload() {
+      zlog.flushLog()
+    }
+
     onShow() {
       this.getData()
     }
@@ -446,6 +450,12 @@
         .then(res =>{
           let body = res.data
           let code = body.code
+          zlog.setLog({
+            level: LogLevel.INFO,
+            msg: `${code}`,
+            loc: 'pages/attnd function getAttndInfo()',
+            oper: '获取考勤基本信息'
+          })
           if (code !== CODE.GLOBAL_SUCCESS) return
           this.baseInfo = body.data
           // 获取考勤状态，负数表示考勤结束
@@ -480,6 +490,12 @@
         .then(res => {
           let body = res.data
           let code = body.code
+          zlog.setLog({
+            level: LogLevel.INFO,
+            msg: `${code}`,
+            loc: 'pages/attnd function getResponserList()',
+            oper: '获取考勤列表'
+          })
           if (code !== CODE.GLOBAL_SUCCESS) return
           // 获取人数
           let attndInfo = body.data
@@ -516,6 +532,7 @@
     async signIn() {
       if (!zmid.checkSelfinfo()) {
         this.showToast(ToastType.HINT, '完善信息', 1000)
+        zlog.setLog({level: LogLevel.INFO,msg: `签到时未填写个人信息`,loc: 'pages/attnd function signIn()',oper: '签到'})
         setTimeout(() => { wx.navigateTo({ url: 'selfinfo' }) }, 1000)
         return
       }
@@ -523,6 +540,11 @@
       // 获取经纬度
       await zmap.getLocation()
         .then(res => {
+          zlog.setLog({level: LogLevel.INFO,
+            msg: JSON.stringify(res),
+            loc: 'pages/attnd function signIn()',
+            oper: '签到时获取位置'
+          })
           this.location.latitude = res.latitude
           this.location.longitude = res.longitude
           this.location.accuracy = res.accuracy
@@ -546,6 +568,7 @@
         .then(res => {
           let body = res.data
           let code = body.code
+          zlog.setLog({level: LogLevel.INFO,msg: `${code}`,loc: 'pages/attnd function signIn()',oper: '签到'})
           let msg = ''
           switch (code) {
             case CODE.GLOBAL_SUCCESS: 

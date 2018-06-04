@@ -31,7 +31,7 @@
   import { ToastType } from '../share/consts'
   import zstore from '../utils/zstore'
   import zmid from '../utils/zmid'
-  import zlog from '../utils/zlog'
+  import zlog, { LogLevel } from '../utils/zlog'
 
   export default class Selfinfo extends wepy.page {
 
@@ -98,6 +98,12 @@
       .then(res => {
         let body = res.data
         let code = body.code
+        zlog.setLog({
+          level: LogLevel.INFO,
+          msg: `${code}`,
+          loc: 'pages/selfinfo function updateUserInfo()',
+          oper: '更新用户信息'
+        })
         if (code !== CODE.GLOBAL_SUCCESS) {
           this.showToast(ToastType.HINT, '服务出了点问题', 2000)
           return

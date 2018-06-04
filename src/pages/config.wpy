@@ -39,6 +39,7 @@
   import { ToastType } from '../share/consts'
   import zstore from '../utils/zstore'
   import zmid from '../utils/zmid'
+  import zlog, { LogLevel } from '../utils/zlog'
 
   export default class Config extends wepy.page {
 
@@ -114,6 +115,12 @@
         .then(res => {
           let body = res.data
           let code = body.code
+          zlog.setLog({
+            level: LogLevel.INFO,
+            msg: `${code}`,
+            loc: 'pages/config function getHistoryAttndNames()',
+            oper: '初始化表单'
+          })
           if (code !== CODE.GLOBAL_SUCCESS) return
           let options = body.data
           if (Array.isArray(options)) this.nameModel.options = options
@@ -128,6 +135,12 @@
         .then(res => {
           let body = res.data
           let code = body.code
+          zlog.setLog({
+            level: LogLevel.INFO,
+            msg: `${code}`,
+            loc: 'pages/config function getHistoryPlaceNames()',
+            oper: '初始化表单'
+          })
           if (code !== CODE.GLOBAL_SUCCESS) return
           let options = body.data
           if (Array.isArray(options)) this.placeModel.options = options
@@ -153,7 +166,13 @@
     // 获取位置
     getLocation() {
       return zmap.getLocation()
-        .then(res => { 
+        .then(res => {
+          zlog.setLog({
+            level: LogLevel.INFO,
+            msg: JSON.stringify(res),
+            loc: 'pages/config function getLocation()',
+            oper: '初始化表单'
+          })
           this.location.latitude = res.latitude
           this.location.longitude = res.longitude
           this.location.accuracy = res.accuracy
@@ -172,6 +191,12 @@
     releaseAttnd() {
       let checkLoc = this.checkLocation()
       if (!checkLoc) {
+        zlog.setLog({
+          level: LogLevel.INFO,
+          msg: '未获取位置或经纬度超出范围，跳转到授权页',
+          loc: 'pages/config function releaseAttnd()',
+          oper: '发布考勤'
+        })
         wx.navigateTo({ url: 'auth' })
         return
       }
@@ -197,6 +222,12 @@
           this.hideToast()
           let body = res.data
           let code = body.code
+          zlog.setLog({
+            level: LogLevel.INFO,
+            msg: `${code}`,
+            loc: 'pages/config function releaseAttnd()',
+            oper: '发布考勤'
+          })
           if (code !== CODE.GLOBAL_SUCCESS) {   
             this.showToast(ToastType.HINT, '服务出了点问题', 2000)
             return

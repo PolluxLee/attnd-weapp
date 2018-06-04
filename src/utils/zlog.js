@@ -32,35 +32,55 @@ zlog.error = function(data, loc) {
  * 3. 用户杀死小程序
  */
 let cache = []
-let timeLimit = 10000
-let lenLimit = 20
+const timeLimit = 10000
+const lenLimit = 20
+const switcher = true  // 日志开关
 
 /**
- * @param {level, msg, loc, oper} msg：分别是等级，信息，定位，操作
+ * @param {level, msg, loc, oper} model：分别是等级，信息，定位，操作
  */
-zlog.setLog = function(msg) {
+zlog.setLog = function(model) {
+  if (!switcher) return
+  if (!isLogValid(model)) return
   let logTime = zstore.get(zstore.logTime)
   let curTime = Date.now()
-  cache.push(msg)
-
+  model.time = curTime  // 添加时间戳
+  cache.push(model)
+  // 大于给定长度，发送日志
   if (cache.length >= lenLimit) {
-    this.sendLog(cache.slice())
-    cache = []
-    return
-  }
-  if (curTime - logTime > timeLimit) {
     zstore.set(zstore.logTime, curTime)
-    this.sendLog(cache.slice())
+    sendLog(cache.slice())
     cache = []
     return
   }
+  // 距离上次请求发送日志的时间间隔大于给定时间，发送日志
+  // if (curTime - logTime > timeLimit) {
+  //   zstore.set(zstore.logTime, curTime)
+  //   this.sendLog(cache.slice())
+  //   cache = []
+  //   return
+  // }
 }
 
-zlog.sendLog = function(arr) {
-  let logs = []
-  if (!Array.isArray(arr)) logs = cache.slice()
-  else logs = arr
+function isLogValid(model) {
+  return !!(model && model.level && model.msg)
+}
 
+zlog.flushLog = function() {
+  let logs = cache
+  cache = []
+  console.warn(logs)
+}
+
+function sendLog(arr) {
+  let logs = []
+  if (!Array.isArray(arr)) {
+    logs = cache
+  } else {
+    logs = arr
+  }
+  console.warn(logs)
 }
 
 export default zlog
+export const LogLevel = { DEBUG: 'debug', INFO: 'info', WARN: 'warn', ERROR: 'error', FATAL: 'fatal' }

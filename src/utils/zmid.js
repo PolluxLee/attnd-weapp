@@ -1,7 +1,7 @@
 import zajax from './zajax'
 import zstore from './zstore'
 import { URL, CODE } from '../share/consts'
-import zlog from './zlog'
+import zlog, { LogLevel } from './zlog'
 const zmid = {}
 
 // 设置个人信息到 storage
@@ -45,6 +45,11 @@ zmid.getFreshSelfinfo = async function() {
     let body = res.data
     zlog.log({ name, stuid, id }, 'zmid/getSelfinfo/backend')
     let code = body.code
+    zlog.setLog({
+      level: LogLevel.INFO,
+      msg: `${code}`,
+      loc: 'utils/zmid.js function zmid/getFreshSelfinfo()'
+    })
     if (code !== CODE.GLOBAL_SUCCESS) return {}
     id = body.data.id
     name = body.data.name

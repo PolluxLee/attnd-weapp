@@ -86,7 +86,7 @@
   import zajax from '../utils/zajax'
   import zstore from '../utils/zstore'
   import zmid from '../utils/zmid'
-  import zlog from '../utils/zlog'
+  import zlog, { LogLevel } from '../utils/zlog'
 
   export default class Index extends wepy.page {
 
@@ -132,6 +132,10 @@
       this.$invoke('attndModal','hideModal')
     }
 
+    onUnload() {
+      zlog.flushLog()
+    }
+
     isNameEmpty() {
       let name = zstore.get(zstore.userName)
       let id = zstore.get(zstore.id)
@@ -152,6 +156,12 @@
         this.model.value = ''
         if (JSON.stringify(zmid.checkSelfinfo()) === '{}') {
           this.showToast(ToastType.HINT, '完善信息', 1000)
+          zlog.setLog({ 
+            level: LogLevel.INFO,
+            msg: '需要完善个人信息才能输入口令',
+            loc: 'pages/index function onClickResp()',
+            oper: '点击输入口令'
+          })
           setTimeout(() => { wx.navigateTo({ url: 'selfinfo' }) }, 1000)
           return
         }

@@ -314,7 +314,7 @@
   import zstore from '../utils/zstore'
   import zajax from '../utils/zajax'
   import zmid from '../utils/zmid'
-  import zlog from '../utils/zlog'
+  import zlog, { LogLevel } from '../utils/zlog'
 
   export default class Mine extends wepy.page {
 
@@ -356,6 +356,10 @@
       this.getData()
     }
 
+    onUnload() {
+      zlog.flushLog()
+    }
+
     resetData({ page, query, isShow }) {
       if (Number.isInteger(page) && page > 0) this.page = page
       if (typeof query === 'string') this.query = query
@@ -390,13 +394,28 @@
       let latitude
       let longitude
       await zmap.getLocation()
-        .then(res => { latitude = res.latitude; longitude = res.longitude })
+        .then(res => { 
+          latitude = res.latitude
+          longitude = res.longitude
+          zlog.setLog({
+            level: LogLevel.INFO,
+            msg: JSON.stringify({ res }),
+            loc: 'pages/mine function getAddrName()',
+            oper: '获取经纬度'
+          })
+        })
         .catch(err => {})
       await zmap.getAddrName(latitude, longitude)
         .then(res => {
           if (res) {
             this.addrName = res ? res : ''
-            this.$apply() 
+            this.$apply()
+            zlog.setLog({
+              level: LogLevel.INFO,
+              msg: JSON.stringify({ addrName }),
+              loc: 'pages/mine function getAddrName()',
+              oper: '获取位置名称'
+            })
           }
         })
         .catch(err => {})
@@ -419,6 +438,12 @@
         .then(res => {
           let body = res.data
           let code = body.code
+          zlog.setLog({
+            level: LogLevel.INFO,
+            msg: `${code}`,
+            loc: 'pages/mine function getAttndList()',
+            oper: '获取考勤列表'
+          })
           if (code !== CODE.GLOBAL_SUCCESS) return
           this.count = Number.isInteger(body.data.count) ? body.data.count : 0
           body.data.attnds = Array.isArray(body.data.attnds) ? body.data.attnds : []
