@@ -226,7 +226,7 @@
             <image class="attnd__filter--img" src="{{Icon.triangle}}" mode="scaleToFill"/>
           </view>
         </view>
-        <view class="attnd__item attnd__item--self" wx:if="{{isSignin && isShowList}}">
+        <view class="attnd__item attnd__item--self" wx:if="{{isShowSelf && isShowList}}">
           <view class="attnd__item--avator attnd__item--avator-me">我</view>
           <view class="attnd__item--info">
             <view class="attnd__item--name">{{self.name}}{{self.stu_id ? '（'+ self.stu_id +'）' : ''}}</view>
@@ -374,6 +374,13 @@
       isSignin() {
         if (JSON.stringify(this.self) !== '{}' 
           && (this.identity===Identity.STUDENT)
+          && (typeof this.self.attnd_status === 'number' && this.self.attnd_status > 0) ) return true
+        return false
+      },
+      // 显示 self 结构体
+      isShowSelf() {
+        if (JSON.stringify(this.self) !== '{}' 
+          && (this.identity===Identity.STUDENT)
           && (this.signInFilter === SigninType.SIGNIN_ALL || this.signInFilter === this.self.attnd_status) ) return true
         return false
       },
@@ -406,6 +413,7 @@
       wx.showNavigationBarLoading()
       await this.getAttndInfo()
       this.isShow = true
+      this.isShowList = true
       this.$apply()
       await this.getResponserList() 
       wx.hideNavigationBarLoading()
@@ -413,22 +421,23 @@
     }
 
     // 刷新数据
-    async refreshData(page) {
-      this.isShowList = false
-      this.$apply()
+    async refreshData({ page, isShow, isShowList }) {
       wx.showNavigationBarLoading()
-      if (Number.isInteger(page)) this.page = page
+      if (Number.isInteger(page) && page > 0) this.page = page
+      if (typeof isShow === 'boolean') this.isShow = isShow
+      if (typeof isShowList === 'boolean') this.isShowList = isShowList
       this.$apply()
       await this.getAttndInfo()
       await this.getResponserList()
-      wx.hideNavigationBarLoading()
+      this.isShow = true
       this.isShowList = true
       this.$apply()
+      wx.hideNavigationBarLoading()
     }
 
     // 监听下拉
     onPullDownRefresh() {
-      this.refreshData(1)
+      this.refreshData({ isShow: true, isShowList: true })
     }
 
     // 获取考勤基本信息
@@ -499,8 +508,6 @@
           this.$apply()
         })
         .catch(err => {})
-      this.isShow = true
-      this.$apply()
       setTimeout(() => { this.emptyLock = false; this.$apply() }, 200);
       this.$apply()
       wx.stopPullDownRefresh()
@@ -561,7 +568,8 @@
           this.showToast(ToastType.HINT, msg, 2000)
         })
         .catch(err => { this.showToast(ToastType.FAIL, '签到失败', 2000) })
-      this.refreshData()
+
+      this.refreshData({ page: 1, isShow: true, isShowList: true })
     }
 
     //检查位置
@@ -603,7 +611,7 @@
               case 1: this.signInFilter = SigninType.DISTANCE_OUT; break
               case 2: this.signInFilter = SigninType.TIME_OUT; break
             }
-            this.refreshData(1)
+            this.refreshData({ page: 1, isShow: true, isShowList: false })
           },
           fail: res => console.log(res.errMsg)
         })
@@ -656,7 +664,7 @@
           }
         })
         .catch(err => {})
-      this.refreshData()
+      this.refreshData({ isShow: true, isShowList: true })
     }
 
     // 删除考勤
@@ -700,7 +708,7 @@
             return
           }
           this.$apply()
-          this.refreshData()
+          this.refreshData({ isShow: true, isShowList: true })
         })
         .catch(err => {})
     }

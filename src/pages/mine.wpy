@@ -352,14 +352,15 @@
     }
 
     onShow() {
-      this.resetData()
+      this.resetData({ page: 1, query: '', isShow: true })
       this.getData()
     }
 
-    resetData() {
-      this.page = 1
-      this.query = ''
-      this.isShow = false
+    resetData({ page, query, isShow }) {
+      if (Number.isInteger(page) && page > 0) this.page = page
+      if (typeof query === 'string') this.query = query
+      if (typeof isShow === 'boolean') this.isShow = isShow
+      this.$apply()
     }
 
     // Promise 并行开始，串行结束
@@ -439,7 +440,7 @@
 
     // 监听下拉
     onPullDownRefresh() {
-      this.resetData()
+      this.resetData({})
       this.getAttndList()
     }
 
@@ -473,7 +474,7 @@
           case 2: this.attndType = 2; break
           default: this.attndType = 1; break
         }
-        this.resetData()
+        this.resetData({ page: 1, query: '', isShow: false })
         this.getAttndList()
       },
       //搜索框确认搜索
@@ -484,7 +485,7 @@
         this.getAttndList()
       },
       onQueryClear() {
-        this.resetData()
+        this.resetData({ page: 1, query: '', isShow: false })
         this.getAttndList()
       },
       onScrollToLower() {
