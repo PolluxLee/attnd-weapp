@@ -54,8 +54,34 @@
     }
 
     onLaunch() {
+      zstore.set(zstore.logTime, Date.now())
+      this.updateWeApp()
       this.login()
       this.auth()
+    }
+
+    // 更新小程序版本
+    updateWeApp() {
+      const updateManager = wx.getUpdateManager()
+      updateManager.onCheckForUpdate(function (res) {
+        // 请求完新版本信息的回调
+        console.log(res.hasUpdate)
+      })
+      updateManager.onUpdateReady(function () {
+        wx.showModal({
+          title: '更新提示',
+          content: '新版本已经准备好，是否重启应用？',
+          success: function (res) {
+            if (res.confirm) {
+              // 新的版本已经下载好，调用 applyUpdate 应用新版本并重启
+              updateManager.applyUpdate()
+            }
+          }
+        })
+      })
+      updateManager.onUpdateFailed(function () {
+        // 新的版本下载失败
+      })
     }
 
     auth() {
@@ -75,29 +101,7 @@
     }
 
     login() {
-      wx.login({
-        success: res => {
-          zlog.log(res, 'wx.login')
-          if (res.code) {
-            zmid.setSelfinfo({ openid: res.code })
-            zajax.postFD(URL.login, { code: res.code })
-              .then(res => {
-                if(res.header['Set-Cookie']) zstore.set(zstore.cookie, res.header['Set-Cookie'])
-                let userInfo = res.data.data
-                let name = userInfo.name
-                let stuid = userInfo.stu_id
-                let id = userInfo.id
-                let openid = userInfo.openid
-                zmid.setSelfinfo({ name, stuid, id, openid })
-                zstore.set(zstore.logTime, Date.now())
-              })
-              .catch(err => {})
-          } else {
-            zlog.log(res, 'wx.login')
-            wx.showModal({ title: '提示', showCancel: false, content: '非常抱歉，小程序登录失败，请稍后再试' })
-          }
-        }
-      });
+      zmid.login()
     }
 
   }

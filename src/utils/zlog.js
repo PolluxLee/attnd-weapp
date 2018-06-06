@@ -1,4 +1,5 @@
 import zstore from './zstore'
+import { URL } from '../share/consts'
 const zlog = {}
 
 zlog.log = function(data, loc) {
@@ -32,7 +33,7 @@ zlog.error = function(data, loc) {
  * 3. 用户杀死小程序
  */
 let cache = []
-const timeLimit = 10000
+const timeLimit = 20000
 const lenLimit = 20
 const switcher = true  // 日志开关
 
@@ -48,18 +49,16 @@ zlog.setLog = function(model) {
   cache.push(model)
   // 大于给定长度，发送日志
   if (cache.length >= lenLimit) {
-    zstore.set(zstore.logTime, curTime)
     sendLog(cache.slice())
     cache = []
     return
   }
   // 距离上次请求发送日志的时间间隔大于给定时间，发送日志
-  // if (curTime - logTime > timeLimit) {
-  //   zstore.set(zstore.logTime, curTime)
-  //   this.sendLog(cache.slice())
-  //   cache = []
-  //   return
-  // }
+  if (curTime - logTime > timeLimit) {
+    sendLog(cache.slice())
+    cache = []
+    return
+  }
 }
 
 function isLogValid(model) {
@@ -69,17 +68,31 @@ function isLogValid(model) {
 zlog.flushLog = function() {
   let logs = cache
   cache = []
-  console.warn(logs)
+  sendLog(logs)
 }
 
-function sendLog(arr) {
-  let logs = []
-  if (!Array.isArray(arr)) {
-    logs = cache
-  } else {
-    logs = arr
+function sendLog(logs) {
+  if (!Array.isArray(logs)) {
+    return
   }
   console.warn(logs)
+  zstore.set(zstore.logTime, Date.now())
+  // 发送日志
+  wx.request({
+    url: URL.logger,
+    header: {
+      'content-type': 'application/json',
+      'cookie': wx.getStorageSync('cookie')
+    },
+    method: 'POST',
+    data: logs,
+    success: res => {
+      console.log(res.data)
+    },
+    fail: err => {
+      console.error(err)
+    }
+  })
 }
 
 export default zlog

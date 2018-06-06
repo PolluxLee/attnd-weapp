@@ -6,7 +6,7 @@ const zmid = {}
 
 // 设置个人信息到 storage
 // { id, openid, name, stuid }
-zmid.setSelfinfo = ({ id, openid, name, stuid }) => {
+zmid.setSelfinfo = function({ id, openid, name, stuid }) {
   zlog.log({ id, openid, name, stuid }, 'zmid/setSelfinfo')
   if (Number.isInteger(id)) zstore.set(zstore.id, id)
   if (openid) zstore.set(zstore.openid, openid)
@@ -15,13 +15,15 @@ zmid.setSelfinfo = ({ id, openid, name, stuid }) => {
 }
 
 // 验证 openid
-zmid.checkOpenid = () => {
+zmid.checkOpenid = function() {
   let openid = zstore.get(zstore.openid)
   return !!openid
 }
 
 // 获取 openid
-zmid.getOpenid = () => zstore.get(zstore.openid)
+zmid.getOpenid = function() {
+  return zstore.get(zstore.openid)
+}
 
 // 验证个人信息
 zmid.checkSelfinfo = () => {
@@ -76,6 +78,34 @@ zmid.getSelfinfo = function() {
     return { name, stuid, id }
   }
   return {}
+}
+
+zmid.login = function() {
+  wx.login({
+    success: res => {
+      zlog.log(res, 'wx.login')
+      if (res.code) {
+        zmid.setSelfinfo({ openid: res.code })
+        zajax.postFD(URL.login, { code: res.code })
+          .then(res => {
+            if(res.header['Set-Cookie']) {
+              zstore.set(zstore.cookie, res.header['Set-Cookie'])
+              zlog.log(res.header['Set-Cookie'], 'cookie')
+            }
+            let userInfo = res.data.data
+            let name = userInfo.name
+            let stuid = userInfo.stu_id
+            let id = userInfo.id
+            let openid = userInfo.openid
+            this.setSelfinfo({ name, stuid, id, openid })
+          })
+          .catch(err => {})
+      } else {
+        zlog.log(res, 'wx.login')
+        wx.showModal({ title: '提示', showCancel: false, content: '非常抱歉，小程序启动失败，请稍后再试' })
+      }
+    }
+  });
 }
 
 

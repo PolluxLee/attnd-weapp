@@ -42,6 +42,7 @@ export const URL = {
   attndSituation: `${PREFIX}/api/attnd/situation`,
   signIn: `${PREFIX}/api/attnd/signin`,
   updateSignIn: `${PREFIX}/api/signin/status/upd`,
+  logger: `${PREFIX}/api/fe/log`,
 }
 
 // Status Code

@@ -1,6 +1,6 @@
 import zstore from './zstore'
 import zlog, { LogLevel } from './zlog'
-import { CODE } from '../share/consts'
+import { URL, CODE } from '../share/consts'
 const zajax = {
   get: () => {},
   post: () => {},
@@ -30,7 +30,8 @@ function createWxRequest(opts) {
             msg: 'session 过期',
             loc: opts.url.slice(opts.url.indexOf('/api'))
           })
-          wx.showModal({ title: '提示', content: '会话过期，请重启小程序' })
+          login()
+          // wx.showModal({ title: '提示', content: '会话过期，请重启小程序' })
           reject('session 过期')
         }
         resolve(res)
@@ -54,7 +55,7 @@ function createWxRequest(opts) {
   })
 }
 
-zajax.get = (url, data) => {
+zajax.get = function(url, data) {
   let header = {
     'content-type': 'application/json',
     'cookie': wx.getStorageSync('cookie')
@@ -63,7 +64,7 @@ zajax.get = (url, data) => {
   return createWxRequest({ url, data, header, method })
 }
 
-zajax.post = (url, data) => {
+zajax.post = function(url, data) {
   let header = {
     'content-type': 'application/json',
     'cookie': wx.getStorageSync('cookie')
@@ -72,13 +73,45 @@ zajax.post = (url, data) => {
   return createWxRequest({ url, data, header, method })
 }
 
-zajax.postFD = (url, data) => {
+zajax.postFD = function(url, data) {
   let header = {
     'content-type': 'application/x-www-form-urlencoded',
     'cookie': wx.getStorageSync('cookie')
   }
   let method = 'POST'
   return createWxRequest({ url, data, header, method })
+}
+
+function login() {
+  wx.login({
+    success: res => {
+      zlog.log(res, 'wx.login')
+      if (res.code) {
+        if (res.code) zstore.set(zstore.openid, res.code)
+        zajax.postFD(URL.login, { code: res.code })
+          .then(res => {
+            if(res.header['Set-Cookie']) {
+              zstore.set(zstore.cookie, res.header['Set-Cookie'])
+              zlog.log(res.header['Set-Cookie'], 'cookie')
+            }
+            let userInfo = res.data.data
+            let name = userInfo.name
+            let stuid = userInfo.stu_id
+            let id = userInfo.id
+            let openid = userInfo.openid
+            zlog.log({ id, openid, name, stuid }, 'zmid/setSelfinfo')
+            if (Number.isInteger(id)) zstore.set(zstore.id, id)
+            if (openid) zstore.set(zstore.openid, openid)
+            if (name) zstore.set(zstore.name, name)
+            if (stuid) zstore.set(zstore.stuid, stuid)
+          })
+          .catch(err => {})
+      } else {
+        zlog.log(res, 'wx.login')
+        wx.showModal({ title: '提示', showCancel: false, content: '非常抱歉，小程序登录失败，请稍后再试' })
+      }
+    }
+  });
 }
 
 export default zajax
