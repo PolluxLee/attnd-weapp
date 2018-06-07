@@ -37,12 +37,12 @@ zmid.checkSelfinfo = () => {
 }
 
 // 从后端获取个人信息
-zmid.getFreshSelfinfo = async function() {
+zmid.getFreshSelfinfo = async function(from) {
   let name
   let stuid
   let id
   let openid = this.getOpenid()
-  await zajax.get(URL.userInfo, { openid })
+  await zajax.get(URL.userInfo, { openid }, from)
   .then(res => {
     let body = res.data
     zlog.log({ name, stuid, id }, 'zmid/getSelfinfo/backend')
@@ -90,7 +90,6 @@ zmid.login = function() {
           .then(res => {
             if(res.header['Set-Cookie']) {
               zstore.set(zstore.cookie, res.header['Set-Cookie'])
-              zlog.log(res.header['Set-Cookie'], 'cookie')
             }
             let userInfo = res.data.data
             let name = userInfo.name

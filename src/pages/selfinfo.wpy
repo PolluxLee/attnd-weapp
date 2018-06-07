@@ -37,6 +37,7 @@
 
     mixins = [AToast]
     data = {
+      from: 'selfinfo',
       isShow: false,
       nameModel: {},
       idModel: {},
@@ -73,7 +74,7 @@
 
     // 获取用户信息
     async getData() {
-      await zmid.getFreshSelfinfo().then(res => {
+      await zmid.getFreshSelfinfo(this.from).then(res => {
         this.nameModel.value = res.name ? res.name : ''
         this.idModel.value = res.stuid ? res.stuid : ''
         this.$apply()
@@ -94,7 +95,7 @@
         return
       }
       this.showToast(ToastType.LOADING, '正在保存')
-      zajax.post(URL.userInfo, data)
+      zajax.post(URL.userInfo, data, this.from)
       .then(res => {
         let body = res.data
         let code = body.code

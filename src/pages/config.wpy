@@ -45,6 +45,7 @@
 
     mixins = [AToast]
     data = {
+      from: 'config',
       nameModel: {},
       dateModel: {},
       timeModel: {},
@@ -111,7 +112,7 @@
 
     // 获取历史考勤名字列表
     getHistoryAttndNames() {
-      return zajax.get(URL.historyAttndNames)
+      return zajax.get(URL.historyAttndNames, null, this.from)
         .then(res => {
           let body = res.data
           let code = body.code
@@ -131,7 +132,7 @@
 
     // 获取历史常用地点列表
     getHistoryPlaceNames() {
-      return zajax.get(URL.historyPlaceNames)
+      return zajax.get(URL.historyPlaceNames, null, this.from)
         .then(res => {
           let body = res.data
           let code = body.code
@@ -151,7 +152,7 @@
 
     // 获取我的名字
     async getAuthorName() {
-      let name = (await zmid.getFreshSelfinfo()).name
+      let name = (await zmid.getFreshSelfinfo(this.from)).name
       if (name) {
         this.authorModel.value = name
         this.authorModel.readonly = true
@@ -217,7 +218,7 @@
         "teacher_name": this.authorModel.value
       }
       this.showToast(ToastType.LOADING, '正在发布')
-      zajax.post(URL.attnd, JSON.stringify(reqData))
+      zajax.post(URL.attnd, JSON.stringify(reqData), this.from)
         .then(res => {
           this.hideToast()
           let body = res.data

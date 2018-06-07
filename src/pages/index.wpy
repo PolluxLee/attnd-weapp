@@ -92,6 +92,7 @@
 
     mixins = [AToast]
     data = {
+      from: 'index',
       model: {}
     }
 
@@ -110,7 +111,7 @@
           let cipher = res
           if (!cipher) return
           this.showToast(ToastType.LOADING, '获取数据')
-          zajax.get(URL.attnd, { cipher })
+          zajax.get(URL.attnd, { cipher }, this.from)
             .then(res => {
               this.showToast(ToastType.LOADING, '加载数据', 1000)
               let body = res.data

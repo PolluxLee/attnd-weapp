@@ -302,6 +302,7 @@
 
     mixins = [AToast]
     data = {
+      from: '',
       Icon: Icon,
       SigninType: SigninType,
       AttndStatus: AttndStatus,
@@ -401,6 +402,7 @@
     onLoad(option) {
       zlog.log(option)
       this.cipher = option.cipher ? option.cipher : ''
+      if (this.cipher) this.from = `attnd?cipher=${this.cipher}`
       wx.setNavigationBarTitle({ title: '考勤情况' })
     }
 
@@ -446,7 +448,7 @@
 
     // 获取考勤基本信息
     getAttndInfo() {
-      return zajax.get(URL.attnd, { cipher: this.cipher })
+      return zajax.get(URL.attnd, { cipher: this.cipher }, this.from)
         .then(res =>{
           let body = res.data
           let code = body.code
@@ -486,7 +488,7 @@
       }
       this.emptyLock = true
       this.$apply()
-      await zajax.get(URL.attndSituation, reqData)
+      await zajax.get(URL.attndSituation, reqData, this.from)
         .then(res => {
           let body = res.data
           let code = body.code
@@ -564,7 +566,7 @@
         location: this.location,
         attnd_id: this.baseInfo.attnd_id
       }
-      await zajax.post(URL.signIn, reqData)
+      await zajax.post(URL.signIn, reqData, this.from)
         .then(res => {
           let body = res.data
           let code = body.code
@@ -611,7 +613,7 @@
         if (this.isStudent || !this.isAttndFinish) return
         if (!openid) return
         wx.showActionSheet({
-          itemList: ['已到', '超出距离', '迟到'],
+          itemList: ['修改为已到', '修改为超出距离', '修改为迟到'],
           success: res => {
             let status
             switch (res.tapIndex) {
@@ -651,7 +653,7 @@
         if (!this.isAttndFinish || this.isStudent) return
         wx.showModal({
           title: '提示',
-          content: '确认删除此考勤？',
+          content: '删除考勤后，列表中将不会出现此考勤，确认删除？',
           success: res => {
             if (res.confirm) {
               this.removeAttnd()
@@ -677,7 +679,7 @@
     async finishAttnd() {
       if (!this.cipher) { this.showToast(ToastType.FAIL, '操作失败', 1000); return }
       this.showToast(ToastType.LOADING, '正在结束')
-      await zajax.postFD(URL.endAttnd, { cipher: this.cipher })
+      await zajax.postFD(URL.endAttnd, { cipher: this.cipher }, this.from)
         .then(res => {
           this.hideToast()
           let body = res.data
@@ -698,7 +700,7 @@
         return
       }
       this.showToast(ToastType.LOADING, '加载中')
-      zajax.postFD(URL.removeAttnd, { cipher })
+      zajax.postFD(URL.removeAttnd, { cipher }, this.from)
         .then(res => {
           this.hideToast()
           let body = res.data
@@ -721,7 +723,7 @@
         openid,
         attnd_status: status
       }
-      zajax.postFD(URL.updateSignIn, reqData)
+      zajax.postFD(URL.updateSignIn, reqData, this.from)
         .then(res => {
           this.hideToast()
           let body = res.data

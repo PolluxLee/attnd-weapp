@@ -325,6 +325,7 @@
 
     mixins = [AToast]
     data = {
+      from: 'mine',
       Icon: Icon,
       AttndStatus: AttndStatus,
       name: '...',
@@ -381,7 +382,7 @@
 
     // 获取个人信息
     async getSelfInfo() {
-      let name = (await zmid.getFreshSelfinfo()).name
+      let name = (await zmid.getFreshSelfinfo(this.from)).name
       if (name) {
         this.name = name
         this.avator = name[0].toUpperCase()
@@ -434,7 +435,7 @@
         query: this.query ? this.query : ''
       }
       this.$apply()
-      await zajax.get(URL.attndList, reqData)
+      await zajax.get(URL.attndList, reqData, this.from)
         .then(res => {
           let body = res.data
           let code = body.code
