@@ -4,6 +4,8 @@
 
 **后端：** https://github.com/WisperDin/attnd-server
 
+![Attnd2.jpg](https://upload-images.jianshu.io/upload_images/2351420-23fc108aae528bf8.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
 ### 使用步骤
 
 #### 1. 克隆项目
