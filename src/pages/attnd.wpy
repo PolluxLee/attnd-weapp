@@ -226,21 +226,6 @@
             <image class="attnd__filter--img" src="{{Icon.triangle}}" mode="scaleToFill"/>
           </view>
         </view>
-        <view class="attnd__item attnd__item--self" wx:if="{{isShowSelf && isShowList}}">
-          <view class="attnd__item--avator attnd__item--avator-me">我</view>
-          <view class="attnd__item--info">
-            <view class="attnd__item--name">{{self.name}}{{self.stu_id ? '（'+ self.stu_id +'）' : ''}}</view>
-            <view class="attnd__item--location">距离：{{self.distance}}m</view>
-          </view>
-          <view class="attnd__item--icon">
-            <image wx:if="{{self.attnd_status===SigninType.ARRIVED}}" src="{{Icon.attndArrived}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
-            <image wx:if="{{self.attnd_status===SigninType.DISTANCE_OUT}}" src="{{Icon.attndDistanceOut}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
-            <image wx:if="{{self.attnd_status===SigninType.TIME_OUT}}" src="{{Icon.attndTimeOut}}" mode="scaleToFill" style="height: 40rpx; width: 40rpx" />
-            <view wx:if="{{self.attnd_status===SigninType.ARRIVED}}">已到</view>
-            <view wx:if="{{self.attnd_status===SigninType.DISTANCE_OUT}}">超距</view>
-            <view wx:if="{{self.attnd_status===SigninType.TIME_OUT}}">迟到</view>
-          </view>
-        </view>
         <view class="attnd__item" wx:for-items="{{attndList}}" wx:for-item="stu" wx:key="id" wx:if="{{isShowList}}">
           <view class="attnd__item--avator">{{stu.avator}}</view>
           <view class="attnd__item--info">
