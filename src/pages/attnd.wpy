@@ -6,7 +6,6 @@
     width: 100%;
     padding: 46rpx 46rpx 100rpx 46rpx;
     box-sizing: border-box;
-    background: white;
     position: relative;
 
     &__header {
@@ -204,7 +203,7 @@
 </style>
 
 <template>
-  <scroll-view style="height: 100vh"
+  <scroll-view style="height: 100vh; background: white"
     scroll-y="true" lower-threshold="50" bindscrolltolower="onScrollToLower">
     <view class="attnd" wx:if="{{isShow}}">
       <view class="attnd__header">
