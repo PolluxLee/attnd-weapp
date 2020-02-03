@@ -1,3 +1,5 @@
+### 本项目不再维护，请前往 https://github.com/Lyokoo/LBS-Attnd
+
 ## attnd-weapp
 
 **GPS 定位考勤小程序**
